@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.burakpozut.microservices.order_platform_monolith.dto.CreateCustomerRequest;
 import com.burakpozut.microservices.order_platform_monolith.entity.Customer;
+import com.burakpozut.microservices.order_platform_monolith.exception.CustomerNotFoundException;
 import com.burakpozut.microservices.order_platform_monolith.repository.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,13 +27,14 @@ public class CustomerService {
 
   public Customer findById(UUID id) {
     log.info("Fetching customer with id: {}", id);
-    return customerRepository.findById(id).orElseThrow(() -> new RuntimeException("Customer with id not found: " + id));
+    return customerRepository.findById(id)
+        .orElseThrow(() -> new CustomerNotFoundException("Customer with id not found: " + id));
   }
 
   public Customer findByEmail(String email) {
     log.info("Fetching customer wiht email: {}", email);
     return customerRepository.findByEmail(email)
-        .orElseThrow(() -> new RuntimeException("There is no customer with email: " + email));
+        .orElseThrow(() -> new CustomerNotFoundException("There is no customer with email: " + email));
   }
 
   public Customer save(CreateCustomerRequest request) {
