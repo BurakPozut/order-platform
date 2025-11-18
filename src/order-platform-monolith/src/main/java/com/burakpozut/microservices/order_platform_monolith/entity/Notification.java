@@ -1,5 +1,6 @@
 package com.burakpozut.microservices.order_platform_monolith.entity;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -17,14 +18,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Notification {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
   @Column(name = "customer_id")
   private UUID customerId;
 
   @Column(name = "order_id")
-  private Long orderId;
+  private UUID orderId;
 
   @Column(name = "type", nullable = false, length = 20)
   private String type;
@@ -36,5 +37,5 @@ public class Notification {
   private String status;
 
   @Column(name = "created_at", nullable = false)
-  private java.time.LocalDateTime createdAt;
+  private LocalDateTime createdAt;
 }

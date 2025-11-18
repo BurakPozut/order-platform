@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class Customer {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
   @Column(name = "email", nullable = false, unique = true)

@@ -1,12 +1,13 @@
 package com.burakpozut.microservices.order_platform_monolith.entity;
 
+import java.util.UUID;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,14 +15,13 @@ import lombok.NoArgsConstructor;
 @Table(name = "orders")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Order {
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
   @Column(name = "customer_id", nullable = false)
-  private Long customerId;
+  private UUID customerId;
 
   @Column(name = "status", nullable = false, length = 32)
   private String status;
