@@ -25,4 +25,9 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
   public Optional<Customer> findByFullName(@NonNull String fullName) {
     return jpa.findByFullName(fullName).map(CustomerMapper::toDomain);
   }
+
+  @Override
+  public Optional<Customer> findByEmail(@NonNull String email) {
+    return jpa.findByEmail(email).map(CustomerMapper::toDomain);
+  }
 }

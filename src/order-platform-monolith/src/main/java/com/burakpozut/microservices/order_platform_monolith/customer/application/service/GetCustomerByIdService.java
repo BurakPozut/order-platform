@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class GetCustomerDetailsService {
+public class GetCustomerByIdService {
   private final CustomerRepository customerRepository;
 
   public Customer handle(GetCusotmerDetailsQuery query) {

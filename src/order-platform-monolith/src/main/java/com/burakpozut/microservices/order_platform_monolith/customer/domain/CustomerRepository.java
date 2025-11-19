@@ -11,4 +11,6 @@ public interface CustomerRepository {
   Optional<Customer> findById(@NonNull UUID id);
 
   Optional<Customer> findByFullName(@NonNull String fullName);
+
+  Optional<Customer> findByEmail(@NonNull String email);
 }

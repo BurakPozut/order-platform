@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SpringDataCustomerRepository extends JpaRepository<CustomerJpaEntity, UUID> {
   Optional<CustomerJpaEntity> findByFullName(String fullName);
 
+  Optional<CustomerJpaEntity> findByEmail(String email);
+
 }

@@ -10,5 +10,6 @@ import lombok.Getter;
 public class CustomerResponse {
   private final UUID id;
   private final String fullName;
+  private final String email;
 
 }
