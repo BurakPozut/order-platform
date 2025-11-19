@@ -3,6 +3,7 @@ package com.burakpozut.microservices.order_platform_monolith.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import com.burakpozut.microservices.order_platform_monolith.dto.CreateCustomerRequest;
@@ -25,13 +26,13 @@ public class CustomerService {
     return customerRepository.findAll();
   }
 
-  public Customer findById(UUID id) {
+  public Customer findById(@NonNull UUID id) {
     log.info("Fetching customer with id: {}", id);
     return customerRepository.findById(id)
         .orElseThrow(() -> new CustomerNotFoundException("Customer with id not found: " + id));
   }
 
-  public Customer findByEmail(String email) {
+  public Customer findByEmail(@NonNull String email) {
     log.info("Fetching customer wiht email: {}", email);
     return customerRepository.findByEmail(email)
         .orElseThrow(() -> new CustomerNotFoundException("There is no customer with email: " + email));
@@ -42,7 +43,7 @@ public class CustomerService {
     return customerRepository.save(request.toEntity());
   }
 
-  public void deleteById(UUID id) {
+  public void deleteById(@NonNull UUID id) {
     log.info("Deleting customer with id: {}", id);
     customerRepository.deleteById(id);
   }

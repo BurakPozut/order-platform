@@ -2,6 +2,8 @@ package com.burakpozut.microservices.order_platform_monolith.dto;
 
 import java.time.LocalDateTime;
 
+import org.springframework.lang.NonNull;
+
 import com.burakpozut.microservices.order_platform_monolith.entity.Customer;
 
 import jakarta.validation.constraints.Email;
@@ -20,6 +22,7 @@ public class CreateCustomerRequest {
 
   private String status; // TODO: check if this field is protected for the sql injections
 
+  @NonNull
   public Customer toEntity() {
     Customer customer = new Customer();
     customer.setEmail(this.email);

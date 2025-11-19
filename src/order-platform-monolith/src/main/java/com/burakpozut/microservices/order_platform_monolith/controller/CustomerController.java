@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,12 +35,12 @@ public class CustomerController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Customer> getCustomerById(@PathVariable UUID id) {
+  public ResponseEntity<Customer> getCustomerById(@PathVariable @NonNull UUID id) {
     return ResponseEntity.ok(customerService.findById(id));
   }
 
   @GetMapping("/email/{email}")
-  public ResponseEntity<Customer> getCustomerByEmail(@PathVariable String email) {
+  public ResponseEntity<Customer> getCustomerByEmail(@PathVariable @NonNull String email) {
     return ResponseEntity.ok(customerService.findByEmail(email));
   }
 
