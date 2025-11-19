@@ -13,4 +13,6 @@ public interface CustomerRepository {
   Optional<Customer> findByFullName(@NonNull String fullName);
 
   Optional<Customer> findByEmail(@NonNull String email);
+
+  Customer save(@NonNull Customer customer);
 }

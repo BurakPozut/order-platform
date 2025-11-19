@@ -7,6 +7,18 @@ import com.burakpozut.microservices.order_platform_monolith.customer.domain.Cust
 public class CustomerMapper {
   @NonNull
   static Customer toDomain(CustomerJpaEntity entity) {
-    return new Customer(entity.getId(), entity.getEmail(), entity.getFullName());
+    return Customer.rehydrate(entity.getId(), entity.getEmail(), entity.getFullName());
+  }
+
+  @NonNull
+  static CustomerJpaEntity toEntity(Customer c) {
+    var entity = new CustomerJpaEntity();
+    entity.setId(c.getId());
+    entity.setEmail(c.getEmail());
+    entity.setFullName(c.getFullName());
+    entity.setNew(true);
+    entity.setStatus("ACTIVE");
+    return entity;
+
   }
 }

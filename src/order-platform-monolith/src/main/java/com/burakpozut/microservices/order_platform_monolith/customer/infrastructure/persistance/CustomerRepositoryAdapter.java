@@ -30,4 +30,11 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
   public Optional<Customer> findByEmail(@NonNull String email) {
     return jpa.findByEmail(email).map(CustomerMapper::toDomain);
   }
+
+  @Override
+  public Customer save(@NonNull Customer customer) {
+    var entity = CustomerMapper.toEntity(customer);
+    var savedEntity = jpa.save(entity);
+    return CustomerMapper.toDomain(savedEntity);
+  }
 }

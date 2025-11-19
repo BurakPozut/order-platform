@@ -2,14 +2,10 @@ package com.burakpozut.microservices.order_platform_monolith.customer.api.dto;
 
 import java.util.UUID;
 
-import lombok.Builder;
-import lombok.Getter;
+import org.springframework.lang.NonNull;
 
-@Builder
-@Getter
-public class CustomerResponse {
-  private final UUID id;
-  private final String fullName;
-  private final String email;
-
+public record CustomerResponse(
+    @NonNull UUID id,
+    @NonNull String fullName,
+    @NonNull String email) {
 }
