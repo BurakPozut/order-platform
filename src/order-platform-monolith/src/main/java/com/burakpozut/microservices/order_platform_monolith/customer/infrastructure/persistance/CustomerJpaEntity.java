@@ -1,4 +1,4 @@
-package com.burakpozut.microservices.order_platform_monolith.entity;
+package com.burakpozut.microservices.order_platform_monolith.customer.infrastructure.persistance;
 
 import java.util.UUID;
 
@@ -12,35 +12,28 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "payments")
+@Table(name = "customers")
 @Data
 @NoArgsConstructor
-public class Payment {
+public class CustomerJpaEntity {
+
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Column(name = "order_id", nullable = false)
-  private UUID orderId;
+  @Column(name = "email", nullable = false, unique = true)
+  private String email;
 
-  @Column(name = "amount", nullable = false)
-  private java.math.BigDecimal amount;
+  @Column(name = "full_name", nullable = false)
+  private String fullName;
 
-  @Column(name = "currency", nullable = false, length = 3)
-  private String currency;
-
-  @Column(name = "status", nullable = false, length = 32)
+  @Column(name = "status", nullable = false)
   private String status;
-
-  @Column(name = "provider", nullable = false, length = 64)
-  private String provider;
-
-  @Column(name = "provider_ref", length = 128)
-  private String providerRef;
 
   @Column(name = "created_at", nullable = false)
   private java.time.LocalDateTime createdAt;
 
   @Column(name = "updated_at", nullable = false)
   private java.time.LocalDateTime updatedAt;
+
 }
