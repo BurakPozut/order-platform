@@ -3,6 +3,7 @@ package com.burakpozut.microservices.order_platform_monolith.order.infrastructur
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
@@ -11,9 +12,10 @@ import com.burakpozut.microservices.order_platform_monolith.order.domain.OrderRe
 
 import lombok.RequiredArgsConstructor;
 
+@Primary
 @Repository
 @RequiredArgsConstructor
-public class OrderRepositoryImpl implements OrderRepository {
+public class OrderRepositoryAdapter implements OrderRepository {
 
   private final SpringDataOrderRepository jpa;
 
