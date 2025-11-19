@@ -1,4 +1,4 @@
-package com.burakpozut.microservices.order_platform_monolith.entity;
+package com.burakpozut.microservices.order_platform_monolith.order.domain;
 
 import java.math.BigDecimal;
 import java.util.UUID;
