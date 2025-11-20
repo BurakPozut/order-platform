@@ -3,7 +3,7 @@ package com.burakpozut.microservices.order_platform_monolith.product.application
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.burakpozut.microservices.order_platform_monolith.customer.application.command.CreateProductCommand;
+import com.burakpozut.microservices.order_platform_monolith.product.application.command.CreateProductCommand;
 import com.burakpozut.microservices.order_platform_monolith.product.domain.Product;
 import com.burakpozut.microservices.order_platform_monolith.product.domain.ProductRepository;
 

@@ -3,9 +3,9 @@ package com.burakpozut.microservices.order_platform_monolith.product.api;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.burakpozut.microservices.order_platform_monolith.customer.application.command.CreateProductCommand;
 import com.burakpozut.microservices.order_platform_monolith.product.api.dto.CreateProductRequest;
 import com.burakpozut.microservices.order_platform_monolith.product.api.dto.ProductResponse;
+import com.burakpozut.microservices.order_platform_monolith.product.application.command.CreateProductCommand;
 import com.burakpozut.microservices.order_platform_monolith.product.application.service.CreateProductService;
 import com.burakpozut.microservices.order_platform_monolith.product.application.service.GetProductByIdService;
 import com.burakpozut.microservices.order_platform_monolith.product.application.service.GetProductByNameService;

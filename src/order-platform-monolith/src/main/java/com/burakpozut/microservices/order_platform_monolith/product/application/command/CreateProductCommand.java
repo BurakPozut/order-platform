@@ -1,4 +1,4 @@
-package com.burakpozut.microservices.order_platform_monolith.customer.application.command;
+package com.burakpozut.microservices.order_platform_monolith.product.application.command;
 
 import java.math.BigDecimal;
 
