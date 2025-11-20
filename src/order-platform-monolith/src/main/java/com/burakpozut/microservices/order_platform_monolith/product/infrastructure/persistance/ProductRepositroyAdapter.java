@@ -25,4 +25,11 @@ public class ProductRepositroyAdapter implements ProductRepository {
   public Optional<Product> findByName(String name) {
     return jpa.findByName(name).map(ProductMapper::toDomain);
   }
+
+  @Override
+  public Product save(Product product, boolean isNew) {
+    var entity = ProductMapper.toEntity(product, isNew);
+    var savedEntity = jpa.save(entity);
+    return ProductMapper.toDomain(savedEntity);
+  }
 }

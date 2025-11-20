@@ -3,12 +3,16 @@ package com.burakpozut.microservices.order_platform_monolith.product.api;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.burakpozut.microservices.order_platform_monolith.customer.application.command.CreateProductCommand;
+import com.burakpozut.microservices.order_platform_monolith.product.api.dto.CreateProductRequest;
 import com.burakpozut.microservices.order_platform_monolith.product.api.dto.ProductResponse;
+import com.burakpozut.microservices.order_platform_monolith.product.application.service.CreateProductService;
 import com.burakpozut.microservices.order_platform_monolith.product.application.service.GetProductByIdService;
 import com.burakpozut.microservices.order_platform_monolith.product.application.service.GetProductByNameService;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
@@ -16,6 +20,8 @@ import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("api/products")
@@ -23,6 +29,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class ProductController {
   private final GetProductByIdService getProductByIdService;
   private final GetProductByNameService getProductByNameService;
+  private final CreateProductService createProductService;
 
   @GetMapping("/{id}")
   public ResponseEntity<ProductResponse> getById(
@@ -36,6 +43,15 @@ public class ProductController {
   @GetMapping("/name/{name}")
   public ResponseEntity<ProductResponse> getByName(@PathVariable String name) {
     var product = getProductByNameService.handle(name);
+    var response = new ProductResponse(product.getId(), product.getName(), product.getPrice(), product.getCurrency(),
+        product.getStatus());
+    return ResponseEntity.ok(response);
+  }
+
+  @PostMapping()
+  public ResponseEntity<ProductResponse> create(@Valid @RequestBody CreateProductRequest request) {
+    var command = new CreateProductCommand(request.name(), request.price(), request.currency(), request.status());
+    var product = createProductService.hande(command);
     var response = new ProductResponse(product.getId(), product.getName(), product.getPrice(), product.getCurrency(),
         product.getStatus());
     return ResponseEntity.ok(response);

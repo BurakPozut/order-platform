@@ -11,4 +11,5 @@ public interface ProductRepository {
 
   Optional<Product> findByName(String name);
 
+  Product save(Product product, boolean isNew);
 }
