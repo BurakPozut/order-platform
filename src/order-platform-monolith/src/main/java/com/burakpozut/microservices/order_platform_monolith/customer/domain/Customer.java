@@ -2,17 +2,15 @@ package com.burakpozut.microservices.order_platform_monolith.customer.domain;
 
 import java.util.UUID;
 
-import org.springframework.lang.NonNull;
 
 import lombok.Getter;
 
 @Getter
 public class Customer {
-  @NonNull
+  
   private final UUID id;
-  @NonNull
-  private final String email;
-  @NonNull
+ final String email;
+  
   private final String fullName;
 
   private Customer(UUID id, String fullName, String email) {
@@ -34,7 +32,7 @@ public class Customer {
     return new Customer(id, fullName, email);
   }
 
-  @NonNull
+  
   public static Customer rehydrate(UUID id, String fullName, String email) {
     return new Customer(id, fullName, email);
   }

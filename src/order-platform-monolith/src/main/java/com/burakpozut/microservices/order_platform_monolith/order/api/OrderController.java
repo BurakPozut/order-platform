@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -27,7 +26,7 @@ public class OrderController {
   private final GetOrderDetailsService getOrderDetailsService;
 
   @GetMapping("/{id}")
-  public ResponseEntity<OrderResponse> getById(@PathVariable("id") @NonNull UUID id) {
+  public ResponseEntity<OrderResponse> getById(@PathVariable("id") UUID id) {
     var query = new GetOrderDetailsQuery(id);
     Order order = getOrderDetailsService.handle(query);
 

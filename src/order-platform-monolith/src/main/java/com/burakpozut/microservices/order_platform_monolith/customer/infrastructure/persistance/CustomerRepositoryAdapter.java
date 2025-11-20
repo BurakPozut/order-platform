@@ -3,7 +3,6 @@ package com.burakpozut.microservices.order_platform_monolith.customer.infrastruc
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import com.burakpozut.microservices.order_platform_monolith.customer.domain.Customer;
@@ -17,23 +16,23 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
   private final SpringDataCustomerRepository jpa;
 
   @Override
-  public Optional<Customer> findById(@NonNull UUID id) {
+  public Optional<Customer> findById( UUID id) {
     return jpa.findById(id).map(CustomerMapper::toDomain);
   }
 
   @Override
-  public Optional<Customer> findByFullName(@NonNull String fullName) {
+  public Optional<Customer> findByFullName( String fullName) {
     return jpa.findByFullName(fullName).map(CustomerMapper::toDomain);
   }
 
   @Override
-  public Optional<Customer> findByEmail(@NonNull String email) {
+  public Optional<Customer> findByEmail( String email) {
     return jpa.findByEmail(email).map(CustomerMapper::toDomain);
   }
 
   @Override
-  public Customer save(@NonNull Customer customer) {
-    var entity = CustomerMapper.toEntity(customer);
+  public Customer save( Customer customer, boolean isNew) {
+    var entity = CustomerMapper.toEntity(customer,isNew);
     var savedEntity = jpa.save(entity);
     return CustomerMapper.toDomain(savedEntity);
   }

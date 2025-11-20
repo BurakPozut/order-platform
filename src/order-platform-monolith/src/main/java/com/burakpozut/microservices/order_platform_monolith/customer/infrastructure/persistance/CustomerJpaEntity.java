@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.lang.NonNull;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,15 +32,12 @@ public class CustomerJpaEntity {
 
   @Id
   // @GeneratedValue(strategy = GenerationType.UUID)
-  @NonNull
   private UUID id;
 
   @Column(name = "email", nullable = false, unique = true)
-  @NonNull
   private String email;
 
   @Column(name = "full_name", nullable = false)
-  @NonNull
   private String fullName;
 
   @Column(name = "status", nullable = false)

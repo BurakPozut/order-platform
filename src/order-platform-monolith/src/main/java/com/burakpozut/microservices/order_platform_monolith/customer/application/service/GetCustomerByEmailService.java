@@ -1,6 +1,5 @@
 package com.burakpozut.microservices.order_platform_monolith.customer.application.service;
 
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import com.burakpozut.microservices.order_platform_monolith.customer.domain.Customer;
@@ -14,7 +13,7 @@ public class GetCustomerByEmailService {
 
   private final CustomerRepository customerRepository;
 
-  public Customer handle(@NonNull String email) {
+  public Customer handle(String email) {
     return customerRepository.findByEmail(email)
         .orElseThrow(() -> new IllegalArgumentException("No Customer by email:" + email));
 

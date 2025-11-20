@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +34,7 @@ public class CustomerController {
   private final CreateCustomerService createCustomerService;
 
   @GetMapping("/{id}")
-  public ResponseEntity<CustomerResponse> getById(@PathVariable("id") @NonNull UUID id) {
+  public ResponseEntity<CustomerResponse> getById(@PathVariable("id")  UUID id) {
     var query = new GetCusotmerDetailsQuery(id);
     Customer customer = getCustomerDetailsService.handle(query);
 
@@ -45,7 +44,7 @@ public class CustomerController {
   }
 
   @GetMapping("/email/{email}")
-  public ResponseEntity<CustomerResponse> getByEmail(@PathVariable @NonNull String email) {
+  public ResponseEntity<CustomerResponse> getByEmail(@PathVariable String email) {
     Customer customer = getCustomerByEmailService.handle(email);
     var response = new CustomerResponse(customer.getId(), customer.getFullName(), customer.getEmail());
     return ResponseEntity.ok(response);
