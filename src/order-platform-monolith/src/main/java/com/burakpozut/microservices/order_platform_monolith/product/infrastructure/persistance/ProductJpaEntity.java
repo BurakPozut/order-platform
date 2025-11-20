@@ -1,7 +1,4 @@
-package com.burakpozut.microservices.order_platform_monolith.customer.infrastructure.persistance;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
+package com.burakpozut.microservices.order_platform_monolith.product.infrastructure.persistance;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -19,35 +16,36 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "customers")
+@Table(name = "products")
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class CustomerJpaEntity {
-
+public class ProductJpaEntity {
   @Id
-  // @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+  @Column(name = "id", nullable = false, updatable = false)
+  private java.util.UUID id;
 
-  @Column(name = "email", nullable = false, unique = true)
-  private String email;
+  @Column(name = "name", nullable = false)
+  private String name;
 
-  @Column(name = "full_name", nullable = false)
-  private String fullName;
+  @Column(name = "price", nullable = false)
+  private java.math.BigDecimal price;
+
+  @Column(name = "currency", nullable = false, length = 3)
+  private String currency;
 
   @Column(name = "status", nullable = false)
   private String status;
 
   @CreatedDate
-  @Column(name = "created_at", nullable = false)
-  private LocalDateTime createdAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private java.time.LocalDateTime createdAt;
 
   @LastModifiedDate
   @Column(name = "updated_at", nullable = false)
-  private LocalDateTime updatedAt;
+  private java.time.LocalDateTime updatedAt;
 
   @Transient
   private boolean isNew;
-
 }

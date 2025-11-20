@@ -3,7 +3,7 @@ package com.burakpozut.microservices.order_platform_monolith.customer.applicatio
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.burakpozut.microservices.order_platform_monolith.customer.api.exception.EmailAlreadyInUseException;
+import com.burakpozut.microservices.order_platform_monolith.customer.application.exception.EmailAlreadyInUseException;
 import com.burakpozut.microservices.order_platform_monolith.customer.domain.Customer;
 import com.burakpozut.microservices.order_platform_monolith.customer.domain.CustomerRepository;
 

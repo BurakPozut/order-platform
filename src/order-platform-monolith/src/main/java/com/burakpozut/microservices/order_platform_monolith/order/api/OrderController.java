@@ -8,6 +8,8 @@ import com.burakpozut.microservices.order_platform_monolith.order.application.qu
 import com.burakpozut.microservices.order_platform_monolith.order.application.service.GetOrderDetailsService;
 import com.burakpozut.microservices.order_platform_monolith.order.domain.Order;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +28,8 @@ public class OrderController {
   private final GetOrderDetailsService getOrderDetailsService;
 
   @GetMapping("/{id}")
-  public ResponseEntity<OrderResponse> getById(@PathVariable("id") UUID id) {
+  public ResponseEntity<OrderResponse> getById(
+      @Parameter(description = "Order Id", required = true, schema = @Schema(type = "string", format = "uuid", example = "4e0d25e9-cc74-4462-8ddc-e9a9d43f067a")) @PathVariable("id") UUID id) {
     var query = new GetOrderDetailsQuery(id);
     Order order = getOrderDetailsService.handle(query);
 

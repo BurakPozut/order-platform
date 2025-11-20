@@ -1,4 +1,4 @@
-package com.burakpozut.microservices.order_platform_monolith.customer.api.exception;
+package com.burakpozut.microservices.order_platform_monolith.customer.application.exception;
 
 import com.burakpozut.microservices.order_platform_monolith.common.exception.BusinessException;
 
