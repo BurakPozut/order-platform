@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.burakpozut.microservices.order_platform_monolith.common.api.ApiError;
 import com.burakpozut.microservices.order_platform_monolith.common.exception.AppException;
 import com.burakpozut.microservices.order_platform_monolith.common.exception.BusinessException;
+import com.burakpozut.microservices.order_platform_monolith.common.exception.DomainValidationException;
 import com.burakpozut.microservices.order_platform_monolith.common.exception.NotFoundException;
 
 import jakarta.validation.ConstraintViolationException;
@@ -39,6 +40,17 @@ public class GlobalExceptionHandler {
         "BUSINESS_ERROR",
         ex.getMessage());
     return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+  }
+
+  @ExceptionHandler(DomainValidationException.class)
+  public ResponseEntity<ApiError> handleDomainValidation(DomainValidationException ex) {
+    ApiError body = new ApiError(
+        LocalDateTime.now(),
+        HttpStatus.BAD_REQUEST.value(),
+        "DOMAIN_VALIDATION_ERROR",
+        ex.getMessage());
+
+    return ResponseEntity.badRequest().body(body);
   }
 
   @ExceptionHandler(AppException.class)
