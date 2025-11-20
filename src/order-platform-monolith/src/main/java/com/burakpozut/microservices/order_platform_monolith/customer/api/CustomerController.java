@@ -11,6 +11,8 @@ import com.burakpozut.microservices.order_platform_monolith.customer.application
 import com.burakpozut.microservices.order_platform_monolith.customer.application.service.GetCustomerByIdService;
 import com.burakpozut.microservices.order_platform_monolith.customer.domain.Customer;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +36,8 @@ public class CustomerController {
   private final CreateCustomerService createCustomerService;
 
   @GetMapping("/{id}")
-  public ResponseEntity<CustomerResponse> getById(@PathVariable("id")  UUID id) {
+  public ResponseEntity<CustomerResponse> getById(
+      @Parameter(description = "Customer ID", required = true, schema = @Schema(type = "string", format = "uuid", example = "550e8400-e29b-41d4-a716-446655440000")) @PathVariable("id") UUID id) {
     var query = new GetCusotmerDetailsQuery(id);
     Customer customer = getCustomerDetailsService.handle(query);
 

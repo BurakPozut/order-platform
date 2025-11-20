@@ -2,6 +2,7 @@ package com.burakpozut.microservices.order_platform_monolith.customer.applicatio
 
 import org.springframework.stereotype.Service;
 
+import com.burakpozut.microservices.order_platform_monolith.customer.api.exception.CustomerNotFoundException;
 import com.burakpozut.microservices.order_platform_monolith.customer.application.query.GetCusotmerDetailsQuery;
 import com.burakpozut.microservices.order_platform_monolith.customer.domain.Customer;
 import com.burakpozut.microservices.order_platform_monolith.customer.domain.CustomerRepository;
@@ -15,7 +16,7 @@ public class GetCustomerByIdService {
 
   public Customer handle(GetCusotmerDetailsQuery query) {
     return customerRepository.findById(query.getCustomerId())
-        .orElseThrow(() -> new IllegalArgumentException("Customer not found wiht id: " + query.getCustomerId()));
+        .orElseThrow(() -> new CustomerNotFoundException(query.getCustomerId()));
 
   }
 

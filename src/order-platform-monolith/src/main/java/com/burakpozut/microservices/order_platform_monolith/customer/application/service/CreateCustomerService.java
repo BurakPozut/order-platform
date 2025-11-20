@@ -3,6 +3,7 @@ package com.burakpozut.microservices.order_platform_monolith.customer.applicatio
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.burakpozut.microservices.order_platform_monolith.customer.api.exception.EmailAlreadyInUseException;
 import com.burakpozut.microservices.order_platform_monolith.customer.domain.Customer;
 import com.burakpozut.microservices.order_platform_monolith.customer.domain.CustomerRepository;
 
@@ -14,13 +15,13 @@ public class CreateCustomerService {
   private final CustomerRepository customerRepository;
 
   @Transactional
-  public Customer hande( String fullName, String email) {
+  public Customer hande(String fullName, String email) {
     customerRepository.findByEmail(email).ifPresent(c -> {
-      throw new IllegalArgumentException("Email already in use: " + email);
+      throw new EmailAlreadyInUseException(email);
     });
 
     Customer customer = Customer.createNew(fullName, email);
-    return customerRepository.save(customer,true);
+    return customerRepository.save(customer, true);
   }
 
 }
