@@ -1,5 +1,6 @@
 package com.burakpozut.microservices.order_platform_monolith.product.infrastructure.persistance;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -39,5 +40,10 @@ public class ProductRepositroyAdapter implements ProductRepository {
   public Set<Product> findAllByIds(Set<UUID> productIds) {
     var products = jpa.findAllById(productIds);
     return products.stream().map(ProductMapper::toDomain).collect(Collectors.toSet());
+  }
+
+  @Override
+  public List<Product> findAll() {
+    return jpa.findAll().stream().map(ProductMapper::toDomain).collect(Collectors.toList());
   }
 }

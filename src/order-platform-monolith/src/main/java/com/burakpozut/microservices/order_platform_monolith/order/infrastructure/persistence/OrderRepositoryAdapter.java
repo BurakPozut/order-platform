@@ -1,7 +1,9 @@
 package com.burakpozut.microservices.order_platform_monolith.order.infrastructure.persistence;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
@@ -28,6 +30,11 @@ public class OrderRepositoryAdapter implements OrderRepository {
     var entity = OrderMapper.toEntity(order, isNew);
     var savedEntity = jpa.save(entity);
     return OrderMapper.toDomain(savedEntity);
+  }
+
+  @Override
+  public List<Order> findAll() {
+    return jpa.findAll().stream().map(OrderMapper::toDomain).collect(Collectors.toList());
   }
 
 }

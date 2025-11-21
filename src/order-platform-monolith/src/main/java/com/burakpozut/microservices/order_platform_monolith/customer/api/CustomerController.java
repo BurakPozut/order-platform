@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.burakpozut.microservices.order_platform_monolith.customer.api.dto.CreateCustomerRequest;
 import com.burakpozut.microservices.order_platform_monolith.customer.api.dto.CustomerResponse;
+import com.burakpozut.microservices.order_platform_monolith.customer.application.GetAllCustomersService;
 import com.burakpozut.microservices.order_platform_monolith.customer.application.query.GetCusotmerDetailsQuery;
 import com.burakpozut.microservices.order_platform_monolith.customer.application.service.CreateCustomerService;
 import com.burakpozut.microservices.order_platform_monolith.customer.application.service.GetCustomerByEmailService;
@@ -17,7 +18,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +37,15 @@ public class CustomerController {
   private final GetCustomerByIdService getCustomerDetailsService;
   private final GetCustomerByEmailService getCustomerByEmailService;
   private final CreateCustomerService createCustomerService;
+  private final GetAllCustomersService getAllCustomersService;
+
+  @GetMapping
+  public ResponseEntity<List<CustomerResponse>> getAll() {
+    var customers = getAllCustomersService.handle();
+    var response = customers.stream().map(CustomerResponse::from).collect(Collectors.toList());
+
+    return ResponseEntity.ok(response);
+  }
 
   @GetMapping("/{id}")
   public ResponseEntity<CustomerResponse> getById(
@@ -41,23 +53,20 @@ public class CustomerController {
     var query = new GetCusotmerDetailsQuery(id);
     Customer customer = getCustomerDetailsService.handle(query);
 
-    CustomerResponse response = new CustomerResponse(id, customer.getFullName(), customer.getEmail());
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(CustomerResponse.from(customer));
 
   }
 
   @GetMapping("/email/{email}")
   public ResponseEntity<CustomerResponse> getByEmail(@PathVariable String email) {
     Customer customer = getCustomerByEmailService.handle(email);
-    var response = new CustomerResponse(customer.getId(), customer.getFullName(), customer.getEmail());
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(CustomerResponse.from(customer));
   }
 
   @PostMapping
   public ResponseEntity<CustomerResponse> create(@Valid @RequestBody CreateCustomerRequest request) {
     var customer = createCustomerService.hande(request.fullName(), request.email());
-    var response = new CustomerResponse(customer.getId(), customer.getFullName(), customer.getEmail());
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(CustomerResponse.from(customer));
   }
 
 }

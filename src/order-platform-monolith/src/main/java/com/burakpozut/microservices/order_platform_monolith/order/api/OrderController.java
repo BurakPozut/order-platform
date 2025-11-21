@@ -9,6 +9,7 @@ import com.burakpozut.microservices.order_platform_monolith.order.api.dto.OrderR
 import com.burakpozut.microservices.order_platform_monolith.order.application.command.CreateOrderCommand;
 import com.burakpozut.microservices.order_platform_monolith.order.application.query.GetOrderDetailsQuery;
 import com.burakpozut.microservices.order_platform_monolith.order.application.service.CreateOrderService;
+import com.burakpozut.microservices.order_platform_monolith.order.application.service.GetAllOrdersService;
 import com.burakpozut.microservices.order_platform_monolith.order.application.service.GetOrderDetailsService;
 import com.burakpozut.microservices.order_platform_monolith.order.domain.Order;
 
@@ -18,6 +19,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,14 @@ public class OrderController {
 
   private final GetOrderDetailsService getOrderDetailsService;
   private final CreateOrderService createOrderService;
+  private final GetAllOrdersService getAllOrdersService;
+
+  @GetMapping
+  public ResponseEntity<List<OrderResponse>> getAll() {
+    var orders = getAllOrdersService.handle();
+    var response = orders.stream().map(OrderResponse::from).collect(Collectors.toList());
+    return ResponseEntity.ok(response);
+  }
 
   @GetMapping("/{id}")
   public ResponseEntity<OrderResponse> getById(
@@ -42,9 +52,7 @@ public class OrderController {
     var query = new GetOrderDetailsQuery(id);
     Order order = getOrderDetailsService.handle(query);
 
-    var response = new OrderResponse(order.getId(), order.getCustomerId(), order.getOrderStatus());
-
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(OrderResponse.from(order));
   }
 
   @PostMapping()

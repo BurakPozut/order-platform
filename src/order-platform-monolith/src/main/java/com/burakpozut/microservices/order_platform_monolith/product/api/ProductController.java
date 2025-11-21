@@ -7,6 +7,7 @@ import com.burakpozut.microservices.order_platform_monolith.product.api.dto.Crea
 import com.burakpozut.microservices.order_platform_monolith.product.api.dto.ProductResponse;
 import com.burakpozut.microservices.order_platform_monolith.product.application.command.CreateProductCommand;
 import com.burakpozut.microservices.order_platform_monolith.product.application.service.CreateProductService;
+import com.burakpozut.microservices.order_platform_monolith.product.application.service.GetAllProductsService;
 import com.burakpozut.microservices.order_platform_monolith.product.application.service.GetProductByIdService;
 import com.burakpozut.microservices.order_platform_monolith.product.application.service.GetProductByNameService;
 
@@ -15,7 +16,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,31 +33,33 @@ public class ProductController {
   private final GetProductByIdService getProductByIdService;
   private final GetProductByNameService getProductByNameService;
   private final CreateProductService createProductService;
+  private final GetAllProductsService getAllProductsService;
+
+  @GetMapping()
+  public ResponseEntity<List<ProductResponse>> getAll() {
+    var products = getAllProductsService.handle();
+    var response = products.stream().map(ProductResponse::from).collect(Collectors.toList());
+    return ResponseEntity.ok(response);
+  }
 
   @GetMapping("/{id}")
   public ResponseEntity<ProductResponse> getById(
       @Parameter(description = "Product ID", required = true, schema = @Schema(type = "string", format = "uuid", example = "0989a886-d533-4bcc-97a5-c005562afaae")) @PathVariable UUID id) {
     var product = getProductByIdService.hande(id);
-    var response = new ProductResponse(product.getId(), product.getName(), product.getPrice(), product.getCurrency(),
-        product.getStatus());
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(ProductResponse.from(product));
   }
 
   @GetMapping("/name/{name}")
   public ResponseEntity<ProductResponse> getByName(@PathVariable String name) {
     var product = getProductByNameService.handle(name);
-    var response = new ProductResponse(product.getId(), product.getName(), product.getPrice(), product.getCurrency(),
-        product.getStatus());
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(ProductResponse.from(product));
   }
 
   @PostMapping()
   public ResponseEntity<ProductResponse> create(@Valid @RequestBody CreateProductRequest request) {
     var command = new CreateProductCommand(request.name(), request.price(), request.currency(), request.status());
     var product = createProductService.hande(command);
-    var response = new ProductResponse(product.getId(), product.getName(), product.getPrice(), product.getCurrency(),
-        product.getStatus());
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(ProductResponse.from(product));
   }
 
 }

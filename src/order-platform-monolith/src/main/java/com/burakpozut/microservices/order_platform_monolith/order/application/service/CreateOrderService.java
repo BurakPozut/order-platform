@@ -36,50 +36,43 @@ public class CreateOrderService {
 
   @Transactional
   public Order handle(CreateOrderCommand command) {
-    if (!customerGateway.customerExists(command.getCustomerId()))
-      throw new CustomerNotFoundException(command.getCustomerId());
+    if (!customerGateway.customerExists(command.customerId()))
+      throw new CustomerNotFoundException(command.customerId());
 
-    Set<UUID> productIds = command.getItems().stream().map(CreateOrderCommand.OrderItemData::getProductId)
+    Set<UUID> productIds = command.items().stream().map(CreateOrderCommand.OrderItemData::productId)
         .collect(Collectors.toSet());
 
     // Fetching all products in one query no N queries
     Map<UUID, Product> products = productGateway.getProductsById(productIds);
 
+    BigDecimal totalAmount = BigDecimal.ZERO;
+
     // Validating all products exist
-    for (var item : command.getItems()) {
-      if (!products.containsKey(item.getProductId())) {
-        throw new ProductNotFoundException(item.getProductId());
-      }
+    for (var item : command.items()) {
+      Product product = products.get(item.productId());
 
-      // validate status
+      if (product == null)
+        throw new ProductNotFoundException(item.productId());
 
-      var product = products.get(item.getProductId());
-      if (product.getStatus() != ProductStatus.ACTIVE) {
+      if (product.getStatus() != ProductStatus.ACTIVE)
         throw new ProductNotAvailbaleException(product.getId());
-      }
-
-      // Validate currency
-      if (product.getCurrency() != command.getCurrency()) {
+      if (product.getCurrency() != command.currency())
         throw new DomainValidationException(
-            "Product currency " + product.getCurrency() + " does not match order currency " + command.getCurrency());
-      }
+            "Product currentcy " + product.getCurrency() + " does not match the order currency " + command.currency());
+
+      totalAmount = totalAmount.add(product.getPrice().multiply(BigDecimal.valueOf(item.quantity())));
+
     }
 
-    // Calcualte the total amount from order items
-    BigDecimal totalAmount = command.getItems().stream().map(item -> {
-      Product product = products.get(item.getProductId());
-      return product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-    }).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-    var order = Order.createNew(command.getCustomerId(), command.getStatus(), totalAmount,
-        command.getCurrency());
+    var order = Order.createNew(command.customerId(), command.status(), totalAmount,
+        command.currency());
     var savedOrder = orderRepository.save(order, true);
 
     // saving order items
-    List<OrderItem> orderItems = command.getItems().stream().map(item -> {
-      Product product = products.get(item.getProductId());
-      return OrderItem.createNew(savedOrder.getId(), item.getProductId(), product.getName(), product.getPrice(),
-          item.getQuantity());
+    List<OrderItem> orderItems = command.items().stream().map(item -> {
+      Product product = products.get(item.productId());
+      return OrderItem.createNew(savedOrder.getId(), item.productId(), product.getName(), product.getPrice(),
+          item.quantity());
     }).collect(Collectors.toList());
 
     orderItemRepository.saveAll(orderItems, true);

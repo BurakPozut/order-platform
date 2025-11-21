@@ -1,9 +1,9 @@
 package com.burakpozut.microservices.order_platform_monolith.product.application.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
-import com.burakpozut.microservices.order_platform_monolith.product.application.command.CreateProductCommand;
+import org.springframework.stereotype.Service;
+
 import com.burakpozut.microservices.order_platform_monolith.product.domain.Product;
 import com.burakpozut.microservices.order_platform_monolith.product.domain.ProductRepository;
 
@@ -11,13 +11,11 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CreateProductService {
+public class GetAllProductsService {
   private final ProductRepository productRepository;
 
-  @Transactional
-  public Product hande(CreateProductCommand command) {
-    var product = Product.createNew(command.name(), command.price(), command.currency(), command.status());
-    return productRepository.save(product, true);
+  public List<Product> handle() {
+    return productRepository.findAll();
   }
 
 }
