@@ -3,14 +3,17 @@ package com.burakpozut.microservices.order_platform_monolith.order.infrastructur
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import com.burakpozut.microservices.order_platform_monolith.order.domain.OrderStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -20,9 +23,9 @@ import lombok.NoArgsConstructor;
 @Table(name = "orders")
 @Data // Maybe exclude the created at and updatet at in the equals and hashcode
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class OrderJpaEntity {
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
   @Column(name = "customer_id", nullable = false)
@@ -38,9 +41,11 @@ public class OrderJpaEntity {
   @Column(name = "currency", nullable = false, length = 3)
   private String currency;
 
-  @Column(name = "created_at", nullable = false)
+  @CreatedDate
+  @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
+  @LastModifiedDate
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 }

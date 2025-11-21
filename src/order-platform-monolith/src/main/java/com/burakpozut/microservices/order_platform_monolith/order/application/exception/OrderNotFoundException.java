@@ -1,4 +1,4 @@
-package com.burakpozut.microservices.order_platform_monolith.order.api.exception;
+package com.burakpozut.microservices.order_platform_monolith.order.application.exception;
 
 import java.util.UUID;
 

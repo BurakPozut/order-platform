@@ -10,9 +10,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public record CreateProductRequest(
-    @NotBlank String name,
-    @NotNull @Positive BigDecimal price,
-    @NotNull Currency currency,
-    @NotNull ProductStatus status) {
+        @NotBlank String name,
+        @NotNull @Positive BigDecimal price,
+        @NotNull Currency currency,
+        @NotNull ProductStatus status) {
 
 }

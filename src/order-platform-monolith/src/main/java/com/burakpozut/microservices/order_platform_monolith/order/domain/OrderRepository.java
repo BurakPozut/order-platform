@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OrderRepository {
   Optional<Order> findById(UUID id);
+
+  Order save(Order order, boolean isNew);
 }

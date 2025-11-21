@@ -23,4 +23,11 @@ public class OrderRepositoryAdapter implements OrderRepository {
     return jpa.findById(id).map(OrderMapper::toDomain);
   }
 
+  @Override
+  public Order save(Order order, boolean isNew) {
+    var entity = OrderMapper.toEntity(order, isNew);
+    var savedEntity = jpa.save(entity);
+    return OrderMapper.toDomain(savedEntity);
+  }
+
 }
