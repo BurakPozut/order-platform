@@ -1,6 +1,7 @@
 package com.burakpozut.microservices.order_platform_monolith.product.domain;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,8 @@ public interface ProductRepository {
   Optional<Product> findById(UUID id);
 
   Optional<Product> findByName(String name);
+
+  Set<Product> findAllByIds(Set<UUID> productIds);
 
   Product save(Product product, boolean isNew);
 }

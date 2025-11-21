@@ -1,7 +1,9 @@
 package com.burakpozut.microservices.order_platform_monolith.product.infrastructure.persistance;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
@@ -31,5 +33,11 @@ public class ProductRepositroyAdapter implements ProductRepository {
     var entity = ProductMapper.toEntity(product, isNew);
     var savedEntity = jpa.save(entity);
     return ProductMapper.toDomain(savedEntity);
+  }
+
+  @Override
+  public Set<Product> findAllByIds(Set<UUID> productIds) {
+    var products = jpa.findAllById(productIds);
+    return products.stream().map(ProductMapper::toDomain).collect(Collectors.toSet());
   }
 }

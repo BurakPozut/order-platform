@@ -3,36 +3,56 @@ package com.burakpozut.microservices.order_platform_monolith.order.domain;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.burakpozut.microservices.order_platform_monolith.common.exception.DomainValidationException;
 
-@Entity
-@Table(name = "order_items")
-@Data
-@NoArgsConstructor
+import lombok.Getter;
+
+@Getter
 public class OrderItem {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+  private final UUID id;
+  private final UUID orderId;
+  private final UUID productId;
+  private final String productName;
+  private final BigDecimal unitPrice;
+  private final int quantity;
 
-  @Column(name = "order_id", nullable = false)
-  private UUID orderId;
+  private OrderItem(UUID id, UUID orderId, UUID productId, String productName, BigDecimal unitPrice, int quantity) {
+    if (id == null) {
+      throw new DomainValidationException("Order item id cannot be null");
+    }
+    if (orderId == null) {
+      throw new DomainValidationException("Order id cannot be null");
+    }
+    if (productId == null) {
+      throw new DomainValidationException("Product id cannot be null");
+    }
+    if (productName == null || productName.trim().isEmpty()) {
+      throw new DomainValidationException("Product name cannot be null or empty");
+    }
+    if (unitPrice == null) {
+      throw new DomainValidationException("Unit price cannot be null");
+    }
+    if (unitPrice.compareTo(BigDecimal.ZERO) < 0) {
+      throw new DomainValidationException("Unit price cannot be negative");
+    }
+    if (quantity <= 0) {
+      throw new DomainValidationException("Quantity must be positive");
+    }
+    this.id = id;
+    this.orderId = orderId;
+    this.productId = productId;
+    this.productName = productName;
+    this.unitPrice = unitPrice;
+    this.quantity = quantity;
+  }
 
-  @Column(name = "product_id", nullable = false)
-  private UUID productId;
+  public static OrderItem createNew(UUID orderId, UUID productId, String productName, BigDecimal unitPrice,
+      int quantity) {
+    return new OrderItem(UUID.randomUUID(), orderId, productId, productName, unitPrice, quantity);
+  }
 
-  @Column(name = "product_name", nullable = false)
-  private String productName;
-
-  @Column(name = "unit_price", nullable = false)
-  private BigDecimal unitPrice;
-
-  @Column(name = "quantity", nullable = false)
-  private Integer quantity;
+  public static OrderItem rehydrate(UUID id, UUID orderId, UUID productId, String productName, BigDecimal unitPrice,
+      int quantity) {
+    return new OrderItem(id, orderId, productId, productName, unitPrice, quantity);
+  }
 }

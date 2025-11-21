@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,8 +49,13 @@ public class OrderController {
 
   @PostMapping()
   public ResponseEntity<OrderResponse> create(@Valid @RequestBody CreateOrderRequest request) {
+    // Map DTO items to Command items
+    var commandItems = request.items().stream()
+        .map(item -> new CreateOrderCommand.OrderItemData(item.productId(), item.quantity()))
+        .collect(Collectors.toList());
+
     var command = new CreateOrderCommand(request.customerId(), request.status(), request.totalAmount(),
-        Currency.valueOf(request.currency()));
+        Currency.valueOf(request.currency()), commandItems);
     var order = createOrderService.handle(command);
     var response = new OrderResponse(order.getId(), order.getCustomerId(), order.getOrderStatus());
 
