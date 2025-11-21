@@ -12,7 +12,7 @@
 	<groupId>com.burakpozut.microservices</groupId>
 	<artifactId>order-platform-monolith</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>order-platform-monolith</name>
+	<name>order-platform</name>
 	<description>Demo project for Spring Boot</description>
 	<url />
 	<licenses>

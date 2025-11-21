@@ -1,0 +1,27 @@
+package com.burakpozut.microservices.order_platform.customer.application.service;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.burakpozut.microservices.order_platform.customer.application.exception.EmailAlreadyInUseException;
+import com.burakpozut.microservices.order_platform.customer.domain.Customer;
+import com.burakpozut.microservices.order_platform.customer.domain.CustomerRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class CreateCustomerService {
+  private final CustomerRepository customerRepository;
+
+  @Transactional
+  public Customer hande(String fullName, String email) {
+    customerRepository.findByEmail(email).ifPresent(c -> {
+      throw new EmailAlreadyInUseException(email);
+    });
+
+    Customer customer = Customer.createNew(fullName, email);
+    return customerRepository.save(customer, true);
+  }
+
+}

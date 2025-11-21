@@ -1,0 +1,65 @@
+package com.burakpozut.microservices.order_platform.product.api;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.burakpozut.microservices.order_platform.product.api.dto.CreateProductRequest;
+import com.burakpozut.microservices.order_platform.product.api.dto.ProductResponse;
+import com.burakpozut.microservices.order_platform.product.application.command.CreateProductCommand;
+import com.burakpozut.microservices.order_platform.product.application.service.CreateProductService;
+import com.burakpozut.microservices.order_platform.product.application.service.GetAllProductsService;
+import com.burakpozut.microservices.order_platform.product.application.service.GetProductByIdService;
+import com.burakpozut.microservices.order_platform.product.application.service.GetProductByNameService;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+@RestController
+@RequestMapping("api/products")
+@RequiredArgsConstructor
+public class ProductController {
+  private final GetProductByIdService getProductByIdService;
+  private final GetProductByNameService getProductByNameService;
+  private final CreateProductService createProductService;
+  private final GetAllProductsService getAllProductsService;
+
+  @GetMapping()
+  public ResponseEntity<List<ProductResponse>> getAll() {
+    var products = getAllProductsService.handle();
+    var response = products.stream().map(ProductResponse::from).collect(Collectors.toList());
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<ProductResponse> getById(
+      @Parameter(description = "Product ID", required = true, schema = @Schema(type = "string", format = "uuid", example = "0989a886-d533-4bcc-97a5-c005562afaae")) @PathVariable UUID id) {
+    var product = getProductByIdService.hande(id);
+    return ResponseEntity.ok(ProductResponse.from(product));
+  }
+
+  @GetMapping("/name/{name}")
+  public ResponseEntity<ProductResponse> getByName(@PathVariable String name) {
+    var product = getProductByNameService.handle(name);
+    return ResponseEntity.ok(ProductResponse.from(product));
+  }
+
+  @PostMapping()
+  public ResponseEntity<ProductResponse> create(@Valid @RequestBody CreateProductRequest request) {
+    var command = new CreateProductCommand(request.name(), request.price(), request.currency(), request.status());
+    var product = createProductService.hande(command);
+    return ResponseEntity.ok(ProductResponse.from(product));
+  }
+
+}
