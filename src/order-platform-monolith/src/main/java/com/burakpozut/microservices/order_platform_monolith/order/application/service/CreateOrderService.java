@@ -1,5 +1,6 @@
 package com.burakpozut.microservices.order_platform_monolith.order.application.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.burakpozut.microservices.order_platform_monolith.common.exception.DomainValidationException;
 import com.burakpozut.microservices.order_platform_monolith.customer.application.exception.CustomerNotFoundException;
 import com.burakpozut.microservices.order_platform_monolith.order.application.command.CreateOrderCommand;
 import com.burakpozut.microservices.order_platform_monolith.order.domain.Order;
@@ -17,6 +19,7 @@ import com.burakpozut.microservices.order_platform_monolith.order.domain.OrderIt
 import com.burakpozut.microservices.order_platform_monolith.order.domain.OrderRepository;
 import com.burakpozut.microservices.order_platform_monolith.order.domain.port.CustomerGateway;
 import com.burakpozut.microservices.order_platform_monolith.order.domain.port.ProductGateway;
+import com.burakpozut.microservices.order_platform_monolith.product.application.exception.ProductNotAvailbaleException;
 import com.burakpozut.microservices.order_platform_monolith.product.application.exception.ProductNotFoundException;
 import com.burakpozut.microservices.order_platform_monolith.product.domain.Product;
 import com.burakpozut.microservices.order_platform_monolith.product.domain.ProductStatus;
@@ -52,11 +55,23 @@ public class CreateOrderService {
 
       var product = products.get(item.getProductId());
       if (product.getStatus() != ProductStatus.ACTIVE) {
-        throw new ProductNotFoundException(product.getId());// TODO add product not available exception
+        throw new ProductNotAvailbaleException(product.getId());
+      }
+
+      // Validate currency
+      if (product.getCurrency() != command.getCurrency()) {
+        throw new DomainValidationException(
+            "Product currency " + product.getCurrency() + " does not match order currency " + command.getCurrency());
       }
     }
 
-    var order = Order.createNew(command.getCustomerId(), command.getStatus(), command.getTotalAmount(),
+    // Calcualte the total amount from order items
+    BigDecimal totalAmount = command.getItems().stream().map(item -> {
+      Product product = products.get(item.getProductId());
+      return product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+    }).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    var order = Order.createNew(command.getCustomerId(), command.getStatus(), totalAmount,
         command.getCurrency());
     var savedOrder = orderRepository.save(order, true);
 
@@ -69,10 +84,6 @@ public class CreateOrderService {
 
     orderItemRepository.saveAll(orderItems, true);
 
-    // TODO: add good error handling when I send bad product id it jsut showd 500
-    // but it was user error
-    // TODO: and also calculate the totalt amount using the proce and quantity in
-    // the products
     return savedOrder;
   }
 

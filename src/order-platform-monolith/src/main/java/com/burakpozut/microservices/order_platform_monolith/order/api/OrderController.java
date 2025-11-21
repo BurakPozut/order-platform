@@ -54,7 +54,7 @@ public class OrderController {
         .map(item -> new CreateOrderCommand.OrderItemData(item.productId(), item.quantity()))
         .collect(Collectors.toList());
 
-    var command = new CreateOrderCommand(request.customerId(), request.status(), request.totalAmount(),
+    var command = new CreateOrderCommand(request.customerId(), request.status(),
         Currency.valueOf(request.currency()), commandItems);
     var order = createOrderService.handle(command);
     var response = new OrderResponse(order.getId(), order.getCustomerId(), order.getOrderStatus());

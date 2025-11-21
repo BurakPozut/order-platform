@@ -1,6 +1,5 @@
 package com.burakpozut.microservices.order_platform_monolith.order.application.command;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 public class CreateOrderCommand {
   private final UUID customerId;
   private final OrderStatus status;
-  private final BigDecimal totalAmount;
   private final Currency currency;
   private final List<OrderItemData> items;
 
