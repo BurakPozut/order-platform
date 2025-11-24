@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -118,6 +119,17 @@ public class GlobalExceptionHandler {
         "VALIDATION_ERROR",
         message);
 
+    return ResponseEntity.badRequest().body(body);
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+    String message = ex.getMessage();
+
+    var body = new ApiError(LocalDateTime.now(),
+        HttpStatus.BAD_REQUEST.value(),
+        "BAD_REQUEST",
+        message);
     return ResponseEntity.badRequest().body(body);
   }
 }

@@ -10,4 +10,7 @@ public class OrderPlatformMonolithApplication {
 		SpringApplication.run(OrderPlatformMonolithApplication.class, args);
 	}
 
+	// TODO: add put and delete to all services
+
 }
+

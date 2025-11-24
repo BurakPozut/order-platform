@@ -3,7 +3,6 @@ package com.burakpozut.microservices.order_platform.order.api;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.burakpozut.microservices.order_platform.common.domain.Currency;
 import com.burakpozut.microservices.order_platform.order.api.dto.CreateOrderRequest;
 import com.burakpozut.microservices.order_platform.order.api.dto.OrderResponse;
 import com.burakpozut.microservices.order_platform.order.application.command.CreateOrderCommand;
@@ -61,9 +60,11 @@ public class OrderController {
     var commandItems = request.items().stream()
         .map(item -> new CreateOrderCommand.OrderItemData(item.productId(), item.quantity()))
         .collect(Collectors.toList());
+    // request.items().add(new
+    // CreateOrderRequest.OrderItemRequest(UUID.randomUUID(), 5));
 
     var command = new CreateOrderCommand(request.customerId(), request.status(),
-        Currency.valueOf(request.currency()), commandItems);
+        request.currency(), commandItems);
     var order = createOrderService.handle(command);
     var response = new OrderResponse(order.getId(), order.getCustomerId(), order.getOrderStatus());
 
