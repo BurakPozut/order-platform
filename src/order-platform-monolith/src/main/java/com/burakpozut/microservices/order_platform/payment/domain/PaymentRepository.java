@@ -10,4 +10,6 @@ public interface PaymentRepository {
   List<Payment> findAll();
 
   Payment save(Payment payment);
+
+  void deleteById(UUID id);
 }

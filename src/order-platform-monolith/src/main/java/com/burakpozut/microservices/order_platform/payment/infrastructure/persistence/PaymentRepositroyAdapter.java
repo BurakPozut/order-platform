@@ -34,4 +34,9 @@ public class PaymentRepositroyAdapter implements PaymentRepository {
 
     return PaymentMapper.toDomain(savedEntity);
   }
+
+  @Override
+  public void deleteById(UUID id) {
+    jpa.deleteById(id);
+  }
 }

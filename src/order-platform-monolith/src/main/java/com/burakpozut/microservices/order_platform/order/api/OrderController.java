@@ -8,6 +8,7 @@ import com.burakpozut.microservices.order_platform.order.api.dto.OrderResponse;
 import com.burakpozut.microservices.order_platform.order.application.command.CreateOrderCommand;
 import com.burakpozut.microservices.order_platform.order.application.query.GetOrderDetailsQuery;
 import com.burakpozut.microservices.order_platform.order.application.service.CreateOrderService;
+import com.burakpozut.microservices.order_platform.order.application.service.DeleteOrderService;
 import com.burakpozut.microservices.order_platform.order.application.service.GetAllOrdersService;
 import com.burakpozut.microservices.order_platform.order.application.service.GetOrderDetailsService;
 import com.burakpozut.microservices.order_platform.order.domain.Order;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +39,7 @@ public class OrderController {
   private final GetOrderDetailsService getOrderDetailsService;
   private final CreateOrderService createOrderService;
   private final GetAllOrdersService getAllOrdersService;
+  private final DeleteOrderService deleteOrderService;
 
   @GetMapping
   public ResponseEntity<List<OrderResponse>> getAll() {
@@ -60,8 +63,6 @@ public class OrderController {
     var commandItems = request.items().stream()
         .map(item -> new CreateOrderCommand.OrderItemData(item.productId(), item.quantity()))
         .collect(Collectors.toList());
-    // request.items().add(new
-    // CreateOrderRequest.OrderItemRequest(UUID.randomUUID(), 5));
 
     var command = new CreateOrderCommand(request.customerId(), request.status(),
         request.currency(), commandItems);
@@ -71,4 +72,9 @@ public class OrderController {
     return ResponseEntity.ok(response);
   }
 
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
+    deleteOrderService.handle(id);
+    return ResponseEntity.noContent().build();
+  }
 }

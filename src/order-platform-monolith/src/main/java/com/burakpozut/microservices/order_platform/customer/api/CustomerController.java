@@ -8,6 +8,7 @@ import com.burakpozut.microservices.order_platform.customer.api.dto.CustomerResp
 import com.burakpozut.microservices.order_platform.customer.application.GetAllCustomersService;
 import com.burakpozut.microservices.order_platform.customer.application.query.GetCusotmerDetailsQuery;
 import com.burakpozut.microservices.order_platform.customer.application.service.CreateCustomerService;
+import com.burakpozut.microservices.order_platform.customer.application.service.DeleteCustomerService;
 import com.burakpozut.microservices.order_platform.customer.application.service.GetCustomerByEmailService;
 import com.burakpozut.microservices.order_platform.customer.application.service.GetCustomerByIdService;
 import com.burakpozut.microservices.order_platform.customer.domain.Customer;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +40,7 @@ public class CustomerController {
   private final GetCustomerByEmailService getCustomerByEmailService;
   private final CreateCustomerService createCustomerService;
   private final GetAllCustomersService getAllCustomersService;
+  private final DeleteCustomerService deleteCustomerService;
 
   @GetMapping
   public ResponseEntity<List<CustomerResponse>> getAll() {
@@ -67,6 +70,12 @@ public class CustomerController {
   public ResponseEntity<CustomerResponse> create(@Valid @RequestBody CreateCustomerRequest request) {
     var customer = createCustomerService.hande(request.fullName(), request.email());
     return ResponseEntity.ok(CustomerResponse.from(customer));
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
+    deleteCustomerService.handle(id);
+    return ResponseEntity.noContent().build();
   }
 
 }

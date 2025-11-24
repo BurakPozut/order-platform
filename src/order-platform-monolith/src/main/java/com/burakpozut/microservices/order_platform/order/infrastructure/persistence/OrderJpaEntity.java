@@ -1,5 +1,6 @@
 package com.burakpozut.microservices.order_platform.order.infrastructure.persistence;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -29,14 +30,14 @@ public class OrderJpaEntity {
   private UUID id;
 
   @Column(name = "customer_id", nullable = false)
-  private java.util.UUID customerId;
+  private UUID customerId;
 
   @Column(name = "status", nullable = false, length = 32)
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
 
   @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
-  private java.math.BigDecimal totalAmount;
+  private BigDecimal totalAmount;
 
   @Column(name = "currency", nullable = false, length = 3)
   private String currency;

@@ -13,4 +13,6 @@ public interface OrderRepository {
   List<Order> findAll();
 
   Order save(Order order, boolean isNew);
+
+  void deleteById(UUID id);
 }

@@ -31,5 +31,3 @@ public record CreateOrderRequest(
       @NotNull @Positive Integer quantity) {
   }
 }
-
-// TODO: Problem with valid annotation with enums

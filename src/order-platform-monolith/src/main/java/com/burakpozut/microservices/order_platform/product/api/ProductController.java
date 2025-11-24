@@ -7,6 +7,7 @@ import com.burakpozut.microservices.order_platform.product.api.dto.CreateProduct
 import com.burakpozut.microservices.order_platform.product.api.dto.ProductResponse;
 import com.burakpozut.microservices.order_platform.product.application.command.CreateProductCommand;
 import com.burakpozut.microservices.order_platform.product.application.service.CreateProductService;
+import com.burakpozut.microservices.order_platform.product.application.service.DeleteProductService;
 import com.burakpozut.microservices.order_platform.product.application.service.GetAllProductsService;
 import com.burakpozut.microservices.order_platform.product.application.service.GetProductByIdService;
 import com.burakpozut.microservices.order_platform.product.application.service.GetProductByNameService;
@@ -21,6 +22,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +36,7 @@ public class ProductController {
   private final GetProductByNameService getProductByNameService;
   private final CreateProductService createProductService;
   private final GetAllProductsService getAllProductsService;
+  private final DeleteProductService deleteProductService;
 
   @GetMapping()
   public ResponseEntity<List<ProductResponse>> getAll() {
@@ -62,4 +65,9 @@ public class ProductController {
     return ResponseEntity.ok(ProductResponse.from(product));
   }
 
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
+    deleteProductService.handle(id);
+    return ResponseEntity.noContent().build();
+  }
 }

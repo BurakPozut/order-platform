@@ -7,6 +7,7 @@ import com.burakpozut.microservices.order_platform.payment.api.dto.CreatePayment
 import com.burakpozut.microservices.order_platform.payment.api.dto.PaymentResponse;
 import com.burakpozut.microservices.order_platform.payment.application.command.CreatePaymentCommand;
 import com.burakpozut.microservices.order_platform.payment.application.service.CreatePaymentService;
+import com.burakpozut.microservices.order_platform.payment.application.service.DeletePaymentService;
 import com.burakpozut.microservices.order_platform.payment.application.service.GetAllPaymentsService;
 import com.burakpozut.microservices.order_platform.payment.application.service.GetPaymentByIdService;
 
@@ -19,6 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,6 +35,7 @@ public class PaymentController {
   private final GetPaymentByIdService getPaymentByIdService;
   private final GetAllPaymentsService getAllPaymentsService;
   private final CreatePaymentService createPaymentService;
+  private final DeletePaymentService deletePaymentService;
 
   @GetMapping
   public ResponseEntity<List<PaymentResponse>> getAll() {
@@ -54,6 +57,12 @@ public class PaymentController {
         request.providerRef());
     var payment = createPaymentService.handle(command);
     return ResponseEntity.ok(PaymentResponse.from(payment));
+  }
 
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
+    deletePaymentService.handle(id);
+
+    return ResponseEntity.noContent().build();
   }
 }

@@ -19,4 +19,6 @@ public interface ProductRepository {
   Set<Product> findAllByIds(Set<UUID> productIds);
 
   Product save(Product product, boolean isNew);
+
+  void deleteById(UUID id);
 }

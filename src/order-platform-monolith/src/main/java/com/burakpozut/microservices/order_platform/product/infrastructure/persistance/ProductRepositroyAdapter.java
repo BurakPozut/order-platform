@@ -46,4 +46,9 @@ public class ProductRepositroyAdapter implements ProductRepository {
   public List<Product> findAll() {
     return jpa.findAll().stream().map(ProductMapper::toDomain).collect(Collectors.toList());
   }
+
+  @Override
+  public void deleteById(UUID id) {
+    jpa.deleteById(id);
+  }
 }

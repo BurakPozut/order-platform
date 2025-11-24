@@ -43,4 +43,9 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
     var savedEntity = jpa.save(entity);
     return CustomerMapper.toDomain(savedEntity);
   }
+
+  @Override
+  public void deleteById(UUID id) {
+    jpa.deleteById(id);
+  }
 }

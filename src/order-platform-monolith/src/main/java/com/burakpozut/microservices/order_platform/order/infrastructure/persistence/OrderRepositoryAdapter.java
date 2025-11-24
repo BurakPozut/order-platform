@@ -37,4 +37,8 @@ public class OrderRepositoryAdapter implements OrderRepository {
     return jpa.findAll().stream().map(OrderMapper::toDomain).collect(Collectors.toList());
   }
 
+  @Override
+  public void deleteById(UUID id) {
+    jpa.deleteById(id);
+  }
 }
