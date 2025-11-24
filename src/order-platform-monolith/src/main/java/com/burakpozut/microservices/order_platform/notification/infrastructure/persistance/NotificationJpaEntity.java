@@ -43,8 +43,8 @@ public class NotificationJpaEntity {
   @Enumerated(EnumType.STRING)
   private NotificationType type;
 
-  @Column(name = "channed", nullable = false)
-  private String channed;
+  @Column(name = "channel", nullable = false)
+  private String channel;
 
   @Column(name = "status", nullable = false)
   @Enumerated(EnumType.STRING)

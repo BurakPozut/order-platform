@@ -12,7 +12,7 @@ import com.burakpozut.microservices.order_platform.payment.domain.port.OrderGate
 
 import lombok.RequiredArgsConstructor;
 
-@Repository
+@Repository("paymentOrderGatewayAdapter")
 @RequiredArgsConstructor
 public class OrderGatewayAdapter implements OrderGateway {
   private final OrderRepository orderRepository;

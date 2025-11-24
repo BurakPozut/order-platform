@@ -49,7 +49,7 @@ WHERE o.customer_id = (SELECT id FROM customers WHERE email = 'john.doe@example.
 LIMIT 1;
 
 -- Insert dummy notification
-INSERT INTO notifications (id, customer_id, order_id, type, channed, status)
+INSERT INTO notifications (id, customer_id, order_id, type, channel, status)
 SELECT gen_random_uuid(), c.id, o.id, 'ORDER_CONFIRMED', 'EMAIL', 'SENT'
 FROM customers c, orders o
 WHERE c.email = 'john.doe@example.com'

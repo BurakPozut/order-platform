@@ -9,7 +9,7 @@ public class NotificationMapper {
         entity.getCustomerId(),
         entity.getOrderId(),
         entity.getType(),
-        entity.getChanned(),
+        entity.getChannel(),
         entity.getStatus());
   }
 
@@ -19,7 +19,7 @@ public class NotificationMapper {
     entity.setCustomerId(n.getCustomerId());
     entity.setOrderId(n.getOrderId());
     entity.setType(n.getType());
-    entity.setChanned(n.getChanned());
+    entity.setChannel(n.getChannel());
     entity.setStatus(n.getStatus());
     entity.setNew(isNew);
     return entity;

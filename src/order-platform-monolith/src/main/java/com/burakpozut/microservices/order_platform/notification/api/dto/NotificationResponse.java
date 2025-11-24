@@ -5,9 +5,9 @@ import com.burakpozut.microservices.order_platform.notification.domain.Notificat
 
 public record NotificationResponse(
     NotificationType type,
-    String channed) {
+    String channel) {
 
   public static NotificationResponse from(Notification notification) {
-    return new NotificationResponse(notification.getType(), notification.getChanned());
+    return new NotificationResponse(notification.getType(), notification.getChannel());
   }
 }

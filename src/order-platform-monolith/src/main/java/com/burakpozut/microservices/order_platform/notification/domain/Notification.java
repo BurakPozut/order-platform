@@ -13,10 +13,10 @@ public class Notification {
   private final UUID customerId;
   private final UUID orderId;
   private final NotificationType type;
-  private final String channed;
+  private final String channel;
   private final NotificationStatus status;
 
-  private Notification(UUID id, UUID customerId, UUID orderId, NotificationType type, String channed,
+  private Notification(UUID id, UUID customerId, UUID orderId, NotificationType type, String channel,
       NotificationStatus status) {
     if (id == null)
       throw new DomainValidationException("id cannot be null");
@@ -24,8 +24,8 @@ public class Notification {
       throw new DomainValidationException("Customer id cannot be null");
     if (type == null)
       throw new DomainValidationException("Type cannot be null");
-    if (channed == null)
-      throw new DomainValidationException("Channed cannot be null");
+    if (channel == null)
+      throw new DomainValidationException("Channel cannot be null");
     if (status == null)
       throw new DomainValidationException("Status cannot be null");
 
@@ -33,18 +33,18 @@ public class Notification {
     this.customerId = customerId;
     this.orderId = orderId;
     this.type = type;
-    this.channed = channed;
+    this.channel = channel;
     this.status = status;
   }
 
-  public static Notification createNew(UUID customerId, UUID orderId, NotificationType type, String channed,
+  public static Notification createNew(UUID customerId, UUID orderId, NotificationType type, String channel,
       NotificationStatus status) {
     UUID id = UUID.randomUUID();
-    return new Notification(id, customerId, orderId, type, channed, status);
+    return new Notification(id, customerId, orderId, type, channel, status);
   }
 
-  public static Notification rehydrate(UUID id, UUID customerId, UUID orderId, NotificationType type, String channed,
+  public static Notification rehydrate(UUID id, UUID customerId, UUID orderId, NotificationType type, String channel,
       NotificationStatus status) {
-    return new Notification(id, customerId, orderId, type, channed, status);
+    return new Notification(id, customerId, orderId, type, channel, status);
   }
 }
