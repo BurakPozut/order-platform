@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  customer-db:
+    image: postgres:16-alpine
+    container_name: customer-db
+    env_file:
+      - ./customer-service/.env
+    ports:
+      - "${CUSTOMER_DB_PORT}:5432"
+    volumes:
+      - customer_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-network
+    restart: unless-stopped
+  
+  customer-service:
+    build:
+      context: ./customer-service
+      dockerfile: Dockerfile
+    container_name: customer-service
+    env_file:
+      - ./customer-service/.env
+    ports:
+      - "${CUSTOMER_SERVICE_PORT}:8081"
+    depends_on:
+      customer-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+volumes:
+  customer_db_data:
+
+networks:
+  microservices-network:
+    driver: bridge
