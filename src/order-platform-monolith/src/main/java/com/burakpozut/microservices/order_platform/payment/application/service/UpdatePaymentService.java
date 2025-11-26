@@ -45,8 +45,6 @@ public class UpdatePaymentService {
     notificationGateway.createNotificationForPayment(orderDetails.customerId(), command.orderId(),
         notificationType.toString(),
         "email", "PENDING");
-    // TODO: Get the customer on the order id and create the notification
-    // And also add if or swtich statement if the payment is confirmed then proceed
     return paymentSaved;
   }
 
