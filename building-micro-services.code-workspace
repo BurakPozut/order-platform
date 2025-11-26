@@ -5,6 +5,21 @@
 		},
 		{
 			"path": "src/order-platform/src/main/java/com/burakpozut/microservices/order_platform"
+		},
+		{
+			"path": "customer-service"
+		},
+		{
+			"path": "product-service"
+		},
+		{
+			"path": "order-service"
+		},
+		{
+			"path": "payment-service"
+		},
+		{
+			"path": "notification-service"
 		}
 	],
 	"settings": {
