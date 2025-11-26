@@ -4,10 +4,11 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.stereotype.Repository;
-
-@Repository
 public interface OrderGateway {
   Optional<BigDecimal> getOrderAmount(UUID id);
 
+  Optional<OrderDetails> getOrderDetails(UUID id);
+
+  record OrderDetails(UUID customerId, BigDecimal amount) {
+  }
 }

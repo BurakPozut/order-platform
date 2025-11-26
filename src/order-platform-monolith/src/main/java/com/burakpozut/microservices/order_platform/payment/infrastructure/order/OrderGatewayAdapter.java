@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
-import com.burakpozut.microservices.order_platform.order.domain.Order;
 import com.burakpozut.microservices.order_platform.order.domain.OrderRepository;
 import com.burakpozut.microservices.order_platform.payment.domain.port.OrderGateway;
 
@@ -18,8 +17,12 @@ public class OrderGatewayAdapter implements OrderGateway {
   private final OrderRepository orderRepository;
 
   @Override
-  public Optional<BigDecimal> getOrderAmount(UUID id) {
-    return orderRepository.findById(id).map(Order::getTotalAmount);
+  public Optional<OrderDetails> getOrderDetails(UUID id) {
+    return orderRepository.findById(id).map(order -> new OrderDetails(order.getCustomerId(), order.getTotalAmount()));
   }
 
+  @Override
+  public Optional<BigDecimal> getOrderAmount(UUID id) {
+    return orderRepository.findById(id).map(order -> order.getTotalAmount());
+  }
 }

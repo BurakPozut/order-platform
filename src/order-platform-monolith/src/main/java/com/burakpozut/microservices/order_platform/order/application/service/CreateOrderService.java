@@ -18,6 +18,8 @@ import com.burakpozut.microservices.order_platform.order.domain.OrderItem;
 import com.burakpozut.microservices.order_platform.order.domain.OrderItemRepository;
 import com.burakpozut.microservices.order_platform.order.domain.OrderRepository;
 import com.burakpozut.microservices.order_platform.order.domain.port.CustomerGateway;
+import com.burakpozut.microservices.order_platform.order.domain.port.NotificationGateway;
+import com.burakpozut.microservices.order_platform.order.domain.port.PaymentGateway;
 import com.burakpozut.microservices.order_platform.order.domain.port.ProductGateway;
 import com.burakpozut.microservices.order_platform.product.application.exception.ProductNotAvailbaleException;
 import com.burakpozut.microservices.order_platform.product.application.exception.ProductNotFoundException;
@@ -33,6 +35,8 @@ public class CreateOrderService {
   private final OrderItemRepository orderItemRepository;
   private final CustomerGateway customerGateway;
   private final ProductGateway productGateway;
+  private final PaymentGateway paymentGateway;
+  private final NotificationGateway notificationGateway;
 
   @Transactional
   public Order handle(CreateOrderCommand command) {
@@ -76,6 +80,9 @@ public class CreateOrderService {
     }).collect(Collectors.toList());
 
     orderItemRepository.saveAll(orderItems, true);
+    paymentGateway.createPaymentForOrder(savedOrder.getId(), totalAmount, "Stripe", "strp123");
+    notificationGateway.createNotificationForOrder(savedOrder.getCustomerId(), savedOrder.getId(), "PAYMENT_DUE",
+        "email", "PENDING");
 
     return savedOrder;
   }
