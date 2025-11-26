@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import com.burakpozut.microservices.order_platform.common.exception.NotFoundException;
 
-public class PaymentNotFound extends NotFoundException {
-  public PaymentNotFound(UUID id) {
-    super("Payment not found with id: " + id);
+public class PaymentNotFoundWithOrderId extends NotFoundException {
+  public PaymentNotFoundWithOrderId(UUID id) {
+    super("Payment not found wiht order id: " + id);
   }
 }

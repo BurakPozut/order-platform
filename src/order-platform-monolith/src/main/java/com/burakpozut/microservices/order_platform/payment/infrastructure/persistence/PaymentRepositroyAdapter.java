@@ -39,4 +39,9 @@ public class PaymentRepositroyAdapter implements PaymentRepository {
   public void deleteById(UUID id) {
     jpa.deleteById(id);
   }
+
+  @Override
+  public Optional<Payment> findByOrderId(UUID id) {
+    return jpa.findByOrderId(id).map(PaymentMapper::toDomain);
+  }
 }

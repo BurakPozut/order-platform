@@ -11,7 +11,7 @@ import com.burakpozut.microservices.order_platform.payment.domain.port.CustomerG
 
 import lombok.RequiredArgsConstructor;
 
-@Repository
+@Repository("paymentCustomerGatewayAdapter")
 @RequiredArgsConstructor
 public class CustomerGatewayAdapter implements CustomerGateway {
   private final CustomerRepository customerRepository;

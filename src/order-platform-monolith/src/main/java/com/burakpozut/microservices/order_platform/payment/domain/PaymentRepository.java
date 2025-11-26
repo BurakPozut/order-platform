@@ -7,6 +7,8 @@ import java.util.UUID;
 public interface PaymentRepository {
   Optional<Payment> findById(UUID id);
 
+  Optional<Payment> findByOrderId(UUID id);
+
   List<Payment> findAll();
 
   Payment save(Payment payment);

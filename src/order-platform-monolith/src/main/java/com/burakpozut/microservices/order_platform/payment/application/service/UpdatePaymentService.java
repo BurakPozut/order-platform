@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.burakpozut.microservices.order_platform.notification.domain.NotificationType;
 import com.burakpozut.microservices.order_platform.order.application.exception.OrderNotFoundException;
 import com.burakpozut.microservices.order_platform.payment.application.command.CreatePaymentCommand;
+import com.burakpozut.microservices.order_platform.payment.application.exception.PaymentNotFoundWithOrderId;
 import com.burakpozut.microservices.order_platform.payment.domain.Payment;
 import com.burakpozut.microservices.order_platform.payment.domain.PaymentRepository;
 import com.burakpozut.microservices.order_platform.payment.domain.port.NotificationGateway;
@@ -24,9 +25,14 @@ public class UpdatePaymentService {
   public Payment handle(CreatePaymentCommand command) {
     var orderDetails = orderGateway.getOrderDetails(command.orderId())
         .orElseThrow(() -> new OrderNotFoundException(command.orderId()));
-    var payment = Payment.createNew(command.orderId(), orderDetails.amount(), command.status(), command.provider(),
-        command.provideRef());
-    var paymentSaved = paymentRepository.save(payment);
+
+    var existingPayment = paymentRepository.findByOrderId(command.orderId())
+        .orElseThrow(() -> new PaymentNotFoundWithOrderId(command.orderId()));
+
+    var updatedPayment = Payment.rehydrate(existingPayment.getId(), existingPayment.getOrderId(),
+        existingPayment.getAmount(), command.status(), command.provider(), command.provideRef());
+
+    var paymentSaved = paymentRepository.save(updatedPayment);
 
     NotificationType notificationType = switch (command.status()) {
       case COMPLETED -> NotificationType.PAYMENT_CONFIRMED;

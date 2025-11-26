@@ -9,7 +9,7 @@ import com.burakpozut.microservices.order_platform.notification.domain.port.Cust
 
 import lombok.RequiredArgsConstructor;
 
-@Repository
+@Repository("notificationCustomerGatewayAdapter")
 @RequiredArgsConstructor
 public class CustomerGatewayAdapter implements CustomerGateway {
   private final CustomerRepository customerRepository;
