@@ -4,7 +4,7 @@
 			"path": "."
 		},
 		{
-			"path": "src/order-platform-monolith/src/main/java/com/burakpozut/microservices/order_platform"
+			"path": "src/order-platform/src/main/java/com/burakpozut/microservices/order_platform"
 		}
 	],
 	"settings": {
