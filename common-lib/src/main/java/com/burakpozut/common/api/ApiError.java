@@ -2,10 +2,18 @@ package com.burakpozut.common.api;
 
 import java.time.LocalDateTime;
 
-record ApiError(
+public record ApiError(
         LocalDateTime timestamp,
         int status,
         String error,
         String message) {
+
+    public static ApiError of(int status, String error, String message) {
+        return new ApiError(LocalDateTime.now(), status, error, message);
+    }
+
+    public static ApiError of(LocalDateTime timestamp, int status, String error, String message) {
+        return new ApiError(timestamp, status, error, message);
+    }
 
 }

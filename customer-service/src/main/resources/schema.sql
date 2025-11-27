@@ -7,4 +7,3 @@ CREATE TABLE IF NOT EXISTS customers(
   updated_at  TIMESTAMP  NOT NULL DEFAULT NOW()
 );
 
-ikd´jlkfj
