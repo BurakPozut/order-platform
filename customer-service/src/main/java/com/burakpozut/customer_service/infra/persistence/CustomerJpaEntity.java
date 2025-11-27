@@ -37,7 +37,7 @@ public class CustomerJpaEntity {
   @Column(name = "status", nullable = false)
   private String status;
 
-  @Column(name = "created_at", nullable = false)
+  @Column(name = "created_at", nullable = false, updatable = false)
   @CreatedDate
   private LocalDateTime createdAt;
 

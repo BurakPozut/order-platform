@@ -1,4 +1,4 @@
-package com.burakpozut.customer_service.api.dto;
+package com.burakpozut.customer_service.api.dto.response;
 
 import java.util.UUID;
 
