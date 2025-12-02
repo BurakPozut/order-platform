@@ -10,4 +10,5 @@ public class OrderServiceApplication {
 		SpringApplication.run(OrderServiceApplication.class, args);
 	}
 
+	// TODO: we used eager in the orderJpaEntity make it more effiecent
 }

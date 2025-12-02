@@ -1,6 +1,7 @@
 package com.burakpozut.order_service.domain;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import com.burakpozut.common.domain.Currency;
@@ -11,7 +12,8 @@ public record Order(
     UUID customerId,
     OrderStatus status,
     BigDecimal totalAmount,
-    Currency currency) {
+    Currency currency,
+    List<OrderItem> items) {
   public Order {
     if (id == null)
       throw new DomainValidationException("Order Id cannot be null");
@@ -25,15 +27,19 @@ public record Order(
       throw new DomainValidationException("Total amount cannot be negative");
     if (currency == null)
       throw new DomainValidationException("Currency cannot be null");
+    if (items == null)
+      throw new DomainValidationException("Items can not be null");
   }
 
-  public static Order of(UUID customerId, OrderStatus status, BigDecimal totalAmount, Currency currency) {
+  public static Order of(UUID customerId, OrderStatus status,
+      BigDecimal totalAmount, Currency currency, List<OrderItem> items) {
     return new Order(
         UUID.randomUUID(),
         customerId,
         status,
         totalAmount,
-        currency);
+        currency,
+        items);
   }
 
   public static Order rehydrate(
@@ -41,7 +47,9 @@ public record Order(
       UUID customerId,
       OrderStatus status,
       BigDecimal totalAmount,
-      Currency currency) {
-    return new Order(id, customerId, status, totalAmount, currency);
+      Currency currency,
+      List<OrderItem> items) {
+    return new Order(id, customerId, status,
+        totalAmount, currency, items);
   }
 }
