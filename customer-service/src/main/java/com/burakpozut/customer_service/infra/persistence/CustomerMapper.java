@@ -13,8 +13,8 @@ public class CustomerMapper {
     entity.setId(c.id());
     entity.setEmail(c.email());
     entity.setFullName(c.fullName());
-    entity.setNew(isNew);
     entity.setStatus("ACTIVE");
+    entity.setNew(isNew);
     return entity;
   }
 
