@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SpringDataProductRepository extends JpaRepository<ProductJpaEntity, UUID> {
   Optional<ProductJpaEntity> findByName(String name);
+  boolean existsByName(String name);
 }

@@ -12,6 +12,8 @@ public interface ProductRepository {
 
   List<Product> findAll();
 
+  boolean existsByName(String name);
+
   Product save(Product product, boolean isNew);
 
   void deleteById(UUID id);

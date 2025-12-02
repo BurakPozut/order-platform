@@ -33,6 +33,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
   }
 
   @Override
+  public boolean existsByName(String name) {
+    return jpa.existsByName(name);
+  }
+
+  @Override
   public void deleteById(UUID id) {
     jpa.deleteById(id);
   }

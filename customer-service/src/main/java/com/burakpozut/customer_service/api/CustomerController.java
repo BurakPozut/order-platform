@@ -81,9 +81,5 @@ public class CustomerController {
     var command = PatchCustomerCommand.of(request.fullName(), request.email());
     var customer = patchCustomerService.handle(id, command);
     return ResponseEntity.ok(CustomerResponse.from(customer));
-    // var command = PatchCustomerCommand.of(request.getFullName(),
-    // request.getEmail());
-    // var customer = patchCustomerService.handle(id, command);
-    // return ResponseEntity.ok(CustomerResponse.from(customer));
   }
 }
