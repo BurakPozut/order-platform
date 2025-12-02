@@ -8,4 +8,4 @@ VALUES
   (gen_random_uuid(), 'Webcam HD', 89.99, 'USD', 'INACTIVE'),
   (gen_random_uuid(), 'Noise Cancelling Headphones', 299.99, 'USD', 'ACTIVE'),
   (gen_random_uuid(), 'SSD 1TB', 129.99, 'EUR', 'ACTIVE')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (name) DO NOTHING;

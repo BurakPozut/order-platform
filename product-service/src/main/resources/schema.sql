@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS products(
   id        UUID PRIMARY KEY,
-  name      VARCHAR(255) NOT NULL,
+  name      VARCHAR(255) UNIQUE NOT NULL,
   price     NUMERIC(10,2) NOT NULL,
   currency  CHAR(3) NOT NULL DEFAULT 'USD',
   status    VARCHAR(32) NOT NULL DEFAULT 'ACTIVE',
