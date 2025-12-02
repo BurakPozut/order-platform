@@ -30,8 +30,7 @@ public class OrderRepositoryAdapter implements OrderRepository {
 
   @Override
   public Optional<Order> findById(UUID id) {
-    // TODO Auto-generated method stub
-    return Optional.empty();
+    return jpa.findById(id).map(OrderMapper::toDomain);
   }
 
   @Override
