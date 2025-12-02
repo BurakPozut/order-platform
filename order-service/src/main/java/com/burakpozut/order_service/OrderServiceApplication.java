@@ -11,4 +11,5 @@ public class OrderServiceApplication {
 	}
 
 	// TODO: we used eager in the orderJpaEntity make it more effiecent
+	// TODO: Customer id is now unchecked
 }
