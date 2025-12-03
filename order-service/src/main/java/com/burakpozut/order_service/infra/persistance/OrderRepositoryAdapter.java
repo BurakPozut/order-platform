@@ -35,7 +35,8 @@ public class OrderRepositoryAdapter implements OrderRepository {
 
   @Override
   public Order save(Order order, boolean isNew) {
-    // TODO Auto-generated method stub
-    return null;
+    var entity = OrderMapper.toEntity(order, isNew);
+    var savedEntity = jpa.save(entity);
+    return OrderMapper.toDomain(savedEntity);
   }
 }
