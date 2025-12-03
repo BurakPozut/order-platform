@@ -3,6 +3,7 @@ package com.burakpozut.order_service.config;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -59,6 +60,21 @@ public class GlobalExceptionHandler {
         HttpStatus.SERVICE_UNAVAILABLE.name(), ex.getMessage());
 
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body);
+  }
+
+  // For the request dto validation exceptions
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ApiError> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+    String message = ex.getMessage() != null
+        ? ex.getMessage()
+        : "Invalid request body format";
+
+    ApiError body = ApiError.of(
+        HttpStatus.BAD_REQUEST.value(),
+        HttpStatus.BAD_REQUEST.name(),
+        message);
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
   }
 
   @ExceptionHandler(DataAccessException.class)
