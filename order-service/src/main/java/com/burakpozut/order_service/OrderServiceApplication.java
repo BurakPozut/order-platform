@@ -11,4 +11,5 @@ public class OrderServiceApplication {
 	}
 	// TODO: Customer id is now unchecked
 	// TODO: Handle the calling customer service in the docker as well
+	// TODO: Add batch in the product service for easier checking in the creation
 }

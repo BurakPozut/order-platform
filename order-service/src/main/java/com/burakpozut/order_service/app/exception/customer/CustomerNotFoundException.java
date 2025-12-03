@@ -1,4 +1,4 @@
-package com.burakpozut.order_service.app.exception;
+package com.burakpozut.order_service.app.exception.customer;
 
 import java.util.UUID;
 

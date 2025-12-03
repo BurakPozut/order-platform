@@ -47,7 +47,7 @@ public class OrderController {
 
   @PostMapping()
   public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
-    var command = CreateOrderCommand.of(request.customerId(), request.status(), request.totalAmount(),
+    var command = CreateOrderCommand.of(request.customerId(), request.status(),
         request.currency(), request.items());
 
     var savedOrder = createOrderService.handle(command);
