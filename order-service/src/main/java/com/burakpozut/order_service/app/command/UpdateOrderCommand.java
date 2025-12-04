@@ -10,9 +10,9 @@ public record UpdateOrderCommand(
     OrderStatus status,
     Currency currency) {
   public static UpdateOrderCommand of(
-      UUID productId,
+      UUID customerId,
       OrderStatus status,
       Currency currency) {
-    return new UpdateOrderCommand(productId, status, currency);
+    return new UpdateOrderCommand(customerId, status, currency);
   }
 }

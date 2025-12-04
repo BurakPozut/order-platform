@@ -85,6 +85,22 @@ services:
       - microservices-network
     restart: unless-stopped
 
+  order-service:
+    build:
+      context: .
+      dockerfile: ./order-service/Dockerfile
+    container_name: order-service
+    env_file:
+      - ./order-service/.env
+    ports:
+      - "${ORDER_SERVICE_PORT}:8081"
+    depends_on:
+      order-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
 volumes:
   customer_db_data:
   product_db_data:
