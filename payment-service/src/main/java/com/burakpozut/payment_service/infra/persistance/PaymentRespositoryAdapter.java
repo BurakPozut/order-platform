@@ -18,8 +18,7 @@ public class PaymentRespositoryAdapter implements PaymentRepository {
 
   @Override
   public Optional<Payment> findById(UUID id) {
-    // TODO Auto-generated method stub
-    return Optional.empty();
+    return jpa.findById(id).map(PaymentMapper::toDomain);
   }
 
   @Override
@@ -29,8 +28,9 @@ public class PaymentRespositoryAdapter implements PaymentRepository {
 
   @Override
   public Payment save(Payment p, boolean isNew) {
-    // TODO Auto-generated method stub
-    return null;
+    var entity = PaymentMapper.toEntity(p, isNew);
+    var saved = jpa.save(entity);
+    return PaymentMapper.toDomain(entity);
   }
 
   @Override

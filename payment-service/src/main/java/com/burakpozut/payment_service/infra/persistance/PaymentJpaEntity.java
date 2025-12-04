@@ -8,9 +8,14 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.burakpozut.common.domain.Currency;
+import com.burakpozut.payment_service.domain.PaymentStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -36,11 +41,13 @@ public class PaymentJpaEntity {
   @Column(name = "amount", nullable = false, precision = 10, scale = 2)
   private BigDecimal amount;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "currency", nullable = false, length = 3)
-  private String currency = "USD";
+  private Currency currency;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false, length = 32)
-  private String status;
+  private PaymentStatus status;
 
   @Column(name = "provider", nullable = false, length = 64)
   private String provider;

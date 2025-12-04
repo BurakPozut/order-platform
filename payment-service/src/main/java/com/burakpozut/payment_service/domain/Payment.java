@@ -1,19 +1,18 @@
 package com.burakpozut.payment_service.domain;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
+
+import com.burakpozut.common.domain.Currency;
 
 public record Payment(
     UUID id,
     UUID orderId,
     BigDecimal amount,
-    String currency,
-    String status,
+    Currency currency,
+    PaymentStatus status,
     String provider,
-    String providerRef,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt) {
+    String providerRef) {
   public Payment {
     if (id == null)
       throw new IllegalArgumentException("Payment Id cannot be null");
@@ -23,9 +22,9 @@ public record Payment(
       throw new IllegalArgumentException("Amount cannot be null");
     if (amount.compareTo(BigDecimal.ZERO) < 0)
       throw new IllegalArgumentException("Amount cannot be negative");
-    if (currency == null || currency.isBlank())
+    if (currency == null)
       throw new IllegalArgumentException("Currency cannot be null or blank");
-    if (status == null || status.isBlank())
+    if (status == null)
       throw new IllegalArgumentException("Status cannot be null or blank");
     if (provider == null || provider.isBlank())
       throw new IllegalArgumentException("Provider cannot be null or blank");
@@ -34,35 +33,31 @@ public record Payment(
   public static Payment of(
       UUID orderId,
       BigDecimal amount,
-      String currency,
-      String status,
+      Currency currency,
+      PaymentStatus status,
       String provider,
-      String providerRef,
-      LocalDateTime createdAt,
-      LocalDateTime updatedAt) {
+      String providerRef) {
 
     return new Payment(
         UUID.randomUUID(), orderId,
         amount, currency,
         status, provider,
-        providerRef, createdAt, updatedAt);
+        providerRef);
   }
 
   public static Payment rehydrate(
       UUID id,
       UUID orderId,
       BigDecimal amount,
-      String currency,
-      String status,
+      Currency currency,
+      PaymentStatus status,
       String provider,
-      String providerRef,
-      LocalDateTime createdAt,
-      LocalDateTime updatedAt) {
+      String providerRef) {
 
     return new Payment(
         id, orderId,
         amount, currency,
         status, provider,
-        providerRef, createdAt, updatedAt);
+        providerRef);
   }
 }
