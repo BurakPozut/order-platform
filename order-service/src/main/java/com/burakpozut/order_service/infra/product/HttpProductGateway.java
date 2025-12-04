@@ -49,6 +49,14 @@ public class HttpProductGateway implements ProductGateway {
       return Optional.of(new ProductInfo(response.id, response.name, response.price, response.currency));
     } catch (WebClientResponseException.NotFound e) {
       return Optional.empty();
+    } catch (WebClientResponseException e) {
+      log.error("Product service error for product {}: {} - {}",
+          productId, e.getStatusCode(), e.getMessage());
+      throw new ProductServiceException("Product service returned error: " + e.getStatusCode(), e);
+    } catch (Exception e) {
+      log.error("Failed to communicate with product service for product {}: {}",
+          productId, e.getMessage());
+      throw new ProductServiceException("Product service is unavailable", e);
     }
     // catch (Exception e) {
     // // throw some sort of product exception

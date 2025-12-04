@@ -7,8 +7,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.burakpozut.order_service.api.dto.request.OrderItemRequest;
 import com.burakpozut.order_service.app.command.CreateOrderCommand;
+import com.burakpozut.order_service.app.command.OrderItemData;
 import com.burakpozut.order_service.app.exception.customer.CustomerNotFoundException;
 import com.burakpozut.order_service.app.exception.product.ProductNotFoundException;
 import com.burakpozut.order_service.domain.Order;
@@ -36,7 +36,7 @@ public class CreateOrderService {
       throw new CustomerNotFoundException(command.customerId());
     }
 
-    List<UUID> productIds = command.items().stream().map(OrderItemRequest::productId).distinct().toList();
+    List<UUID> productIds = command.items().stream().map(OrderItemData::productId).distinct().toList();
 
     // Fetch all in parallel
     Map<UUID, ProductInfo> productsMap = productGateway.getProductsByIds(productIds);
@@ -49,11 +49,12 @@ public class CreateOrderService {
     }
 
     List<OrderItem> orderItems = command.items().stream()
-        .map(itemRequest -> {
-          ProductInfo productInfo = productsMap.get(itemRequest.productId());
+        .map(itemData -> {
+          ProductInfo productInfo = productsMap.get(itemData.productId());
           return OrderItem.rehydrate(
               UUID.randomUUID(),
-              productInfo.productId(), productInfo.name(), productInfo.price(), itemRequest.quantity());
+              productInfo.productId(),
+              productInfo.name(), productInfo.price(), itemData.quantity());
         }).toList();
 
     // Calculate total amount
