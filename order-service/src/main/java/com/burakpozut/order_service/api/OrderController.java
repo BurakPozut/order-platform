@@ -7,9 +7,7 @@ import com.burakpozut.order_service.api.dto.request.CreateOrderRequest;
 import com.burakpozut.order_service.api.dto.request.UpdateOrderItemRequest;
 import com.burakpozut.order_service.api.dto.request.UpdateOrderRequest;
 import com.burakpozut.order_service.api.dto.response.OrderResponse;
-import com.burakpozut.order_service.app.command.CreateOrderCommand;
-import com.burakpozut.order_service.app.command.OrderItemData;
-import com.burakpozut.order_service.app.command.UpdateOrderCommand;
+import com.burakpozut.order_service.api.mapper.OrderMapper;
 import com.burakpozut.order_service.app.service.CreateOrderService;
 import com.burakpozut.order_service.app.service.GetAllOrdersService;
 import com.burakpozut.order_service.app.service.GetOrderByIdService;
@@ -58,11 +56,7 @@ public class OrderController {
   @PostMapping()
   public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
 
-    var commandItems = request.items().stream()
-        .map(item -> new OrderItemData(item.productId(), item.quantity()))
-        .toList();
-    var command = CreateOrderCommand.of(request.customerId(), request.status(),
-        request.currency(), commandItems);
+    var command = OrderMapper.toCommand(request);
 
     var savedOrder = createOrderService.handle(command);
     return ResponseEntity.ok(OrderResponse.from(savedOrder));
@@ -71,7 +65,8 @@ public class OrderController {
   @PatchMapping("/{id}")
   public ResponseEntity<OrderResponse> updateOrder(@PathVariable UUID id,
       @Valid @RequestBody UpdateOrderRequest request) {
-    var command = UpdateOrderCommand.of(request.customerId(), request.status(), request.currency());
+
+    var command = OrderMapper.toCommand(request);
     var order = updateOrderService.handle(id, command);
     var body = OrderResponse.from(order);
     return ResponseEntity.ok(body);
@@ -81,7 +76,7 @@ public class OrderController {
   public ResponseEntity<OrderResponse> updateOrderItem(@PathVariable UUID orderId,
       @PathVariable UUID itemId, @Valid @RequestBody UpdateOrderItemRequest request) {
 
-    var command = UpdateOrderItemRequest.toCommand(request);
+    var command = OrderMapper.toCommand(request);
 
     var saved = updateOrderItemService.handle(orderId, itemId, command);
     var body = OrderResponse.from(saved);
