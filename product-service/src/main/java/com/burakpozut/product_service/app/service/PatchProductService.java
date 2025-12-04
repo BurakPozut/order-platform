@@ -29,7 +29,7 @@ public class PatchProductService {
     Currency currency = command.currency() != null ? command.currency() : existing.currency();
     ProductStatus status = command.status() != null ? command.status() : existing.status();
 
-    if (command.name() != null && existing.name().equals(newName)
+    if (command.name() != null && !existing.name().equals(newName)
         && productRepository.existsByName(newName)) {
       throw new NameAlreadyInUseException(newName);
     }

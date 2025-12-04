@@ -21,7 +21,7 @@ public class UpdateProductService {
     var existing = productRepository.findById(id)
         .orElseThrow(() -> new ProductNotFoundException(id));
 
-    if (existing.name().equals(command.name()) && productRepository.existsByName(command.name())) {
+    if (!existing.name().equals(command.name()) && productRepository.existsByName(command.name())) {
       throw new NameAlreadyInUseException(command.name());
     }
 
