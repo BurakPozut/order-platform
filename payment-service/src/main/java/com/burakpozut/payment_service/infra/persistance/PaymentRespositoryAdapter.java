@@ -30,7 +30,7 @@ public class PaymentRespositoryAdapter implements PaymentRepository {
   public Payment save(Payment p, boolean isNew) {
     var entity = PaymentMapper.toEntity(p, isNew);
     var saved = jpa.save(entity);
-    return PaymentMapper.toDomain(entity);
+    return PaymentMapper.toDomain(saved);
   }
 
   @Override
