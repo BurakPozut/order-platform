@@ -29,6 +29,7 @@ public class HttpCustomerGateway implements CustomerGateway {
       webClient.get().uri("/api/customers/{id}", customerId).retrieve().toBodilessEntity().block();
       return true;
     } catch (WebClientResponseException.NotFound e) {
+      log.error("Customer not found with id: {}", customerId);
       return false;
     } catch (WebClientResponseException e) {
       log.error("Customer service error for customer {}: {} - ",
