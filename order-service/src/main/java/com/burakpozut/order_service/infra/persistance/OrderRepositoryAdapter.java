@@ -19,8 +19,7 @@ public class OrderRepositoryAdapter implements OrderRepository {
 
   @Override
   public void deleteById(UUID id) {
-    // TODO Auto-generated method stub
-
+    jpa.deleteById(id);
   }
 
   @Override

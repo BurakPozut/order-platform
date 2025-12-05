@@ -16,6 +16,7 @@ import com.burakpozut.order_service.domain.OrderItem;
 import com.burakpozut.order_service.domain.OrderRepository;
 import com.burakpozut.order_service.domain.ProductInfo;
 import com.burakpozut.order_service.domain.gateway.CustomerGateway;
+import com.burakpozut.order_service.domain.gateway.PaymentGateway;
 import com.burakpozut.order_service.domain.gateway.ProductGateway;
 
 import jakarta.transaction.Transactional;
@@ -29,7 +30,9 @@ public class CreateOrderService {
   private final OrderRepository orderRepository;
   private final CustomerGateway customerGateway;
   private final ProductGateway productGateway;
+  private final PaymentGateway paymentGateway;
 
+  // TODO: create payment as wel if the save is successfull
   @Transactional
   public Order handle(CreateOrderCommand command) {
     if (!customerGateway.validateCustomerExists(command.customerId())) {
@@ -63,7 +66,12 @@ public class CreateOrderService {
         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     Order order = Order.of(command.customerId(), command.status(), totalAmount, command.currency(), orderItems);
-    return orderRepository.save(order, true);
+    var savedOrder = orderRepository.save(order, true);
+
+    paymentGateway.createPayment(order.id(), totalAmount,
+        order.currency(), "stripe", "stp-123"); // TODO: this provider is not good practice I believe
+
+    return savedOrder;
   }
 
 }

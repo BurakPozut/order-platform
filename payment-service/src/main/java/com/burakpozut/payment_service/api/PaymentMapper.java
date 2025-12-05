@@ -8,7 +8,7 @@ import com.burakpozut.payment_service.app.command.PatchPaymentCommand;
 public class PaymentMapper {
   public static CreatePaymentCommand toCommand(CreatePaymentRequest request) {
     return CreatePaymentCommand.of(request.orderId(), request.amount(),
-        request.currency(), request.status(),
+        request.currency(), null,
         request.provider(), request.providerRef());
   }
 

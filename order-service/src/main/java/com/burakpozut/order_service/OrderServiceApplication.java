@@ -9,7 +9,5 @@ public class OrderServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(OrderServiceApplication.class, args);
 	}
-	// TODO: Customer id is now unchecked
-	// TODO: Handle the calling customer service in the docker as well
 	// TODO: Add batch in the product service for easier checking in the creation
 }
