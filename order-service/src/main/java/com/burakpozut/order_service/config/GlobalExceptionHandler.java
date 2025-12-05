@@ -11,6 +11,7 @@ import com.burakpozut.common.api.ApiError;
 import com.burakpozut.common.exception.AppException;
 import com.burakpozut.common.exception.BusinessException;
 import com.burakpozut.common.exception.DomainValidationException;
+import com.burakpozut.common.exception.ExternalServiceException;
 import com.burakpozut.common.exception.NotFoundException;
 
 @RestControllerAdvice
@@ -44,23 +45,15 @@ public class GlobalExceptionHandler {
     return ResponseEntity.badRequest().body(body);
   }
 
-  // @ExceptionHandler(ProductServiceException.class)
-  // public ResponseEntity<ApiError>
-  // handleProductServiceException(ProductServiceException ex) {
-  // ApiError body = ApiError.of(HttpStatus.SERVICE_UNAVAILABLE.value(),
-  // HttpStatus.SERVICE_UNAVAILABLE.name(), ex.getMessage());
+  @ExceptionHandler(ExternalServiceException.class)
+  public ResponseEntity<ApiError> handleExternalServiceException(ExternalServiceException ex) {
+    ApiError body = ApiError.of(
+        HttpStatus.SERVICE_UNAVAILABLE.value(),
+        HttpStatus.SERVICE_UNAVAILABLE.name(),
+        ex.getMessage());
 
-  // return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body);
-  // }
-
-  // @ExceptionHandler(CustomerServiceException.class)
-  // public ResponseEntity<ApiError>
-  // handleCustomerServiceException(CustomerServiceException ex) {
-  // ApiError body = ApiError.of(HttpStatus.SERVICE_UNAVAILABLE.value(),
-  // HttpStatus.SERVICE_UNAVAILABLE.name(), ex.getMessage());
-
-  // return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body);
-  // }
+    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body);
+  }
 
   // For the request dto validation exceptions
   @ExceptionHandler(HttpMessageNotReadableException.class)

@@ -30,9 +30,11 @@ public class HttpOrderGateway implements OrderGateway {
       return true;
     } catch (WebClientResponseException.NotFound e) {
       log.error("Order not found with id: {}", orderId);
-      throw new ExternalServiceException("Order not found with id : " + orderId); // TODO: make others like this in
-                                                                                  // order
-      // service
+      return false;
+    } catch (WebClientResponseException e) {
+      log.error("Order service error for order {}: {} - {}",
+          orderId, e.getStatusCode(), e.getMessage());
+      throw new ExternalServiceException("Order service returned error: " + e.getStatusCode(), e);
     } catch (Exception e) {
       log.error("Falied to communicate with order servoce for order {}: {}",
           orderId, e.getMessage());
