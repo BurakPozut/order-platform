@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import com.burakpozut.payment_service.app.command.CreatePaymentCommand;
 import com.burakpozut.payment_service.domain.Payment;
 import com.burakpozut.payment_service.domain.PaymentRepository;
-import com.burakpozut.payment_service.domain.PaymentStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,9 +22,8 @@ public class CreatePaymentService {
     // throw new OrderNotFoundException(command.orderId());
     // }
 
-    var status = command.status() != null ? command.status() : PaymentStatus.PENDING;
     var payment = Payment.of(command.orderId(), command.amount(),
-        command.currency(), status, command.provider(), command.providerRef());
+        command.currency(), command.status(), command.provider(), command.providerRef());
     return paymentRepository.save(payment, true);
   }
 

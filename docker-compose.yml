@@ -53,6 +53,24 @@ services:
       - microservices-network
     restart: unless-stopped
 
+  notfication-db:
+    image: postgres:16-alpine
+    container_name: notification-db
+    env_file:
+      - ./notification-service/.env
+    ports:
+      - "${NOTIFICATION_DB_PORT}:5432"
+    volumes:
+      - notification_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
   payment-db:
     image: postgres:16-alpine
     container_name: payment-db
@@ -119,12 +137,29 @@ services:
     networks:
       - microservices-network
     restart: unless-stopped
+    
+  payment-service:
+    build:
+      context: .
+      dockerfile: ./payment-service/Dockerfile
+    container_name: payment-service
+    env_file:
+      - ./payment-service/.env
+    ports:
+      - "${PAYMENT_SERVICE_PORT}:8081"
+    depends_on:
+      order-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
 
 volumes:
   customer_db_data:
   product_db_data:
   order_db_data:
   payment_db_data:
+  notification_db_data:
 
 networks:
   microservices-network:
