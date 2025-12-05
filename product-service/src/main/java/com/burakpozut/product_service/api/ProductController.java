@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.burakpozut.product_service.api.dto.request.PatchProductRequest;
 import com.burakpozut.product_service.api.dto.request.UpdateProductRequest;
 import com.burakpozut.product_service.api.dto.response.ProductResponse;
-import com.burakpozut.product_service.app.command.PatchProductCommand;
-import com.burakpozut.product_service.app.command.UpdateProductCommand;
 import com.burakpozut.product_service.app.service.DeleteProductService;
 import com.burakpozut.product_service.app.service.GetAllProductsService;
 import com.burakpozut.product_service.app.service.GetProductByIdService;
@@ -64,7 +62,7 @@ public class ProductController {
   @PutMapping("/{id}")
   public ResponseEntity<ProductResponse> update(@PathVariable UUID id,
       @Valid @RequestBody UpdateProductRequest request) {
-    var command = UpdateProductCommand.of(request.name(), request.price(), request.currency(), request.status());
+    var command = ProductMapper.toCommand(request);
     var product = updateProductService.handle(id, command);
     return ResponseEntity.ok(ProductResponse.from(product));
   }
@@ -72,7 +70,7 @@ public class ProductController {
   @PatchMapping("/{id}")
   public ResponseEntity<ProductResponse> patch(@PathVariable UUID id,
       @Valid @RequestBody PatchProductRequest request) {
-    var command = PatchProductCommand.of(request.name(), request.price(), request.currency(), request.status());
+    var command = ProductMapper.toCommand(request);
     var customer = patchProductService.handle(id, command);
     return ResponseEntity.ok(ProductResponse.from(customer));
   }

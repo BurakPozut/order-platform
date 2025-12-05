@@ -14,7 +14,7 @@ public record PaymentResponse(
     Currency currency,
     PaymentStatus status,
     String provider,
-    String poviderRef) {
+    String providerRef) {
   public static PaymentResponse from(Payment p) {
     return new PaymentResponse(p.id(), p.orderId(),
         p.amount(), p.currency(), p.status(), p.provider(), p.providerRef());

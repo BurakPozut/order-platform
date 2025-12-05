@@ -7,9 +7,6 @@ import com.burakpozut.customer_service.api.dto.request.CreateCustomerRequest;
 import com.burakpozut.customer_service.api.dto.request.PatchCustomerRequest;
 import com.burakpozut.customer_service.api.dto.request.UpdateCustomerRequest;
 import com.burakpozut.customer_service.api.dto.response.CustomerResponse;
-import com.burakpozut.customer_service.app.command.CreateCustomerCommand;
-import com.burakpozut.customer_service.app.command.PatchCustomerCommand;
-import com.burakpozut.customer_service.app.command.UpdateCustomerCommand;
 import com.burakpozut.customer_service.app.service.CreateCustomerService;
 import com.burakpozut.customer_service.app.service.GetAllCustomersService;
 import com.burakpozut.customer_service.app.service.GetCustomerByIdService;
@@ -59,7 +56,7 @@ public class CustomerController {
 
   @PostMapping()
   public ResponseEntity<CustomerResponse> create(@RequestBody @Valid CreateCustomerRequest request) {
-    var command = CreateCustomerCommand.of(request.email(), request.fullName());
+    var command = CustomerMapper.toCommand(request);
     var customer = createCustomerService.handle(command);
     var body = CustomerResponse.from(customer);
 
@@ -69,7 +66,7 @@ public class CustomerController {
   @PutMapping("/{id}")
   public ResponseEntity<CustomerResponse> update(@PathVariable UUID id,
       @Valid @RequestBody UpdateCustomerRequest request) {
-    var command = UpdateCustomerCommand.of(request.fullName(), request.email());
+    var command = CustomerMapper.toCommand(request);
     var customer = updateCustomerService.handle(id, command);
 
     return ResponseEntity.ok(CustomerResponse.from(customer));
@@ -78,7 +75,7 @@ public class CustomerController {
   @PatchMapping("/{id}")
   public ResponseEntity<CustomerResponse> patch(@PathVariable UUID id,
       @Valid @RequestBody PatchCustomerRequest request) {
-    var command = PatchCustomerCommand.of(request.fullName(), request.email());
+    var command = CustomerMapper.toCommand(request);
     var customer = patchCustomerService.handle(id, command);
     return ResponseEntity.ok(CustomerResponse.from(customer));
   }

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.burakpozut.common.domain.Currency;
+import com.burakpozut.common.exception.DomainValidationException;
 
 public record Payment(
     UUID id,
@@ -15,19 +16,19 @@ public record Payment(
     String providerRef) {
   public Payment {
     if (id == null)
-      throw new IllegalArgumentException("Payment Id cannot be null");
+      throw new DomainValidationException("Payment Id cannot be null");
     if (orderId == null)
-      throw new IllegalArgumentException("Order Id cannot be null");
+      throw new DomainValidationException("Order Id cannot be null");
     if (amount == null)
-      throw new IllegalArgumentException("Amount cannot be null");
+      throw new DomainValidationException("Amount cannot be null");
     if (amount.compareTo(BigDecimal.ZERO) < 0)
-      throw new IllegalArgumentException("Amount cannot be negative");
+      throw new DomainValidationException("Amount cannot be negative");
     if (currency == null)
-      throw new IllegalArgumentException("Currency cannot be null or blank");
+      throw new DomainValidationException("Currency cannot be null or blank");
     if (status == null)
-      throw new IllegalArgumentException("Status cannot be null or blank");
+      throw new DomainValidationException("Status cannot be null or blank");
     if (provider == null || provider.isBlank())
-      throw new IllegalArgumentException("Provider cannot be null or blank");
+      throw new DomainValidationException("Provider cannot be null or blank");
   }
 
   public static Payment of(

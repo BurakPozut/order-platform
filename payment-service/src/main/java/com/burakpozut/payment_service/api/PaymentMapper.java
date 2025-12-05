@@ -1,4 +1,4 @@
-package com.burakpozut.payment_service.api.mapper;
+package com.burakpozut.payment_service.api;
 
 import com.burakpozut.payment_service.api.dto.request.CreatePaymentRequest;
 import com.burakpozut.payment_service.app.command.CreatePaymentCommand;
