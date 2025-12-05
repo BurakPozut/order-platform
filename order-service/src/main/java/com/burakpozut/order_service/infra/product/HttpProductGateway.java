@@ -14,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.burakpozut.common.domain.Currency;
-import com.burakpozut.order_service.app.exception.product.ProductServiceException;
+import com.burakpozut.common.exception.ExternalServiceException;
 import com.burakpozut.order_service.domain.ProductInfo;
 import com.burakpozut.order_service.domain.gateway.ProductGateway;
 
@@ -52,15 +52,12 @@ public class HttpProductGateway implements ProductGateway {
     } catch (WebClientResponseException e) {
       log.error("Product service error for product {}: {} - {}",
           productId, e.getStatusCode(), e.getMessage());
-      throw new ProductServiceException("Product service returned error: " + e.getStatusCode(), e);
+      throw new ExternalServiceException("Product service returned error: " + e.getStatusCode(), e);
     } catch (Exception e) {
       log.error("Failed to communicate with product service for product {}: {}",
           productId, e.getMessage());
-      throw new ProductServiceException("Product service is unavailable", e);
+      throw new ExternalServiceException("Product service is unavailable", e);
     }
-    // catch (Exception e) {
-    // // throw some sort of product exception
-    // }
   }
 
   @Override
@@ -84,13 +81,13 @@ public class HttpProductGateway implements ProductGateway {
               // 500 error and 400 error except 404
               log.error("Product service error for product {}: {} - {}",
                   productId, e.getStatusCode(), e.getMessage());
-              return new ProductServiceException("Product service returned error: " + e.getStatusCode(), e);
+              return new ExternalServiceException("Product service returned error: " + e.getStatusCode(), e);
             })
             .onErrorMap(Exception.class, e -> {
               // network errors, timeouts, connection refused...
               log.error("Failed to communicate with product service for product {}: {}",
                   productId, e.getMessage());
-              return new ProductServiceException("Product service is unavailable", e);
+              return new ExternalServiceException("Product service is unavailable", e);
             }))
         .toList();
 
@@ -98,11 +95,9 @@ public class HttpProductGateway implements ProductGateway {
       List<ProductInfo> products = Flux.merge(productMonos).collectList().block();
 
       return products.stream().collect(Collectors.toMap(ProductInfo::productId, Function.identity()));
-    } catch (ProductServiceException e) {
-      throw e;
     } catch (Exception e) {
       log.error("Unexpecter error fetching products", e);
-      throw new ProductServiceException("Failed to fetch products", e);
+      throw new ExternalServiceException("Failed to fetch products", e);
     }
   }
 

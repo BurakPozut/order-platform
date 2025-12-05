@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.burakpozut.order_service.app.exception.customer.CustomerServiceException;
+import com.burakpozut.common.exception.ExternalServiceException;
 import com.burakpozut.order_service.domain.gateway.CustomerGateway;
 
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +34,11 @@ public class HttpCustomerGateway implements CustomerGateway {
     } catch (WebClientResponseException e) {
       log.error("Customer service error for customer {}: {} - ",
           customerId, e.getStatusCode(), e.getMessage());
-      throw new CustomerServiceException("Customer service returned error: " + e.getStatusCode(), e);
+      throw new ExternalServiceException("Customer service returned error: " + e.getStatusCode(), e);
     } catch (Exception e) {
       log.error("Failed to communicate with customer service for customer {}: {}",
           customerId, e.getMessage());
-      throw new CustomerServiceException("Customer service is unavailable", e);
+      throw new ExternalServiceException("Customer service is unavailable", e);
     }
   }
 }

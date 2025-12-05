@@ -11,6 +11,7 @@ import com.burakpozut.common.api.ApiError;
 import com.burakpozut.common.exception.AppException;
 import com.burakpozut.common.exception.BusinessException;
 import com.burakpozut.common.exception.DomainValidationException;
+import com.burakpozut.common.exception.ExternalServiceException;
 import com.burakpozut.common.exception.NotFoundException;
 
 @RestControllerAdvice
@@ -42,6 +43,16 @@ public class GlobalExceptionHandler {
         ex.getMessage());
 
     return ResponseEntity.badRequest().body(body);
+  }
+
+  @ExceptionHandler(ExternalServiceException.class)
+  public ResponseEntity<ApiError> handleExternalServiceException(ExternalServiceException ex) {
+    ApiError body = ApiError.of(
+        HttpStatus.SERVICE_UNAVAILABLE.value(),
+        HttpStatus.SERVICE_UNAVAILABLE.name(),
+        ex.getMessage());
+
+    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body);
   }
 
   // For the request dto validation exceptions

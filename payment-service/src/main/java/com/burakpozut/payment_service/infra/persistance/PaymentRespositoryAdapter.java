@@ -35,7 +35,6 @@ public class PaymentRespositoryAdapter implements PaymentRepository {
 
   @Override
   public void deleteById(UUID id) {
-    // TODO Auto-generated method stub
-
+    jpa.deleteById(id);
   }
 }
