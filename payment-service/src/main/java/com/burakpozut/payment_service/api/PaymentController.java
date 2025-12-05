@@ -5,16 +5,18 @@ import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.burakpozut.payment_service.api.dto.request.CreatePaymentRequest;
+import com.burakpozut.payment_service.api.dto.request.PatchPaymentRequest;
 import com.burakpozut.payment_service.api.dto.response.PaymentResponse;
-import com.burakpozut.payment_service.api.mapper.PaymentMapper;
 import com.burakpozut.payment_service.app.service.CreatePaymentService;
 import com.burakpozut.payment_service.app.service.GetAllPaymentsService;
 import com.burakpozut.payment_service.app.service.GetPaymentByIdService;
+import com.burakpozut.payment_service.app.service.PatchPaymentService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class PaymentController {
   private final GetAllPaymentsService getAllPaymentsService;
   private final GetPaymentByIdService getPaymentByIdService;
   private final CreatePaymentService createPaymentService;
+  private final PatchPaymentService patchPaymentService;
 
   @GetMapping
   public ResponseEntity<List<PaymentResponse>> getAll() {
@@ -48,6 +51,16 @@ public class PaymentController {
     var command = PaymentMapper.toCommand(request);
     var saved = createPaymentService.handle(command);
     var body = PaymentResponse.from(saved);
+    return ResponseEntity.ok(body);
+  }
+
+  @PatchMapping("/{id}")
+  public ResponseEntity<PaymentResponse> patch(@PathVariable UUID id,
+      @Valid @RequestBody PatchPaymentRequest request) {
+    var command = PaymentMapper.toCommand(request);
+    var payment = patchPaymentService.handle(id, command);
+    var body = PaymentResponse.from(payment);
+
     return ResponseEntity.ok(body);
   }
 

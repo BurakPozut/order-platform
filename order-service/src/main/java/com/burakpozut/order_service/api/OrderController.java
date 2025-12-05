@@ -7,7 +7,6 @@ import com.burakpozut.order_service.api.dto.request.CreateOrderRequest;
 import com.burakpozut.order_service.api.dto.request.UpdateOrderItemRequest;
 import com.burakpozut.order_service.api.dto.request.UpdateOrderRequest;
 import com.burakpozut.order_service.api.dto.response.OrderResponse;
-import com.burakpozut.order_service.api.mapper.OrderMapper;
 import com.burakpozut.order_service.app.service.CreateOrderService;
 import com.burakpozut.order_service.app.service.GetAllOrdersService;
 import com.burakpozut.order_service.app.service.GetOrderByIdService;

@@ -1,4 +1,4 @@
-package com.burakpozut.order_service.api.mapper;
+package com.burakpozut.order_service.api;
 
 import com.burakpozut.order_service.api.dto.request.CreateOrderRequest;
 import com.burakpozut.order_service.api.dto.request.UpdateOrderItemRequest;
