@@ -36,7 +36,8 @@ public class HttpPaymentGateway implements PaymentGateway {
   @Override
   public void createPayment(UUID orderId, BigDecimal amount, Currency currency, String provider, String providerRef) {
     try {
-      var request = new CreatePaymentRequest(orderId, amount, currency, provider, providerRef);
+      var request = new CreatePaymentRequest(orderId, amount,
+          currency, provider, providerRef);
       webClient.post().uri("/api/payments")
           .contentType(MediaType.APPLICATION_JSON)
           .bodyValue(request)

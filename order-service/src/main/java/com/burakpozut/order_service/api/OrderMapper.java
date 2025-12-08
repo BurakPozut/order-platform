@@ -7,6 +7,7 @@ import com.burakpozut.order_service.app.command.CreateOrderCommand;
 import com.burakpozut.order_service.app.command.OrderItemData;
 import com.burakpozut.order_service.app.command.UpdateOrderCommand;
 import com.burakpozut.order_service.app.command.UpdateOrderItemCommand;
+import com.burakpozut.order_service.domain.OrderStatus;
 
 public class OrderMapper {
   public static UpdateOrderCommand toCommand(UpdateOrderRequest request) {
@@ -23,7 +24,7 @@ public class OrderMapper {
         .toList();
     return CreateOrderCommand.of(
         request.customerId(),
-        request.status(),
+        OrderStatus.PENDING,
         request.currency(), items);
   }
 

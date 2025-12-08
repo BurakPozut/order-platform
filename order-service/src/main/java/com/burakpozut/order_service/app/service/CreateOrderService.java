@@ -16,6 +16,7 @@ import com.burakpozut.order_service.domain.OrderItem;
 import com.burakpozut.order_service.domain.OrderRepository;
 import com.burakpozut.order_service.domain.ProductInfo;
 import com.burakpozut.order_service.domain.gateway.CustomerGateway;
+import com.burakpozut.order_service.domain.gateway.NotificationGateway;
 import com.burakpozut.order_service.domain.gateway.PaymentGateway;
 import com.burakpozut.order_service.domain.gateway.ProductGateway;
 
@@ -31,6 +32,7 @@ public class CreateOrderService {
   private final CustomerGateway customerGateway;
   private final ProductGateway productGateway;
   private final PaymentGateway paymentGateway;
+  private final NotificationGateway notificationGateway;
 
   // TODO: create payment as wel if the save is successfull
   @Transactional
@@ -70,6 +72,8 @@ public class CreateOrderService {
 
     paymentGateway.createPayment(order.id(), totalAmount,
         order.currency(), "stripe", "stp-123"); // TODO: this provider is not good practice I believe
+
+    notificationGateway.sendNotification(order.customerId(), order.id());
 
     return savedOrder;
   }

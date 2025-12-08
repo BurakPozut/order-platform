@@ -4,15 +4,12 @@ import java.util.List;
 import java.util.UUID;
 
 import com.burakpozut.common.domain.Currency;
-import com.burakpozut.order_service.domain.OrderStatus;
-
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateOrderRequest(
-    @NotNull UUID customerId,
-    @NotNull OrderStatus status,
-    @NotNull Currency currency,
-    @NotEmpty List<OrderItemRequest> items) {
+        @NotNull UUID customerId,
+        @NotNull Currency currency,
+        @NotEmpty List<OrderItemRequest> items) {
 
 }
