@@ -1,6 +1,5 @@
 package com.burakpozut.notification_service.domain;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.burakpozut.common.exception.DomainValidationException;
@@ -9,10 +8,9 @@ public record Notification(
     UUID id,
     UUID customerId,
     UUID orderId,
-    String type,
-    String channel,
-    String status,
-    LocalDateTime createdAt) {
+    NotificationType type,
+    NotificationChannel channel,
+    NotificationStatus status) {
   public Notification {
     if (id == null)
       throw new DomainValidationException("Notification id cannot be null");
@@ -20,48 +18,43 @@ public record Notification(
       throw new DomainValidationException("Customer id cannot be null");
     if (orderId == null)
       throw new DomainValidationException("Order id cannot be null");
-    if (type == null || type.isBlank())
+    if (type == null)
       throw new DomainValidationException("Type cannot be null or blank");
-    if (channel == null || channel.isBlank())
+    if (channel == null)
       throw new DomainValidationException("Channel cannot be null or blank");
-    if (status == null || status.isBlank())
+    if (status == null)
       throw new DomainValidationException("Status cannot be null or blank");
-    if (createdAt == null)
-      throw new DomainValidationException("CreatedAt cannot be null");
   }
 
   public static Notification of(
       UUID customerId,
       UUID orderId,
-      String type,
-      String channel,
-      String status) {
+      NotificationType type,
+      NotificationChannel channel,
+      NotificationStatus status) {
     return new Notification(
         UUID.randomUUID(),
         customerId,
         orderId,
         type,
         channel,
-        status,
-        java.time.LocalDateTime.now());
+        status);
   }
 
   public static Notification rehydrate(
       UUID id,
       UUID customerId,
       UUID orderId,
-      String type,
-      String channel,
-      String status,
-      java.time.LocalDateTime createdAt) {
+      NotificationType type,
+      NotificationChannel channel,
+      NotificationStatus status) {
     return new Notification(
         id,
         customerId,
         orderId,
         type,
         channel,
-        status,
-        createdAt);
+        status);
   }
 
 }

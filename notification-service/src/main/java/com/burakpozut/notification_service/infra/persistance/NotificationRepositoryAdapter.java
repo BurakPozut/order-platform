@@ -1,6 +1,8 @@
 package com.burakpozut.notification_service.infra.persistance;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +19,11 @@ public class NotificationRepositoryAdapter implements NotificationRepository {
   @Override
   public List<Notification> findAll() {
     return jpa.findAll().stream().map(NotificationMapper::toDomain).toList();
+  }
+
+  @Override
+  public Optional<Notification> findById(UUID notificationId) {
+    return jpa.findById(notificationId).map(NotificationMapper::toDomain);
   }
 
 }

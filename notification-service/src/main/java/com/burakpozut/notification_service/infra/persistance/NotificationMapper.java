@@ -10,8 +10,7 @@ public class NotificationMapper {
         entity.getOrderId(),
         entity.getType(),
         entity.getChannel(),
-        entity.getStatus(),
-        entity.getCreatedAt());
+        entity.getStatus());
   }
 
   public static NotificationJpaEntity toEntity(Notification notification, boolean isNew) {
@@ -22,7 +21,6 @@ public class NotificationMapper {
     entity.setType(notification.type());
     entity.setChannel(notification.channel());
     entity.setStatus(notification.status());
-    entity.setCreatedAt(notification.createdAt());
     entity.setNew(isNew);
     return entity;
   }

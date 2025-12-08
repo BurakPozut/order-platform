@@ -6,9 +6,15 @@ import java.util.UUID;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.burakpozut.notification_service.domain.NotificationChannel;
+import com.burakpozut.notification_service.domain.NotificationStatus;
+import com.burakpozut.notification_service.domain.NotificationType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -34,17 +40,20 @@ public class NotificationJpaEntity {
   @Column(name = "order_id", columnDefinition = "UUID")
   private UUID orderId;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "type", nullable = false, length = 20)
-  private String type;
+  private NotificationType type;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "channel", nullable = false, length = 20)
-  private String channel;
+  private NotificationChannel channel;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false, length = 32)
-  private String status;
+  private NotificationStatus status;
 
   @CreatedDate
-  @Column(name = "created_at", nullable = false)
+  @Column(name = "created_at", nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @Transient
