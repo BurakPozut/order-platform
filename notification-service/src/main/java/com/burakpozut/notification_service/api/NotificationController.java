@@ -9,11 +9,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.burakpozut.notification_service.api.dto.request.CreateNotificationRequest;
 import com.burakpozut.notification_service.api.dto.response.NotificationResponse;
+import com.burakpozut.notification_service.app.service.CreateNotificationService;
 import com.burakpozut.notification_service.app.service.GetAllNotificationsService;
 import com.burakpozut.notification_service.app.service.GetNotificationByIdService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -21,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class NotificationController {
   private final GetAllNotificationsService getAllNotificationsService;
   private final GetNotificationByIdService getNotificationByIdService;
+  private final CreateNotificationService createNotificationService;
 
   @GetMapping
   public ResponseEntity<List<NotificationResponse>> getAll() {
@@ -36,6 +42,18 @@ public class NotificationController {
     var body = NotificationResponse.from(notification);
 
     return ResponseEntity.ok(body);
+  }
+
+  @PostMapping()
+  public ResponseEntity<NotificationResponse> createNotification(
+      @Valid @RequestBody CreateNotificationRequest request) {
+    var command = NotificationMapper.toCommand(request);
+
+    var notification = createNotificationService.handle(command);
+
+    var body = NotificationResponse.from(notification);
+    return ResponseEntity.ok(body);
+
   }
 
 }

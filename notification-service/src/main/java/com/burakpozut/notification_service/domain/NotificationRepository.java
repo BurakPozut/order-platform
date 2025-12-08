@@ -8,4 +8,6 @@ public interface NotificationRepository {
   List<Notification> findAll();
 
   Optional<Notification> findById(UUID notificationId);
+
+  Notification save(Notification n);
 }
