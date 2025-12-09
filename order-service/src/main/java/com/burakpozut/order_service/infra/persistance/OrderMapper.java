@@ -15,7 +15,7 @@ public class OrderMapper {
 
     return Order.rehydrate(entity.getId(), entity.getCustomerId(),
         entity.getStatus(), entity.getTotalAmount(),
-        entity.getCurrency(), items);
+        entity.getCurrency(), items, entity.getIdempotencyKey(), entity.getUpdatedAt());
   }
 
   public static OrderJpaEntity toEntity(Order order, boolean isNew) {
@@ -25,6 +25,7 @@ public class OrderMapper {
     entity.setStatus(order.status());
     entity.setTotalAmount(order.totalAmount());
     entity.setCurrency(order.currency());
+    entity.setIdempotencyKey(order.idempotencyKey());
     entity.setNew(isNew);
 
     // Map items

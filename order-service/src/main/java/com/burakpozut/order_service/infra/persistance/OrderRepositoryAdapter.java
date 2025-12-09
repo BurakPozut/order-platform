@@ -38,4 +38,9 @@ public class OrderRepositoryAdapter implements OrderRepository {
     var savedEntity = jpa.save(entity);
     return OrderMapper.toDomain(savedEntity);
   }
+
+  @Override
+  public Optional<Order> findByIdempotencyKey(String idempotencyKey) {
+    return jpa.findByIdempotencyKey(idempotencyKey).map(OrderMapper::toDomain);
+  }
 }

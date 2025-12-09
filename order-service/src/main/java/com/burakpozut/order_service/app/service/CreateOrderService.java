@@ -1,8 +1,11 @@
 package com.burakpozut.order_service.app.service;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -28,6 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class CreateOrderService {
+  private static final Duration IDEMPOTENCY_TTL = Duration.ofMinutes(15); // add this
+
   private final OrderRepository orderRepository;
   private final CustomerGateway customerGateway;
   private final ProductGateway productGateway;
@@ -39,6 +44,13 @@ public class CreateOrderService {
   public Order handle(CreateOrderCommand command) {
     if (!customerGateway.validateCustomerExists(command.customerId())) {
       throw new CustomerNotFoundException(command.customerId());
+    }
+
+    String idempotencyKey = deriveKey(command.customerId(), command.items());
+
+    Optional<Order> existing = orderRepository.findByIdempotencyKey(idempotencyKey);
+    if (existing.isPresent() && isFresh(existing.get())) {
+      return existing.get();// TODO: how does this get work or why do we return exiting get
     }
 
     List<UUID> productIds = command.items().stream().map(OrderItemData::productId).distinct().toList();
@@ -67,7 +79,9 @@ public class CreateOrderService {
         .map(item -> item.unitPrice().multiply(BigDecimal.valueOf(item.quantity())))
         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    Order order = Order.of(command.customerId(), command.status(), totalAmount, command.currency(), orderItems);
+    log.debug("Idempotency key : " + idempotencyKey);
+    Order order = Order.of(command.customerId(), command.status(), totalAmount, command.currency(), orderItems,
+        idempotencyKey);
     var savedOrder = orderRepository.save(order, true);
 
     paymentGateway.createPayment(order.id(), totalAmount,
@@ -78,4 +92,17 @@ public class CreateOrderService {
     return savedOrder;
   }
 
+  private String deriveKey(UUID customerId, List<OrderItemData> items) {
+    String productPart = items.stream()
+        .map(OrderItemData::productId)
+        .sorted()
+        .map(UUID::toString)
+        .reduce("null", (a, b) -> a + ":" + b);
+    return customerId + ":" + productPart + ":" + items.size();
+  }
+
+  private boolean isFresh(Order order) {
+    LocalDateTime updated = order.updatedAt();
+    return updated != null && updated.plus(IDEMPOTENCY_TTL).isAfter(LocalDateTime.now());
+  }
 }

@@ -11,5 +11,7 @@ public interface OrderRepository {
 
   Order save(Order order, boolean isNew);
 
+  Optional<Order> findByIdempotencyKey(String idempotencyKey);
+
   void deleteById(UUID id);
 }

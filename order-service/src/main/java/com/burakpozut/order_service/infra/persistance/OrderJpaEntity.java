@@ -68,6 +68,9 @@ public class OrderJpaEntity {
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<OrderItemJpaEntity> items = new ArrayList<>();
 
+  @Column(name = "idempotency_key", unique = true, length = 128)
+  private String idempotencyKey;
+
   @Transient
   private boolean isNew;
 }

@@ -39,7 +39,7 @@ public class UpdateOrderService {
 
     var updated = Order.rehydrate(existing.id(),
         resolved.customerId, resolved.status,
-        existing.totalAmount(), resolved.currency, existing.items());
+        existing.totalAmount(), resolved.currency, existing.items(), existing.idempotencyKey(), existing.updatedAt());
     return orderRepository.save(updated, false);
   }
 

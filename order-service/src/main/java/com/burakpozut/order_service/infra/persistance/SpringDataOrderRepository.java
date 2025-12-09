@@ -1,6 +1,7 @@
 package com.burakpozut.order_service.infra.persistance;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -14,4 +15,5 @@ public interface SpringDataOrderRepository extends JpaRepository<OrderJpaEntity,
   @Override
   List<OrderJpaEntity> findAll();
 
+  Optional<OrderJpaEntity> findByIdempotencyKey(String idempotencyKey);
 }
