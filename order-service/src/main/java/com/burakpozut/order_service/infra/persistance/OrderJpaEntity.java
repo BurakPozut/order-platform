@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -52,7 +53,8 @@ public class OrderJpaEntity {
   private BigDecimal totalAmount;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "currency", nullable = false, length = 3)
+  @Column(name = "currency", nullable = false, columnDefinition = "CHAR(3)")
+  @JdbcTypeCode(java.sql.Types.CHAR)
   private Currency currency;
 
   @CreatedDate
