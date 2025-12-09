@@ -34,7 +34,8 @@ public class CreateOrderService {
   private static final Duration IDEMPOTENCY_TTL = Duration.ofMinutes(15); // add this
 
   private final OrderRepository orderRepository;
-  private final CustomerGateway customerGateway;
+  private final CustomerGateway customerGateway;// TODO: calling externals like this is not good use outbox pattern or
+                                                // event based communication
   private final ProductGateway productGateway;
   private final PaymentGateway paymentGateway;
   private final NotificationGateway notificationGateway;
