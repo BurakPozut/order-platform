@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -42,7 +43,8 @@ public class PaymentJpaEntity {
   private BigDecimal amount;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "currency", nullable = false, length = 3)
+  @Column(name = "currency", nullable = false, length = 3, columnDefinition = "CHAR(3)")
+  @JdbcTypeCode(java.sql.Types.CHAR)
   private Currency currency;
 
   @Enumerated(EnumType.STRING)
@@ -62,6 +64,9 @@ public class PaymentJpaEntity {
   @LastModifiedDate
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
+
+  @Column(name = "idempotency_key", unique = true, length = 128)
+  private String idempotencyKey;
 
   @Transient
   private boolean isNew;

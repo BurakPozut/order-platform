@@ -1,8 +1,8 @@
 package com.burakpozut.order_service.app.service;
 
 import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class CreateOrderService {
-  private static final Duration IDEMPOTENCY_TTL = Duration.ofMinutes(15); // add this
+  private static final int BUCKET_MINUTES = 5;
 
   private final OrderRepository orderRepository;
   private final CustomerGateway customerGateway;// TODO: calling externals like this is not good use outbox pattern or
@@ -50,7 +50,7 @@ public class CreateOrderService {
     String idempotencyKey = deriveKey(command.customerId(), command.items());
 
     Optional<Order> existing = orderRepository.findByIdempotencyKey(idempotencyKey);
-    if (existing.isPresent() && isFresh(existing.get())) {
+    if (existing.isPresent()) {
       return existing.get();// TODO: how does this get work or why do we return exiting get
     }
 
@@ -94,16 +94,17 @@ public class CreateOrderService {
   }
 
   private String deriveKey(UUID customerId, List<OrderItemData> items) {
+    Instant now = Instant.now();
+    long bucketStart = now.truncatedTo(ChronoUnit.MINUTES)
+        .minus(now.getEpochSecond() / 60 % BUCKET_MINUTES, ChronoUnit.MINUTES)
+        .getEpochSecond();
+
     String productPart = items.stream()
         .map(OrderItemData::productId)
         .sorted()
         .map(UUID::toString)
-        .reduce("null", (a, b) -> a + ":" + b);
-    return customerId + ":" + productPart + ":" + items.size();
-  }
+        .reduce("", (a, b) -> a.isEmpty() ? b : a + ":" + b);
 
-  private boolean isFresh(Order order) {
-    LocalDateTime updated = order.updatedAt();
-    return updated != null && updated.plus(IDEMPOTENCY_TTL).isAfter(LocalDateTime.now());
+    return customerId + ":" + productPart + ":" + items.size() + ":" + bucketStart;
   }
 }

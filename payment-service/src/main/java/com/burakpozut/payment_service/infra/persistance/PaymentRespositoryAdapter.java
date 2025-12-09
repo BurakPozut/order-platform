@@ -37,4 +37,9 @@ public class PaymentRespositoryAdapter implements PaymentRepository {
   public void deleteById(UUID id) {
     jpa.deleteById(id);
   }
+
+  @Override
+  public Optional<Payment> findByIdempotencyKey(String idempotencyKey) {
+    return jpa.findByIdempotencyKey(idempotencyKey).map(PaymentMapper::toDomain);
+  }
 }
