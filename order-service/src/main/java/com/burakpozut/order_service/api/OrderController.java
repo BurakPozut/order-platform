@@ -7,11 +7,12 @@ import com.burakpozut.order_service.api.dto.request.CreateOrderRequest;
 import com.burakpozut.order_service.api.dto.request.UpdateOrderItemRequest;
 import com.burakpozut.order_service.api.dto.request.UpdateOrderRequest;
 import com.burakpozut.order_service.api.dto.response.OrderResponse;
-import com.burakpozut.order_service.app.service.CreateOrderService;
 import com.burakpozut.order_service.app.service.GetAllOrdersService;
 import com.burakpozut.order_service.app.service.GetOrderByIdService;
 import com.burakpozut.order_service.app.service.UpdateOrderItemService;
 import com.burakpozut.order_service.app.service.UpdateOrderService;
+import com.burakpozut.order_service.app.service.create.CreateOrderOrchestrator;
+// import com.burakpozut.order_service.app.service.create.OrderCreationService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class OrderController {
   private final GetAllOrdersService getAllOrders;
   private final GetOrderByIdService getOrderByIdService;
-  private final CreateOrderService createOrderService;
+  // private final OrderCreationService createOrderService;
   private final UpdateOrderService updateOrderService;
   private final UpdateOrderItemService updateOrderItemService;
+  private final CreateOrderOrchestrator createOrderOrchestrator;
 
   @GetMapping()
   public ResponseEntity<List<OrderResponse>> getAll() {
@@ -57,7 +59,8 @@ public class OrderController {
 
     var command = OrderMapper.toCommand(request);
 
-    var savedOrder = createOrderService.handle(command);
+    // var savedOrder = createOrderService.create(command);
+    var savedOrder = createOrderOrchestrator.handle(command);
     return ResponseEntity.ok(OrderResponse.from(savedOrder));
   }
 

@@ -25,6 +25,20 @@ public record OrderItem(
       throw new DomainValidationException("Quantity must be greater than 0");
   }
 
+  public static OrderItem of(
+      UUID productId,
+      String productName,
+      BigDecimal unitPrice,
+      Integer quantity) {
+
+    return new OrderItem(
+        UUID.randomUUID(),
+        productId,
+        productName,
+        unitPrice,
+        quantity);
+  }
+
   public static OrderItem rehydrate(
       UUID id,
       UUID productId,

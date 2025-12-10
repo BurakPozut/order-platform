@@ -8,6 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SpringDataPaymentRespository extends JpaRepository<PaymentJpaEntity, UUID> {
-  Optional<PaymentJpaEntity> findByIdempotencyKey(String idempotencyKey);
 
 }

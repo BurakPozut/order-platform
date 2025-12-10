@@ -1,0 +1,126 @@
+package com.burakpozut.order_service.app.service.create;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import com.burakpozut.order_service.app.command.CreateOrderCommand;
+import com.burakpozut.order_service.app.command.OrderItemData;
+import com.burakpozut.order_service.app.exception.customer.CustomerNotFoundException;
+import com.burakpozut.order_service.app.exception.product.ProductNotFoundException;
+import com.burakpozut.order_service.domain.Order;
+import com.burakpozut.order_service.domain.OrderItem;
+import com.burakpozut.order_service.domain.OrderRepository;
+import com.burakpozut.order_service.domain.ProductInfo;
+import com.burakpozut.order_service.domain.gateway.CustomerGateway;
+import com.burakpozut.order_service.domain.gateway.ProductGateway;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class OrderCreationService {
+  private static final int BUCKET_MINUTES = 5;
+
+  private final OrderRepository orderRepository;
+  private final CustomerGateway customerGateway;
+  private final PlatformTransactionManager transactionManager;
+
+  private final ProductGateway productGateway;
+
+  public record CreationResult(Order order, boolean isNew) {
+  }
+
+  public CreationResult create(CreateOrderCommand command) {
+    long currentBucket = System.currentTimeMillis() / (1000 * 60 * BUCKET_MINUTES);
+
+    // Current bucket, most likely to get hit
+    String currentKey = deriveKey(command.customerId(), command.items(), currentBucket);
+    Optional<Order> existing = orderRepository.findByIdempotencyKey(currentKey);
+
+    if (existing.isPresent()) {
+      log.info("Returning existing order from current bucket : {}", currentKey);
+      return new CreationResult(existing.get(), false);
+    }
+    // Check Previous bucket (handles the boundry case)
+    String prevKey = deriveKey(command.customerId(), command.items(), currentBucket - 1);
+    Optional<Order> existingPrev = orderRepository.findByIdempotencyKey(prevKey);
+
+    // This is where we need freshness check
+    if (existingPrev.isPresent() && isRecent(existingPrev.get())) {
+      log.info("Returning existing order from previous bucket: {}", prevKey);
+      return new CreationResult(existing.get(), false);
+    }
+
+    var validationResult = validateAndFetchData(command);
+
+    return new TransactionTemplate(transactionManager).execute(status -> {
+      List<OrderItem> orderItems = createOrderItmes(command.items(),
+          validationResult.productsMap);
+
+      BigDecimal totalAmount = calculateTotal(orderItems);
+      log.debug("Saving with Idempotency key: " + currentKey);
+      Order order = Order.of(command.customerId(),
+          command.status(), totalAmount, command.currency(), orderItems, currentKey);
+      var savedOrder = orderRepository.save(order, true);
+      return new CreationResult(savedOrder, true);
+    });
+  }
+
+  private String deriveKey(UUID customerId, List<OrderItemData> items, long bucket) {
+    String productPart = items.stream()
+        .sorted(Comparator.comparing(OrderItemData::productId))
+        .map(i -> i.productId() + ":" + i.quantity())
+        .collect(Collectors.joining("|"));
+
+    return customerId + "::" + productPart + "::" + bucket;
+  }
+
+  private boolean isRecent(Order order) {
+    LocalDateTime deadline = LocalDateTime.now().minusMinutes(BUCKET_MINUTES);
+    return order.updatedAt().isAfter(deadline);
+  }
+
+  private ValidationResult validateAndFetchData(CreateOrderCommand command) {
+    if (!customerGateway.validateCustomerExists(command.customerId()))
+      throw new CustomerNotFoundException(command.customerId());
+
+    List<UUID> productIds = command.items().stream()
+        .map(OrderItemData::productId).distinct().toList();
+    Map<UUID, ProductInfo> productsMap = productGateway.getProductsByIds(productIds);
+
+    for (UUID productId : productIds) {
+      if (!productsMap.containsKey(productId))
+        throw new ProductNotFoundException(productId);
+    }
+    return new ValidationResult(productsMap);
+  }
+
+  private List<OrderItem> createOrderItmes(List<OrderItemData> itemsData, Map<UUID, ProductInfo> proudctsMap) {
+    return itemsData.stream()
+        .map(itemData -> {
+          ProductInfo productInfo = proudctsMap.get(itemData.productId());
+          return OrderItem.of(productInfo.productId(),
+              productInfo.name(), productInfo.price(), itemData.quantity());
+        }).toList();
+  }
+
+  private BigDecimal calculateTotal(List<OrderItem> items) {
+    return items.stream().map(item -> item.unitPrice().multiply(BigDecimal.valueOf(item.quantity())))
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+  }
+
+  private record ValidationResult(Map<UUID, ProductInfo> productsMap) {
+  }
+}

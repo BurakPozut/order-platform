@@ -12,7 +12,4 @@ public interface PaymentRepository {
   Payment save(Payment p, boolean isNew);
 
   void deleteById(UUID id);
-
-  Optional<Payment> findByIdempotencyKey(String idempotencyKey);
-
 }

@@ -36,7 +36,7 @@ public class PaymentJpaEntity {
   @Column(name = "id", nullable = false, updatable = false, columnDefinition = "UUID")
   private UUID id;
 
-  @Column(name = "order_id", nullable = false, columnDefinition = "UUID")
+  @Column(name = "order_id", nullable = false, columnDefinition = "UUID", unique = true)
   private UUID orderId;
 
   @Column(name = "amount", nullable = false, precision = 10, scale = 2)
@@ -64,9 +64,6 @@ public class PaymentJpaEntity {
   @LastModifiedDate
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
-
-  @Column(name = "idempotency_key", unique = true, length = 128)
-  private String idempotencyKey;
 
   @Transient
   private boolean isNew;
