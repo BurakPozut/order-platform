@@ -1,9 +1,5 @@
 package com.burakpozut.payment_service.app.service;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -18,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PatchPaymentService {
-  private final int BUCKET_MINUTES = 5;
   private final PaymentRepository paymentRepository;
 
   public Payment handle(UUID paymentId, PatchPaymentCommand command) {

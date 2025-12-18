@@ -6,37 +6,50 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record Product(
-  UUID id,
-  String name,
-  BigDecimal price,
-  Currency currency,
-  ProductStatus status
-) {
-  public Product {
-    if (id == null) throw new DomainValidationException("Product Id can not be null");
-    if (name == null) throw new DomainValidationException( "Product name can not be null");
-    if (price == null) throw new DomainValidationException("Price can not be null");
-    if (price.compareTo(BigDecimal.ZERO) <= 0) throw new DomainValidationException("Price must be greater than 0");
-    if (currency == null) throw new DomainValidationException("Currency can not be null");
-    if (status == null) throw new DomainValidationException("status can not be null");
-  }
-
-  public static Product createNew(
-    String name,
-    BigDecimal price,
-    Currency currency,
-    ProductStatus status
-  ) {
-    return new Product(UUID.randomUUID(), name, price, currency, status);
-  }
-
-  public static Product rehydrate(
     UUID id,
     String name,
     BigDecimal price,
     Currency currency,
-    ProductStatus status
-  ) {
-    return new Product(id, name, price, currency, status);
+    ProductStatus status,
+    Long version,
+    Integer inventory) {
+  public Product {
+    if (id == null)
+      throw new DomainValidationException("Product Id can not be null");
+    if (name == null)
+      throw new DomainValidationException("Product name can not be null");
+    if (price == null)
+      throw new DomainValidationException("Price can not be null");
+    if (price.compareTo(BigDecimal.ZERO) <= 0)
+      throw new DomainValidationException("Price must be greater than 0");
+    if (currency == null)
+      throw new DomainValidationException("Currency can not be null");
+    if (status == null)
+      throw new DomainValidationException("status can not be null");
+    if (version == null)
+      throw new DomainValidationException("Version can not be null");
+    if (inventory == null)
+      throw new DomainValidationException("Inventroy can not be null");
+  }
+
+  public static Product of(
+      String name,
+      BigDecimal price,
+      Currency currency,
+      ProductStatus status,
+      Long version,
+      Integer inventory) {
+    return new Product(UUID.randomUUID(), name, price, currency, status, version, inventory);
+  }
+
+  public static Product rehydrate(
+      UUID id,
+      String name,
+      BigDecimal price,
+      Currency currency,
+      ProductStatus status,
+      Long version,
+      Integer inventory) {
+    return new Product(id, name, price, currency, status, version, inventory);
   }
 }

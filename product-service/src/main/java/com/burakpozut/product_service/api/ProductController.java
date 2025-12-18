@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.burakpozut.product_service.api.dto.request.PatchProductRequest;
+import com.burakpozut.product_service.api.dto.request.ReserveInventoryRequest;
 import com.burakpozut.product_service.api.dto.request.UpdateProductRequest;
 import com.burakpozut.product_service.api.dto.response.ProductResponse;
 import com.burakpozut.product_service.app.service.DeleteProductService;
@@ -20,12 +21,14 @@ import com.burakpozut.product_service.app.service.GetAllProductsService;
 import com.burakpozut.product_service.app.service.GetProductByIdService;
 import com.burakpozut.product_service.app.service.GetProductByNameService;
 import com.burakpozut.product_service.app.service.PatchProductService;
+import com.burakpozut.product_service.app.service.RerserveInventoryService;
 import com.burakpozut.product_service.app.service.UpdateProductService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("api/products")
@@ -37,6 +40,7 @@ public class ProductController {
   private final UpdateProductService updateProductService;
   private final PatchProductService patchProductService;
   private final DeleteProductService deleteProductService;
+  private final RerserveInventoryService rerserveInventoryService;
 
   @GetMapping
   public ResponseEntity<List<ProductResponse>> getAll() {
@@ -73,6 +77,15 @@ public class ProductController {
     var command = ProductMapper.toCommand(request);
     var customer = patchProductService.handle(id, command);
     return ResponseEntity.ok(ProductResponse.from(customer));
+  }
+
+  @PostMapping("/{id}/reserve")
+  public ResponseEntity<Void> decreaseStock(@PathVariable UUID productId,
+      @RequestBody @Valid ReserveInventoryRequest body) {
+    var command = ProductMapper.toCommand(productId, body);
+    rerserveInventoryService.handle(command);
+    return ResponseEntity.noContent().build();
+
   }
 
   @DeleteMapping("/{id}")

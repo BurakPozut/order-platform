@@ -24,4 +24,6 @@ public interface ProductGateway {
    * @return
    */
   Map<UUID, ProductInfo> getProductsByIds(List<UUID> productIds);
+
+  void reserveInventory(UUID productId, Integer quantity);
 }

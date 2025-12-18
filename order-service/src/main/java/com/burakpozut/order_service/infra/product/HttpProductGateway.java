@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -30,6 +31,9 @@ public class HttpProductGateway implements ProductGateway {
 
   private record ProductResponse(UUID id, String name,
       BigDecimal price, Currency currency) {
+  }
+
+  private record ReserveInventoryRequest(Integer quantity) {
   }
 
   public HttpProductGateway(WebClient.Builder builder,
@@ -101,4 +105,28 @@ public class HttpProductGateway implements ProductGateway {
     }
   }
 
+  @Override
+  public void reserveInventory(UUID productId, Integer quantity) {
+    try {
+      webClient.post()
+          .uri("/api/payments/{productId}/reserve", productId)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(new ReserveInventoryRequest(quantity))
+          .retrieve()
+          .toBodilessEntity()
+          .block();
+    } catch (WebClientResponseException.NotFound e) {
+      log.error("Product not found {}", productId);
+      throw new ExternalServiceException("Product not found: " + productId, e);
+    } catch (WebClientResponseException e) {
+      log.error("Product service error for product {}: {} - {}",
+          productId, e.getStatusCode(), e.getMessage());
+      throw new ExternalServiceException("Product service returned error: " + e.getStatusCode(), e);
+    } catch (Exception e) {
+      log.error("Failed to communicate with product service for product {}: {}",
+          productId, e.getMessage());
+      throw new ExternalServiceException("Product service is unavailable", e);
+    }
+
+  }
 }

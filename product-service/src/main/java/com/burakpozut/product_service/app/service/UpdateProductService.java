@@ -25,7 +25,9 @@ public class UpdateProductService {
       throw new NameAlreadyInUseException(command.name());
     }
 
-    var updated = Product.rehydrate(id, command.name(), command.price(), command.currency(), command.status());
+    var updated = Product.rehydrate(id, command.name(), command.price(),
+        command.currency(), command.status(),
+        existing.version(), existing.inventory());
     return productRepository.save(updated, false);
   }
 

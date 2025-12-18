@@ -34,7 +34,9 @@ public class PatchProductService {
       throw new NameAlreadyInUseException(newName);
     }
 
-    var updated = Product.rehydrate(id, newName, price, currency, status);
+    var updated = Product.rehydrate(id, newName, price, currency, status,
+        existing.version(),
+        existing.inventory());
     return productRepository.save(updated, false);
   }
 

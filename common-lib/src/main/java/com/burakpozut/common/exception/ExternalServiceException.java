@@ -8,5 +8,4 @@ public class ExternalServiceException extends AppException {
   public ExternalServiceException(String message, Throwable cause) {
     super(message, cause);
   }
-
 }

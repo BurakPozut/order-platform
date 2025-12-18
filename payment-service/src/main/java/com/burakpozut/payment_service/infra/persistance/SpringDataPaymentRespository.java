@@ -1,6 +1,5 @@
 package com.burakpozut.payment_service.infra.persistance;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;

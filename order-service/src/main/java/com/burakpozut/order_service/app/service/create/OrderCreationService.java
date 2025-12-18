@@ -78,6 +78,7 @@ public class OrderCreationService {
     });
   }
 
+  // #region Helper
   private String deriveKey(UUID customerId, List<OrderItemData> items, long bucket) {
     String productPart = items.stream()
         .sorted(Comparator.comparing(OrderItemData::productId))
@@ -123,4 +124,5 @@ public class OrderCreationService {
 
   private record ValidationResult(Map<UUID, ProductInfo> productsMap) {
   }
+  // #endregion
 }
