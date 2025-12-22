@@ -1,9 +1,7 @@
-
 package com.burakpozut.product_service.persistance;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -18,12 +16,9 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.burakpozut.common.domain.Currency;
-import com.burakpozut.product_service.domain.ProductStatus;
 import com.burakpozut.product_service.infra.persistance.ProductJpaEntity;
 
-// import your entity + enums
-
+// TODO: UTC
 @SpringBootTest
 class ProductOptimisticLockingIT {
 

@@ -80,9 +80,9 @@ public class ProductController {
   }
 
   @PostMapping("/{id}/reserve")
-  public ResponseEntity<Void> decreaseStock(@PathVariable UUID productId,
+  public ResponseEntity<Void> decreaseStock(@PathVariable UUID id,
       @RequestBody @Valid ReserveInventoryRequest body) {
-    var command = ProductMapper.toCommand(productId, body);
+    var command = ProductMapper.toCommand(id, body);
     rerserveInventoryService.handle(command);
     return ResponseEntity.noContent().build();
 

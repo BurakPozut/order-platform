@@ -109,7 +109,7 @@ public class HttpProductGateway implements ProductGateway {
   public void reserveInventory(UUID productId, Integer quantity) {
     try {
       webClient.post()
-          .uri("/api/payments/{productId}/reserve", productId)
+          .uri("/api/products/{productId}/reserve", productId)
           .contentType(MediaType.APPLICATION_JSON)
           .bodyValue(new ReserveInventoryRequest(quantity))
           .retrieve()

@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RerserveInventoryService {
   private final ProductRepository productRepository;
 
-  // @Transactional
+  @Transactional
   public void handle(ReserveInventoryCommand command) {
     var product = productRepository.findById(command.productId())
         .orElseThrow(() -> new ProductNotFoundException(command.productId()));

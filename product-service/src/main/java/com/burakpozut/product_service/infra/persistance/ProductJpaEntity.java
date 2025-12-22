@@ -13,7 +13,6 @@ import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 
 import java.time.LocalDateTime;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

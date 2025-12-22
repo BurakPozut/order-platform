@@ -19,6 +19,8 @@ public class ProductMapper {
     entity.setPrice(p.price());
     entity.setCurrency(p.currency());
     entity.setStatus(p.status());
+    entity.setVersion(p.version());
+    entity.setInventory(p.inventory());
     entity.setNew(isNew);
     return entity;
   }

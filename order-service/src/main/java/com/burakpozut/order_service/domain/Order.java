@@ -36,8 +36,8 @@ public record Order(
     if (items == null)
       throw new DomainValidationException("Items can not be null");
     if (idempotencyKey == null)
-      throw new DomainValidationException("IdempotencyKey can't be null");// TODO: is this domain exception or should we
-                                                                          // retrun this to the client
+      throw new DomainValidationException("IdempotencyKey can't be null");
+
   }
 
   public static Order of(UUID customerId, OrderStatus status,
