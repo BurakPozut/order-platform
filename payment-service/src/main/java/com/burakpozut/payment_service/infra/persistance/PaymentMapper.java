@@ -11,7 +11,8 @@ public class PaymentMapper {
         entity.getCurrency(),
         entity.getStatus(),
         entity.getProvider(),
-        entity.getProviderRef());
+        entity.getProviderRef(),
+        entity.getIdempotencyKey(), entity.getUpdatedAt());
   }
 
   public static PaymentJpaEntity toEntity(Payment payment, boolean isNew) {
@@ -23,6 +24,7 @@ public class PaymentMapper {
     entity.setStatus(payment.status());
     entity.setProvider(payment.provider());
     entity.setProviderRef(payment.providerRef());
+    entity.setIdempotencyKey(payment.idempotencyKey());
     entity.setNew(isNew);
     return entity;
   }

@@ -65,6 +65,9 @@ public class PaymentJpaEntity {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
+  @Column(name = "idempotency_key", unique = true, length = 128)
+  private String idempotencyKey;
+
   @Transient
   private boolean isNew;
 }

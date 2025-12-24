@@ -28,7 +28,7 @@ public class PatchPaymentService {
 
     var updated = Payment.rehydrate(paymentId, orderId,
         existing.amount(), currency,
-        status, provider, providerRef);
+        status, provider, providerRef, existing.idempotencyKey(), existing.updatedAt());
     return paymentRepository.save(updated, false);
   }
 }

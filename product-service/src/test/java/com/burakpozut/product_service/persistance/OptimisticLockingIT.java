@@ -18,7 +18,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.burakpozut.product_service.infra.persistance.ProductJpaEntity;
 
-// TODO: UTC
 @SpringBootTest
 class ProductOptimisticLockingIT {
 
@@ -30,31 +29,6 @@ class ProductOptimisticLockingIT {
   @Test
   void should_throw_when_updating_stale_version() {
     TransactionTemplate tx = new TransactionTemplate(txManager);
-
-    // 1) Seed a Product row
-    // UUID id = UUID.randomUUID();
-    // tx.executeWithoutResult(status -> {
-    // EntityManager em = emf.createEntityManager();
-    // em.joinTransaction();
-
-    // ProductJpaEntity p = new ProductJpaEntity();
-    // p.setId(id);
-    // p.setName("Book");
-    // p.setPrice(new BigDecimal("100.00"));
-    // p.setCurrency(Currency.TRY); // change if needed
-    // p.setStatus(ProductStatus.ACTIVE); // change if needed
-    // p.setInventory(10);
-
-    // // If auditing isn't enabled in tests, set timestamps manually to satisfy NOT
-    // // NULL.
-    // // If auditing IS enabled, Hibernate/Spring Data will overwrite these anyway.
-    // p.setCreatedAt(LocalDateTime.now());
-    // p.setUpdatedAt(LocalDateTime.now());
-
-    // em.persist(p);
-    // em.flush();
-    // em.close();
-    // });
 
     String uuidString = "fcbee20c-7176-4006-adb6-743170388a13";
     UUID uuid = UUID.fromString(uuidString);

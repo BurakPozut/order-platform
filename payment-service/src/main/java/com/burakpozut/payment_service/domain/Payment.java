@@ -1,6 +1,7 @@
 package com.burakpozut.payment_service.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.burakpozut.common.domain.Currency;
@@ -13,7 +14,9 @@ public record Payment(
     Currency currency,
     PaymentStatus status,
     String provider,
-    String providerRef) {
+    String providerRef,
+    String idempotencyKey,
+    LocalDateTime updatedAt) {
   public Payment {
     if (id == null)
       throw new DomainValidationException("Payment Id cannot be null");
@@ -37,13 +40,14 @@ public record Payment(
       Currency currency,
       PaymentStatus status,
       String provider,
-      String providerRef) {
+      String providerRef,
+      String idempotencyKey) {
 
     return new Payment(
         UUID.randomUUID(), orderId,
         amount, currency,
         status, provider,
-        providerRef);
+        providerRef, idempotencyKey, null);
   }
 
   public static Payment rehydrate(
@@ -53,12 +57,13 @@ public record Payment(
       Currency currency,
       PaymentStatus status,
       String provider,
-      String providerRef) {
+      String providerRef,
+      String idempotencyKey, LocalDateTime updatedAt) {
 
     return new Payment(
         id, orderId,
         amount, currency,
         status, provider,
-        providerRef);
+        providerRef, idempotencyKey, updatedAt);
   }
 }

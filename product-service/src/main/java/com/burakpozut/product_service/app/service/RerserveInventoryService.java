@@ -27,6 +27,8 @@ public class RerserveInventoryService {
       throw new InsufficentInventoryException(command.productId());
     }
 
+    // This is a pretty simple inventory reserver logic it is usually best to handle
+    // this with a one single sql query for simplicty
     var updated = Product.rehydrate(product.id(),
         product.name(),
         product.price(),
