@@ -7,9 +7,11 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.burakpozut.common.exception.DomainValidationException;
 import com.burakpozut.payment_service.app.command.CreatePaymentCommand;
 import com.burakpozut.payment_service.domain.Payment;
 import com.burakpozut.payment_service.domain.PaymentRepository;
+import com.burakpozut.payment_service.domain.gateway.OrderGateway;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CreatePaymentService {
   private static final int BUCKET_MINUTES = 5;
+
   private final PaymentRepository paymentRepository;
+  private final OrderGateway orderGateway;
 
   @Transactional
   public Payment handle(CreatePaymentCommand command) {
@@ -45,12 +49,10 @@ public class CreatePaymentService {
       return existingPrev.get();
     }
 
-    // command.providerRef());
-    // // Optional<Payment> exsiting =
-    // paymentRepository.findByIdempotencyKey(idempotencyKey);
-    // // if (exsiting.isPresent()) {
-    // // return exsiting.get();
-    // }
+    if (!orderGateway.validateOrderId(command.orderId())) {
+      log.error("Order {} does not exists when creating payment", command.orderId());
+      throw new DomainValidationException("Order with id " + command.orderId() + "does not exists");
+    }
 
     var payment = Payment.of(command.orderId(), command.amount(),
         command.currency(), command.status(),
