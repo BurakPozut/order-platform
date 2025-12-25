@@ -14,7 +14,7 @@ public class PaymentMapper {
   }
 
   public static PatchPaymentCommand toCommand(PatchPaymentRequest request) {
-    return PatchPaymentCommand.of(request.orderId(), request.currency(),
+    return PatchPaymentCommand.of(request.currency(),
         request.status(), request.provider(), request.providerRef());
   }
 }
