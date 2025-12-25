@@ -1,6 +1,7 @@
 package com.burakpozut.order_service.api;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.burakpozut.order_service.api.dto.request.CreateOrderRequest;
@@ -17,10 +18,11 @@ import com.burakpozut.order_service.app.service.create.CreateOrderOrchestrator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -35,15 +37,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class OrderController {
   private final GetAllOrdersService getAllOrders;
   private final GetOrderByIdService getOrderByIdService;
-  // private final OrderCreationService createOrderService;
   private final UpdateOrderService updateOrderService;
   private final UpdateOrderItemService updateOrderItemService;
   private final CreateOrderOrchestrator createOrderOrchestrator;
 
   @GetMapping()
-  public ResponseEntity<List<OrderResponse>> getAll() {
-    var orders = getAllOrders.handle();
-    var body = orders.stream().map(OrderResponse::from).collect(Collectors.toList());
+  public ResponseEntity<Slice<OrderResponse>> getAll(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
+    Pageable pagealbe = PageRequest.of(page, size);
+    var orderSlice = getAllOrders.handle(pagealbe);
+    var body = orderSlice.map(OrderResponse::from);
     return ResponseEntity.ok(body);
   }
 

@@ -5,6 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import com.burakpozut.order_service.domain.Order;
@@ -25,6 +28,13 @@ public class OrderRepositoryAdapter implements OrderRepository {
   @Override
   public List<Order> findAll() {
     return jpa.findAll().stream().map(OrderMapper::toDomain).collect(Collectors.toList());
+  }
+
+  @Override
+  public Slice<Order> findAll(Pageable pageable) {
+    Slice<OrderJpaEntity> entitySlice = jpa.findAll(pageable);
+    List<Order> orders = entitySlice.getContent().stream().map(OrderMapper::toDomain).toList();
+    return new SliceImpl<Order>(orders, pageable, entitySlice.hasNext());
   }
 
   @Override

@@ -2,6 +2,8 @@ package com.burakpozut.order_service.app.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import com.burakpozut.order_service.domain.Order;
@@ -18,4 +20,7 @@ public class GetAllOrdersService {
     return orderRepository.findAll();
   }
 
+  public Slice<Order> handle(Pageable pageable) {
+    return orderRepository.findAll(pageable);
+  }
 }
