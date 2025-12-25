@@ -1,6 +1,5 @@
 package com.burakpozut.order_service.app.service.create;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -69,10 +68,14 @@ public class OrderCreationService {
       List<OrderItem> orderItems = createOrderItmes(command.items(),
           validationResult.productsMap);
 
-      BigDecimal totalAmount = calculateTotal(orderItems);
-      log.debug("Saving with Idempotency key: " + currentKey);
-      Order order = Order.of(command.customerId(),
-          command.status(), totalAmount, command.currency(), orderItems, currentKey);
+      // BigDecimal totalAmount = calculateTotal(orderItems);
+      // log.debug("Saving with Idempotency key: " + currentKey);
+      // Order order = Order.of(command.customerId(),
+      // command.status(), totalAmount, command.currency(), orderItems, currentKey);
+      Order order = Order.createFrom(
+          command.customerId(),
+          command.status(),
+          command.currency(), orderItems, currentKey);
       var savedOrder = orderRepository.save(order, true);
       return new CreationResult(savedOrder, true);
     });
@@ -117,10 +120,11 @@ public class OrderCreationService {
         }).toList();
   }
 
-  private BigDecimal calculateTotal(List<OrderItem> items) {
-    return items.stream().map(item -> item.unitPrice().multiply(BigDecimal.valueOf(item.quantity())))
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
-  }
+  // private BigDecimal calculateTotal(List<OrderItem> items) {
+  // return items.stream().map(item ->
+  // item.unitPrice().multiply(BigDecimal.valueOf(item.quantity())))
+  // .reduce(BigDecimal.ZERO, BigDecimal::add);
+  // }
 
   private record ValidationResult(Map<UUID, ProductInfo> productsMap) {
   }

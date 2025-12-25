@@ -40,6 +40,30 @@ public record Order(
 
   }
 
+  public BigDecimal calculateTotal() {
+    return items.stream().map(
+        item -> item.unitPrice().multiply(BigDecimal.valueOf(item.quantity())))
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+  }
+
+  public static Order createFrom(
+      UUID customerId,
+      OrderStatus status,
+      Currency currency,
+      List<OrderItem> items,
+      String idempotencyKey) {
+    if (items == null || items.isEmpty()) {
+      throw new DomainValidationException("Order must have at least one item");
+    }
+
+    BigDecimal totalAmount = items.stream()
+        .map(item -> item.unitPrice().multiply(BigDecimal.valueOf(item.quantity())))
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    return Order.of(customerId, status, totalAmount, currency, items, idempotencyKey);
+  }
+
+  // #region Factory Methods
   public static Order of(UUID customerId, OrderStatus status,
       BigDecimal totalAmount, Currency currency, List<OrderItem> items, String idempotencyKey) {
 
@@ -65,4 +89,5 @@ public record Order(
     return new Order(id, customerId, status,
         totalAmount, currency, items, idempotencyKey, updatedAt);
   }
+  // #endregion
 }
