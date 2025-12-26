@@ -50,7 +50,6 @@ public record Payment(
     if (statusChanged) {
       validateStatusTransition(this.status, newStatus);
     }
-
     return Payment.rehydrate(
         this.id,
         this.orderId,

@@ -45,7 +45,7 @@ public class HttpPaymentGateway implements PaymentGateway {
           .toBodilessEntity()
           .block();
     } catch (WebClientResponseException e) {
-      log.error("Payment service erro for order {}: {} - {}",
+      log.error("Payment service error for order {}: {} - {}",
           orderId, e.getStatusCode(), e.getMessage());
       throw new ExternalServiceException("Payment service returned error: " + e.getMessage());
     } catch (Exception e) {

@@ -3,7 +3,7 @@ package com.burakpozut.order_service.app.service.create;
 import org.springframework.stereotype.Service;
 
 import com.burakpozut.order_service.app.command.CreateOrderCommand;
-import com.burakpozut.order_service.app.service.CancleOrderService;
+import com.burakpozut.order_service.app.service.CancelOrderService;
 import com.burakpozut.order_service.app.service.create.OrderCreationService.CreationResult;
 import com.burakpozut.order_service.domain.Order;
 
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CreateOrderOrchestrator {
   private final OrderCreationService orderCreationService;
   private final OrderSideEffectsService orderSideEffectsService;
-  private final CancleOrderService cancleOrderService;
+  private final CancelOrderService cancleOrderService;
 
   public Order handle(CreateOrderCommand command) {
     CreationResult result = orderCreationService.create(command);

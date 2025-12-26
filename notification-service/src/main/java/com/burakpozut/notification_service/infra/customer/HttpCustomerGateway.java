@@ -1,14 +1,14 @@
-package com.burakpozut.order_service.infra.customer;
+package com.burakpozut.notification_service.infra.customer;
 
 import java.util.UUID;
+
+import com.burakpozut.common.exception.ExternalServiceException;
+import com.burakpozut.notification_service.domain.gateway.CustomerGateway;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import com.burakpozut.common.exception.ExternalServiceException;
-import com.burakpozut.order_service.domain.gateway.CustomerGateway;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,10 +26,12 @@ public class HttpCustomerGateway implements CustomerGateway {
   @Override
   public boolean validateCustomerExists(UUID customerId) {
     try {
-      webClient.get().uri("/api/customers/{id}", customerId).retrieve().toBodilessEntity().block();
+      webClient.get().uri("api/customers/{id}",
+          customerId).retrieve().toBodilessEntity().block();
       return true;
     } catch (WebClientResponseException.NotFound e) {
-      log.error("Customer not found with id: {}", customerId);
+      log.error("Customer service error for customer: {}",
+          customerId);
       return false;
     } catch (WebClientResponseException e) {
       log.error("Customer service error for customer {}: {} - {}",
@@ -40,5 +42,6 @@ public class HttpCustomerGateway implements CustomerGateway {
           customerId, e.getMessage());
       throw new ExternalServiceException("Customer service is unavailable", e);
     }
+
   }
 }
