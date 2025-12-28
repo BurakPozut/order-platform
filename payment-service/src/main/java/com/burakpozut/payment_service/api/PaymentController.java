@@ -20,12 +20,15 @@ import com.burakpozut.payment_service.app.service.PatchPaymentService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentController {
   private final GetAllPaymentsService getAllPaymentsService;
   private final GetPaymentByIdService getPaymentByIdService;
