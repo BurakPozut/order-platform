@@ -36,7 +36,6 @@ public class HttpOrderGateway implements OrderGateway {
 
   @Override
   public UUID getOrderCustomerId(UUID orderId) {
-    // try {
     OrderCustomerIdResponse response = webClient.get()
         .uri("/api/orders/{id}", orderId)
         .retrieve()
@@ -46,22 +45,6 @@ public class HttpOrderGateway implements OrderGateway {
         .onErrorMap(error -> mapError(error, orderId))
         .block();
     return response.customerId();
-    // } catch (WebClientResponseException.NotFound e) {
-    // log.error("Order not found");
-
-    // throw new ExternalServiceNotFoundException("Order not found with id: " +
-    // orderId);
-    // } catch (WebClientResponseException e) {
-    // log.error("Order service error for order {}: {} - {}",
-    // orderId, e.getStatusCode(), e.getMessage());
-
-    // throw new ExternalServiceException("Order service returned error: " +
-    // e.getStatusCode(), e);
-    // } catch (Exception e) {
-    // log.error("Failed to communicate with order service for order: {}: {}",
-    // orderId, e.getMessage());
-    // throw new ExternalServiceException("Order service is unavailable");
-    // }
   }
 
   private Throwable mapError(Throwable error, UUID orderId) {

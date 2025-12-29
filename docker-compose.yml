@@ -148,8 +148,50 @@ services:
     ports:
       - "${PAYMENT_SERVICE_PORT}:8081"
     depends_on:
-      order-db:
+      payment-db:
         condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: redpanda
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - "1G"
+      - --reserve-memory
+      - "0M"
+      - --node-id
+      - "0"
+      - --check=false
+      # internal (docker network): redpanda:9092
+      # external (your host): localhost:19092
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - PLAINTEXT://redpanda:9092,OUTSIDE://localhost:19092
+    ports:
+      - "19092:19092"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: redpanda:9092
+    ports:
+      - "8089:8080"
+    depends_on:
+      - redpanda
     networks:
       - microservices-network
     restart: unless-stopped

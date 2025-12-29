@@ -28,10 +28,10 @@ public class HttpCustomerGateway implements CustomerGateway {
   public HttpCustomerGateway(WebClient.Builder builder,
       @Value("${customer.service.url}") String customerServiceUrl,
       CircuitBreaker customerCircuitBreaker,
-      Retry customRetry) {
+      Retry customerRetry) {
     this.webClient = builder.baseUrl(customerServiceUrl).build();
     this.circuitBreaker = customerCircuitBreaker;
-    this.retry = customRetry;
+    this.retry = customerRetry;
   }
 
   @Override
