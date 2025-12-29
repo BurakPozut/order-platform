@@ -8,7 +8,9 @@ public interface CustomerGateway {
    * 
    * @param customerId The customer ID to validate
    * @return true if customer exists, false otherwise
-   * @throws CustomerServiceException if the customer service is unavailable
+   * @throws CustomerServiceException         if the customer service is
+   *                                          unavailable
+   * @throws ExternalServiceNotFoundException if the customer is not found (404)
    */
-  boolean validateCustomerExists(UUID customerId);
+  void validateCustomerExists(UUID customerId);
 }

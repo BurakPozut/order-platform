@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.burakpozut.common.domain.Currency;
 import com.burakpozut.common.exception.DomainValidationException;
+import com.burakpozut.common.exception.ExternalServiceNotFoundException;
 import com.burakpozut.order_service.app.command.UpdateOrderCommand;
 import com.burakpozut.order_service.app.exception.OrderNotFoundException;
 import com.burakpozut.order_service.app.exception.customer.CustomerNotFoundException;
@@ -46,9 +47,8 @@ public class UpdateOrderService {
   private ResolvedOrderFields resolveFields(UpdateOrderCommand command,
       Order existing) {
 
-    if (command.customerId() != null &&
-        !customerGateway.validateCustomerExists(command.customerId())) {
-      throw new CustomerNotFoundException(command.customerId());
+    if (command.customerId() != null) {
+      validateCustomerExists(command.customerId());
     }
     return new ResolvedOrderFields(
         command.customerId() != null ? command.customerId() : existing.customerId(),
@@ -63,6 +63,14 @@ public class UpdateOrderService {
       throw new DomainValidationException("At least one field must be provided");
     }
     return true;
+  }
+
+  private void validateCustomerExists(UUID customerId) {
+    try {
+      customerGateway.validateCustomerExists(customerId);
+    } catch (ExternalServiceNotFoundException e) {
+      throw new CustomerNotFoundException(customerId);
+    }
   }
 
 }

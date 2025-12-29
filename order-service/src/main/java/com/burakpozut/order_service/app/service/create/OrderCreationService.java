@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.burakpozut.common.exception.ExternalServiceNotFoundException;
 import com.burakpozut.order_service.app.command.CreateOrderCommand;
 import com.burakpozut.order_service.app.command.OrderItemData;
 import com.burakpozut.order_service.app.exception.customer.CustomerNotFoundException;
@@ -68,10 +69,6 @@ public class OrderCreationService {
       List<OrderItem> orderItems = createOrderItmes(command.items(),
           validationResult.productsMap);
 
-      // BigDecimal totalAmount = calculateTotal(orderItems);
-      // log.debug("Saving with Idempotency key: " + currentKey);
-      // Order order = Order.of(command.customerId(),
-      // command.status(), totalAmount, command.currency(), orderItems, currentKey);
       Order order = Order.createFrom(
           command.customerId(),
           command.status(),
@@ -97,8 +94,7 @@ public class OrderCreationService {
   }
 
   private ValidationResult validateAndFetchData(CreateOrderCommand command) {
-    if (!customerGateway.validateCustomerExists(command.customerId()))
-      throw new CustomerNotFoundException(command.customerId());
+    validateCustomerExists(command.customerId());
 
     List<UUID> productIds = command.items().stream()
         .map(OrderItemData::productId).distinct().toList();
@@ -120,11 +116,13 @@ public class OrderCreationService {
         }).toList();
   }
 
-  // private BigDecimal calculateTotal(List<OrderItem> items) {
-  // return items.stream().map(item ->
-  // item.unitPrice().multiply(BigDecimal.valueOf(item.quantity())))
-  // .reduce(BigDecimal.ZERO, BigDecimal::add);
-  // }
+  private void validateCustomerExists(UUID customerId) {
+    try {
+      customerGateway.validateCustomerExists(customerId);
+    } catch (ExternalServiceNotFoundException e) {
+      throw new CustomerNotFoundException(customerId);
+    }
+  }
 
   private record ValidationResult(Map<UUID, ProductInfo> productsMap) {
   }

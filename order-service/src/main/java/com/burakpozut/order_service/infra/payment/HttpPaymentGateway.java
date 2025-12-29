@@ -21,7 +21,6 @@ import com.burakpozut.order_service.domain.gateway.PaymentGateway;
 
 import lombok.extern.slf4j.Slf4j;
 
-// TODO: Add resilience here
 @Component
 @Slf4j
 public class HttpPaymentGateway implements PaymentGateway {
@@ -48,7 +47,6 @@ public class HttpPaymentGateway implements PaymentGateway {
 
   @Override
   public void createPayment(UUID orderId, BigDecimal amount, Currency currency, String provider, String providerRef) {
-    // try {
     var request = new CreatePaymentRequest(orderId, amount,
         currency, provider, providerRef);
     webClient.post().uri("/api/payments")
@@ -58,43 +56,43 @@ public class HttpPaymentGateway implements PaymentGateway {
         .toBodilessEntity()
         .transformDeferred(RetryOperator.of(retry))
         .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-        .onErrorMap(error -> {
-          if (error instanceof WebClientResponseException.NotFound e) {
-            log.error("Payment endpoint not found for order {}: {} - {}",
-                orderId, e.getStatusCode(), e.getMessage());
-            return new ExternalServiceNotFoundException("Payment service endpoint not found: " + e.getMessage());
-          } else if (error instanceof WebClientResponseException e) {
-            if (e.getStatusCode().is5xxServerError()) {
-              log.error("Payment service server error for order {}: {} - {}",
-                  orderId, e.getStatusCode(), e.getMessage());
-              return new ExternalServiceException("Payment service returned server error: " + e.getStatusCode(), e);
-            } else {
-              // 4xx client errors (except 404 which is handled above)
-              log.error("Payment service client error for order {}: {} - {}",
-                  orderId, e.getStatusCode(), e.getMessage());
-              return new ExternalServiceException("Payment service returned client error: " + e.getStatusCode(), e);
-            }
-          } else {
-            // Network errors, timeouts, connection refused, etc.
-            log.error("Failed to communicate with Payment service for order {}: {}",
-                orderId, error.getMessage());
-            return new ExternalServiceException("Payment service is unavailable", error);
-          }
-        })
+        .onErrorMap(error -> mapError(error, orderId))
         .block();
-    // }
-    // catch (WebClientResponseException e) {
-    // log.error("Payment service error for order {}: {} - {}",
-    // orderId, e.getStatusCode(), e.getMessage());
-    // throw new ExternalServiceException("Payment service returned error: " +
-    // e.getMessage());
-    // }
-    // catch (Exception e) {
-    // log.error("Failed to communicate with Payment service for order {}: {}",
-    // orderId, e.getMessage());
-    // throw new ExternalServiceException("Payment service is unavailable", e);
-    // }
-
   }
 
+  private Throwable mapError(Throwable error, UUID orderId) {
+    if (error instanceof WebClientResponseException.NotFound e) {
+      return mapNotFoundError(e, orderId);
+    } else if (error instanceof WebClientResponseException e) {
+      return e.getStatusCode().is5xxServerError()
+          ? mapServerError(e, orderId)
+          : mapClientError(e, orderId);
+    } else {
+      return mapNetworkError(error, orderId);
+    }
+  }
+
+  private ExternalServiceNotFoundException mapNotFoundError(WebClientResponseException.NotFound e, UUID orderId) {
+    log.error("Payment endpoint not found for order {}: {} - {}",
+        orderId, e.getStatusCode(), e.getMessage());
+    return new ExternalServiceNotFoundException("Payment service endpoint not found: " + e.getMessage());
+  }
+
+  private ExternalServiceException mapServerError(WebClientResponseException e, UUID orderId) {
+    log.error("Payment service server error for order {}: {} - {}",
+        orderId, e.getStatusCode(), e.getMessage());
+    return new ExternalServiceException("Payment service returned server error: " + e.getStatusCode(), e);
+  }
+
+  private ExternalServiceException mapClientError(WebClientResponseException e, UUID orderId) {
+    log.error("Payment service client error for order {}: {} - {}",
+        orderId, e.getStatusCode(), e.getMessage());
+    return new ExternalServiceException("Payment service returned client error: " + e.getStatusCode(), e);
+  }
+
+  private ExternalServiceException mapNetworkError(Throwable error, UUID orderId) {
+    log.error("Failed to communicate with Payment service for order {}: {}",
+        orderId, error.getMessage());
+    return new ExternalServiceException("Payment service is unavailable", error);
+  }
 }
