@@ -8,6 +8,7 @@ import com.burakpozut.common.exception.DomainValidationException;
 import com.burakpozut.common.exception.ExternalServiceException;
 import com.burakpozut.common.exception.ExternalServiceNotFoundException;
 import com.burakpozut.notification_service.app.command.CreateNotificationCommand;
+import com.burakpozut.notification_service.app.exception.CustomerNotFoundException;
 import com.burakpozut.notification_service.app.exception.OrderNotFoundException;
 import com.burakpozut.notification_service.domain.Notification;
 import com.burakpozut.notification_service.domain.NotificationRepository;
@@ -32,10 +33,7 @@ public class CreateNotificationService {
             + command.orderId() + " does not belong to the customer "
             + command.customerId());
       }
-      if (!customerGateway.validateCustomerExists(command.customerId())) {
-        throw new DomainValidationException("Customer "
-            + command.customerId() + " does not exists");
-      }
+      validateCustomerExists(orderCustomerId);
     } catch (ExternalServiceNotFoundException e) {
       throw new OrderNotFoundException(command.orderId());
     } catch (ExternalServiceException e) {
@@ -48,4 +46,11 @@ public class CreateNotificationService {
     return saved;
   }
 
+  private void validateCustomerExists(UUID customerId) {
+    try {
+      customerGateway.validateCustomerExists(customerId);
+    } catch (ExternalServiceNotFoundException e) {
+      throw new CustomerNotFoundException(customerId);
+    }
+  }
 }

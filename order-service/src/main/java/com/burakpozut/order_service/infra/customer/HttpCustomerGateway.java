@@ -37,25 +37,11 @@ public class HttpCustomerGateway implements CustomerGateway {
 
   @Override
   public void validateCustomerExists(UUID customerId) {
-    // try {
     webClient.get().uri("/api/customers/{id}", customerId).retrieve().toBodilessEntity()
         .transformDeferred(RetryOperator.of(retry))
         .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
         .onErrorMap(error -> mapError(error, customerId))
         .block();
-    // } catch (WebClientResponseException.NotFound e) {
-    // log.error("Customer not found with id: {}", customerId);
-    // return false;
-    // } catch (WebClientResponseException e) {
-    // log.error("Customer service error for customer {}: {} - {}",
-    // customerId, e.getStatusCode(), e.getMessage());
-    // throw new ExternalServiceException("Customer service returned error: " +
-    // e.getStatusCode(), e);
-    // } catch (Exception e) {
-    // log.error("Failed to communicate with customer service for customer {}: {}",
-    // customerId, e.getMessage());
-    // throw new ExternalServiceException("Customer service is unavailable", e);
-    // }
   }
 
   private Throwable mapError(Throwable error, UUID orderId) {

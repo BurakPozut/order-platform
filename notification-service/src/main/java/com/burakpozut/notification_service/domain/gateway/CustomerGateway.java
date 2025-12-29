@@ -4,5 +4,5 @@ import java.util.UUID;
 
 public interface CustomerGateway {
 
-  boolean validateCustomerExists(UUID customerId);
+  void validateCustomerExists(UUID customerId);
 }
