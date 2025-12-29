@@ -7,8 +7,9 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.burakpozut.common.exception.DomainValidationException;
+import com.burakpozut.common.exception.ExternalServiceNotFoundException;
 import com.burakpozut.payment_service.app.command.CreatePaymentCommand;
+import com.burakpozut.payment_service.app.exception.OrderNotFoundException;
 import com.burakpozut.payment_service.domain.Payment;
 import com.burakpozut.payment_service.domain.PaymentRepository;
 import com.burakpozut.payment_service.domain.gateway.OrderGateway;
@@ -28,9 +29,6 @@ public class CreatePaymentService {
 
   @Transactional
   public Payment handle(CreatePaymentCommand command) {
-    // !! Right now we are not checking order cause the order service calls this
-    // and it also depends on this so this create distrubated transaction issue
-    // This method is only called by the order service by logic and desing
     long currentBucket = System.currentTimeMillis() / (1000 * 60 * BUCKET_MINUTES);
 
     String currentKey = deriveKey(command.orderId(), command.amount(), currentBucket);
@@ -49,10 +47,7 @@ public class CreatePaymentService {
       return existingPrev.get();
     }
 
-    if (!orderGateway.validateOrderId(command.orderId())) {
-      log.error("Order {} does not exists when creating payment", command.orderId());
-      throw new DomainValidationException("Order with id " + command.orderId() + "does not exists");
-    }
+    validateOrderExists(command.orderId());
 
     var payment = Payment.of(command.orderId(), command.amount(),
         command.currency(), command.status(),
@@ -68,5 +63,13 @@ public class CreatePaymentService {
   private boolean isRecent(Payment payment) {
     LocalDateTime deadline = LocalDateTime.now().minusMinutes(BUCKET_MINUTES);
     return payment.updatedAt().isAfter(deadline);
+  }
+
+  private void validateOrderExists(UUID orderId) {
+    try {
+      orderGateway.validateOrderId(orderId);
+    } catch (ExternalServiceNotFoundException e) {
+      throw new OrderNotFoundException(orderId);
+    }
   }
 }
