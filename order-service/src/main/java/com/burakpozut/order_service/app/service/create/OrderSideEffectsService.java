@@ -31,8 +31,6 @@ public class OrderSideEffectsService {
         order.totalAmount(), order.currency(),
         "PayPal", "pypl-123");
 
-    // notificationGateway.sendNotification(order.customerId(),
-    // order.id());
     orderConfirmedPublisher.publish(order);
   }
 

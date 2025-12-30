@@ -122,6 +122,14 @@
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- UUID v7 support -->
+		<dependency>
+			<groupId>com.github.f4b6a3</groupId>
+			<artifactId>uuid-creator</artifactId>
+			<version>5.3.7</version>
+		</dependency>
+
 		<!-- Common Library -->
 		<dependency>
 			<groupId>com.burakpozut</groupId>

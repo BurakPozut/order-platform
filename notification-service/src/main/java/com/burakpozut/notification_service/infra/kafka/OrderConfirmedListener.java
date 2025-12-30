@@ -1,6 +1,6 @@
 package com.burakpozut.notification_service.infra.kafka;
 
-import com.burakpozut.common.event.OrderConfirmedEvent;
+import com.burakpozut.common.event.order.OrderConfirmedEvent;
 import com.burakpozut.notification_service.domain.Notification;
 import com.burakpozut.notification_service.domain.NotificationChannel;
 import com.burakpozut.notification_service.domain.NotificationRepository;
@@ -18,7 +18,7 @@ public class OrderConfirmedListener {
 
   private final NotificationRepository notificationRepository;
 
-  @KafkaListener(topics = "${app.kafka.topics.order-confirmed}")
+  @KafkaListener(topics = "${app.kafka.topics.order-events}")
   public void onMessage(OrderConfirmedEvent event) {
     var notification = Notification.of(
         event.customerId(), event.orderId(),

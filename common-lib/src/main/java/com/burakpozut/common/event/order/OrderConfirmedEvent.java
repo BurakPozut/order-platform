@@ -1,12 +1,12 @@
-package com.burakpozut.common.event;
+package com.burakpozut.common.event.order;
 
 import java.time.Instant;
 import java.util.UUID;
 
 public record OrderConfirmedEvent(
     UUID eventId,
-    Instant occuredAt,
+    Instant occurredAt,
     UUID orderId,
-    UUID customerId) {
+    UUID customerId) implements OrderEvent {
 
 }
