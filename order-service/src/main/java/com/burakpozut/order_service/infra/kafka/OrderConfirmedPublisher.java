@@ -30,4 +30,6 @@ public class OrderConfirmedPublisher {
     kafkaTemplate.send(topic, order.id().toString(), event);
   }
 
+  // TODO: Do we need resilience here? Maybe notification service is down or fed
+  // up?
 }

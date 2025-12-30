@@ -25,6 +25,7 @@ public class CreateNotificationService {
   private final OrderGateway orderGateway;
 
   public Notification handle(CreateNotificationCommand command) {
+    // throw new DomainValidationException("This is test exception");
 
     try {
       UUID orderCustomerId = orderGateway.getOrderCustomerId(command.orderId());
