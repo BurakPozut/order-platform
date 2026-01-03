@@ -2,12 +2,10 @@ package com.burakpozut.order_service.app.service.create;
 
 import org.springframework.stereotype.Service;
 
-// import com.burakpozut.common.event.OrderConfirmedEvent;
 import com.burakpozut.order_service.domain.Order;
-// import com.burakpozut.order_service.domain.gateway.NotificationGateway;
 import com.burakpozut.order_service.domain.gateway.PaymentGateway;
-import com.burakpozut.order_service.domain.gateway.ProductGateway;
-import com.burakpozut.order_service.infra.kafka.OrderConfirmedPublisher;
+// import com.burakpozut.order_service.domain.gateway.ProductGateway;
+import com.burakpozut.order_service.infra.kafka.OrderCreatedPublisher;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderSideEffectsService {
   private final PaymentGateway paymentGateway;
   // private final NotificationGateway notificationGateway;
-  private final ProductGateway productGateway;
+  // private final ProductGateway productGateway;
 
-  private final OrderConfirmedPublisher orderConfirmedPublisher;
+  private final OrderCreatedPublisher orderConfirmedPublisher;
+  // TODO: We already have PENDING state make this async
 
   public void trigger(Order order) {
-    for (var item : order.items()) {
-      productGateway.reserveInventory(item.productId(), item.quantity());
-    }
+    // for (var item : order.items()) {
+    // productGateway.reserveInventory(item.productId(), item.quantity());
+    // }
 
     paymentGateway.createPayment(order.id(),
         order.totalAmount(), order.currency(),

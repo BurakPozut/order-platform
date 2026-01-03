@@ -100,10 +100,12 @@ public class OrderCreationService {
         .map(OrderItemData::productId).distinct().toList();
     Map<UUID, ProductInfo> productsMap = productGateway.getProductsByIds(productIds);
 
-    for (UUID productId : productIds) {
-      if (!productsMap.containsKey(productId))
-        throw new ProductNotFoundException(productId);
-    }
+    // Validation is handling from the product service from now on. This is more
+    // event driven
+    // for (UUID productId : productIds) {
+    // if (!productsMap.containsKey(productId))
+    // throw new ProductNotFoundException(productId);
+    // }
     return new ValidationResult(productsMap);
   }
 

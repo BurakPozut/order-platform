@@ -1,6 +1,6 @@
 package com.burakpozut.notification_service.infra.kafka;
 
-import com.burakpozut.common.event.order.OrderConfirmedEvent;
+import com.burakpozut.common.event.order.OrderCreatedEvent;
 import com.burakpozut.common.event.order.OrderEvent;
 import com.burakpozut.notification_service.app.command.CreateNotificationCommand;
 import com.burakpozut.notification_service.app.service.CreateNotificationService;
@@ -18,31 +18,32 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class OrderConfirmedListener {
+public class OrderCreatedListener {
 
   private final CreateNotificationService createNotificationService;
   private final OrderCompensationPublisher compensationPublisher;
 
-  @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "notification-service")
+  @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
   public void onMessage(@Payload OrderEvent event) {
-    if (event instanceof OrderConfirmedEvent) {
+    if (event instanceof OrderCreatedEvent createdEvent) {
 
       try {
         var command = CreateNotificationCommand.of(
-            event.customerId(), event.orderId(),
+            createdEvent.customerId(), createdEvent.orderId(),
             NotificationType.ORDER_CONFIRMED,
             NotificationChannel.EMAIL,
             NotificationStatus.PENDING);
 
         createNotificationService.handle(command);
-        log.info("Successfully created notification for order: {}", event.orderId());
+        log.info("Successfully created notification for order: {}", createdEvent.orderId());
       } catch (Exception e) {
         log.error("Failed to create notification for order: {}, Reason: {}",
-            event.orderId(), e.getMessage(), e);
+            createdEvent.orderId(), e.getMessage(), e);
 
         compensationPublisher.publish(
-            event.orderId(),
-            event.customerId(),
+            createdEvent.orderId(),
+            createdEvent.customerId(),
+            createdEvent.items(),
             "Notification service failed: " + e.getMessage());
       }
     } // we are ignoring OrderCompensationEvent right now

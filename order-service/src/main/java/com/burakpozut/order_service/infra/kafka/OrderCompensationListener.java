@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderCompensationListener {
   private final CancelOrderService cancelOrderService;
 
-  @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "order-service")
+  @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
   public void onMessage(@Payload OrderEvent event) {
     if (event instanceof OrderCompensationEvent compensationEvent) {
 

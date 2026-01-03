@@ -9,6 +9,4 @@ public interface OrderEvent {
     Instant occurredAt();
 
     UUID orderId();
-
-    UUID customerId();
 }

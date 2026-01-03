@@ -1,4 +1,4 @@
-package com.burakpozut.notification_service.infra.kafka;
+package com.burakpozut.product_service.infra.kafka;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,24 +21,22 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderCompensationPublisher {
-
   private final KafkaTemplate<String, OrderCompensationEvent> kafkaTemplate;
 
   @Value("${app.kafka.topics.order-events}")
   private String topic;
 
   @Value("${spring.kafka.consumer.group-id}")
-  private String serviceId;
+  private String groupId;
 
   public void publish(UUID orderId, UUID customerId, List<OrderItemEvent> items, String reason) {
-    var event = OrderCompensationEvent.of(
-        UuidCreator.getTimeOrdered(),
+    var event = OrderCompensationEvent.of(UuidCreator.getTimeOrdered(),
         Instant.now(),
         orderId,
         customerId,
         items,
         reason,
-        "notification-service");
+        groupId);
 
     CompletableFuture<SendResult<String, OrderCompensationEvent>> future = kafkaTemplate.send(topic, orderId.toString(),
         event);
@@ -48,8 +46,9 @@ public class OrderCompensationPublisher {
         log.info("Successfully published OrderCompensationEvent for order: {} to partition: {}",
             orderId, result.getRecordMetadata().partition());
       } else {
-        log.error("Failed to publish OrderCompensationEvent for order: {}. Error: {}",
+        log.error("Failed to publis OrderCompensationEvent for order: {}. Error: {}",
             orderId, exception.getMessage(), exception);
+
         handlePublishFailure(orderId, exception);
       }
     });
@@ -58,5 +57,6 @@ public class OrderCompensationPublisher {
   private void handlePublishFailure(UUID orderId, Throwable failure) {
     log.warn("Event publish failed, Order might still be pending mode. OrderId: {}",
         orderId);
+    // Add later
   }
 }
