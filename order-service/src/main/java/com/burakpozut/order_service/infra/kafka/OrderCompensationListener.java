@@ -15,24 +15,25 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderCompensationListener {
-  private final CancelOrderService cancelOrderService;
+    private final CancelOrderService cancelOrderService;
 
-  @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
-  public void onMessage(@Payload OrderEvent event) {
-    if (event instanceof OrderCompensationEvent compensationEvent) {
+    @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
+    public void onMessage(@Payload OrderEvent event) {
+        if (event instanceof OrderCompensationEvent compensationEvent) {
 
-      try {
-        log.warn("Received componsation event for order: {}, Reason: {}",
-            event.orderId(), compensationEvent.reason());
-        cancelOrderService.handle(event.orderId());
-      } catch (Exception e) {
-        log.error("Failed to process compensation event for order: {}, Error: {}",
-            event.orderId(), e.getMessage(), e);
-        // TODO: we should warn the client that their order is undo
-        // But this is not a critical function and this is just a dummy phase we dont
-        // undo a order just for the notification failed
+            try {
+                log.warn("Received componsation event for order: {}, Reason: {}",
+                        event.orderId(), compensationEvent.reason());
+                cancelOrderService.handle(event.orderId());
+            } catch (Exception e) {
+                log.error("Failed to process compensation event for order: {}, Error: {}",
+                        event.orderId(), e.getMessage(), e);
+                // TODO: we should warn the client that their order is undo
+                // But this is not a critical function and this is just a dummy phase we dont
+                // undo a order just for the notification failed
 
-      }
+                // TODO: create compensation services
+            }
+        }
     }
-  }
 }
