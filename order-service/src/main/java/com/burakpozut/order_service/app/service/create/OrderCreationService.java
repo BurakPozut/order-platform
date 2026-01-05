@@ -16,7 +16,6 @@ import com.burakpozut.common.exception.ExternalServiceNotFoundException;
 import com.burakpozut.order_service.app.command.CreateOrderCommand;
 import com.burakpozut.order_service.app.command.OrderItemData;
 import com.burakpozut.order_service.app.exception.customer.CustomerNotFoundException;
-import com.burakpozut.order_service.app.exception.product.ProductNotFoundException;
 import com.burakpozut.order_service.domain.Order;
 import com.burakpozut.order_service.domain.OrderItem;
 import com.burakpozut.order_service.domain.OrderRepository;

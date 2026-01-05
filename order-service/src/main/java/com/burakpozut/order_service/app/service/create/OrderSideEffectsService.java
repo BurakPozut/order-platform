@@ -19,13 +19,13 @@ public class OrderSideEffectsService {
   // private final ProductGateway productGateway;
 
   private final OrderCreatedPublisher orderConfirmedPublisher;
-  // TODO: We already have PENDING state make this async
 
   public void trigger(Order order) {
     // for (var item : order.items()) {
     // productGateway.reserveInventory(item.productId(), item.quantity());
     // }
 
+    // TODO: make this event based too
     paymentGateway.createPayment(order.id(),
         order.totalAmount(), order.currency(),
         "PayPal", "pypl-123");

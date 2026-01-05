@@ -25,10 +25,15 @@ public class OrderEventListener {
     log.info("Received OrderEvent: type={}, orderId={}",
         event.getClass().getSimpleName(), event.orderId());
 
-    if (event instanceof OrderCreatedEvent createdEvent) {
-      orderCreatedEventHandler.handle(createdEvent);
-    } else if (event instanceof OrderCompensationEvent compensationEvent) {
-      orderCompensationEventHandler.handle(compensationEvent);
+    switch (event) {
+      case OrderCreatedEvent createdEvent -> orderCreatedEventHandler.handle(createdEvent);
+      case OrderCompensationEvent compensationEvent -> orderCompensationEventHandler.handle(compensationEvent);
+
     }
+    // if (event instanceof OrderCreatedEvent createdEvent) {
+    // orderCreatedEventHandler.handle(createdEvent);
+    // } else if (event instanceof OrderCompensationEvent compensationEvent) {
+    // orderCompensationEventHandler.handle(compensationEvent);
+    // }
   }
 }
