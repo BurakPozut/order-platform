@@ -65,6 +65,8 @@ public class CreatePaymentService {
     return payment.updatedAt().isAfter(deadline);
   }
 
+  // TODO: we should now validate fields that come from event using sycnhrounus
+  // calling
   private void validateOrderExists(UUID orderId) {
     try {
       orderGateway.validateOrderId(orderId);

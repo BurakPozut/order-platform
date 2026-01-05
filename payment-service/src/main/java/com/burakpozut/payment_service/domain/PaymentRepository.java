@@ -14,4 +14,6 @@ public interface PaymentRepository {
   void deleteById(UUID id);
 
   Optional<Payment> findByIdempotencyKey(String idempotencyKey);
+
+  Optional<Payment> findByOrderId(UUID orderId);
 }

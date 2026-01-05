@@ -43,6 +43,8 @@ public class OrderCreatedPublisher {
         Instant.now(),
         order.id(),
         order.customerId(),
+        order.totalAmount(),
+        order.currency(),
         items);
 
     CompletableFuture<SendResult<String, OrderCreatedEvent>> future = kafkaTemplate.send(topic,

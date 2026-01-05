@@ -43,4 +43,9 @@ public class PaymentRespositoryAdapter implements PaymentRepository {
     return jpa.findByIdempotencyKey(idempotencyKey).map(PaymentMapper::toDomain);
   }
 
+  @Override
+  public Optional<Payment> findByOrderId(UUID orderId) {
+    return jpa.findByOrderId(orderId).map(PaymentMapper::toDomain);
+  }
+
 }

@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface SpringDataPaymentRespository extends JpaRepository<PaymentJpaEntity, UUID> {
   Optional<PaymentJpaEntity> findByIdempotencyKey(String idempotencyKey);
 
+  Optional<PaymentJpaEntity> findByOrderId(UUID orderId);
 }
