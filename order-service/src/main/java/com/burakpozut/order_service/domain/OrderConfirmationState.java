@@ -3,6 +3,8 @@ package com.burakpozut.order_service.domain;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.burakpozut.common.domain.ServiceName;
+
 public record OrderConfirmationState(
         UUID id,
         UUID orderId,
@@ -23,15 +25,15 @@ public record OrderConfirmationState(
                 LocalDateTime.now());
     }
 
-    public OrderConfirmationState markServiceCompleted(String serviceName) {
+    public OrderConfirmationState markServiceCompleted(ServiceName serviceName) {
         return switch (serviceName) {
-            case "PAYMENT" -> new OrderConfirmationState(
+            case PAYMENT -> new OrderConfirmationState(
                     id, orderId, true, productCompleted, notificationCompleted,
                     confirmedAt, createdAt, LocalDateTime.now());
-            case "PRODUCT" -> new OrderConfirmationState(
+            case PRODUCT -> new OrderConfirmationState(
                     id, orderId, paymentCompleted, true, notificationCompleted,
                     confirmedAt, createdAt, LocalDateTime.now());
-            case "NOTIFICATION" -> new OrderConfirmationState(
+            case NOTIFICATION -> new OrderConfirmationState(
                     id, orderId, paymentCompleted, productCompleted, true,
                     confirmedAt, createdAt, LocalDateTime.now());
             default -> throw new IllegalArgumentException("Unknown service: " + serviceName);
