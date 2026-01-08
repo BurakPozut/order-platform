@@ -17,18 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderEventListener {
-  private final OrderCreatedEventHandler orderCreatedEventHandler;
-  private final OrderCompensationEventHandler orderCompensationEventHandler;
+    private final OrderCreatedEventHandler orderCreatedEventHandler;
+    private final OrderCompensationEventHandler orderCompensationEventHandler;
 
-  @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
-  public void onMessage(@Payload OrderEvent event) {
-    log.info("Received OrderEvent: type={}, orderId={}",
-        event.getClass().getSimpleName(), event.orderId());
+    @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
+    public void onMessage(@Payload OrderEvent event) {
+        log.info("Received OrderEvent: type={}, orderId={}",
+                event.getClass().getSimpleName(), event.orderId());
 
-    switch (event) {
-      case OrderCreatedEvent createdEvent -> orderCreatedEventHandler.handle(createdEvent);
-      case OrderCompensationEvent compensationEvent -> orderCompensationEventHandler.handle(compensationEvent);
+        switch (event) {
+            case OrderCreatedEvent createdEvent -> orderCreatedEventHandler.handle(createdEvent);
+            case OrderCompensationEvent compensationEvent -> orderCompensationEventHandler.handle(compensationEvent);
+        }
     }
-  }
 
 }

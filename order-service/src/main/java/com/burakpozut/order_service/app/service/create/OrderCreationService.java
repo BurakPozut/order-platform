@@ -17,7 +17,6 @@ import com.burakpozut.order_service.app.command.CreateOrderCommand;
 import com.burakpozut.order_service.app.command.OrderItemData;
 import com.burakpozut.order_service.app.exception.customer.CustomerNotFoundException;
 import com.burakpozut.order_service.domain.Order;
-import com.burakpozut.order_service.domain.OrderConfirmationStateRepository;
 import com.burakpozut.order_service.domain.OrderItem;
 import com.burakpozut.order_service.domain.OrderRepository;
 import com.burakpozut.order_service.domain.ProductInfo;

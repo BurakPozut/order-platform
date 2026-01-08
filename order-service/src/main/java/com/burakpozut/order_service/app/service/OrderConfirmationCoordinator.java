@@ -25,9 +25,8 @@ public class OrderConfirmationCoordinator {
     private final OrderRepository orderRepository;
     private final UpdateOrderService updateOrderService;
 
-    @KafkaListener(topics = "${app.kafka.topics.service-completions}", groupId = "${spring.kafka.consumer.group-id}") // TODO:
-                                                                                                                      // change
-                                                                                                                      // application.properties
+    @KafkaListener(topics = "${app.kafka.topics.service-completions}", groupId = "${spring.kafka.consumer.group-id}")
+
     @Transactional
     public void handleServiceCompletion(ServiceCompletionEvent event) {
         UUID orderId = event.orderId();
@@ -77,6 +76,8 @@ public class OrderConfirmationCoordinator {
             log.warn("Order {} is not in PENDING status. Current status {}",
                     orderId, order.status());
         }
+        // TODO: We might need to change something in the compensation event to make the
+        // order confirmation state to be cancelled
     }
 
 }
