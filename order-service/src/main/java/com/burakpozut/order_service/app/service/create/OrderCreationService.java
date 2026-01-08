@@ -18,10 +18,10 @@ import com.burakpozut.order_service.app.command.OrderItemData;
 import com.burakpozut.order_service.app.exception.customer.CustomerNotFoundException;
 import com.burakpozut.order_service.domain.Order;
 import com.burakpozut.order_service.domain.OrderItem;
-import com.burakpozut.order_service.domain.OrderRepository;
 import com.burakpozut.order_service.domain.ProductInfo;
 import com.burakpozut.order_service.domain.gateway.CustomerGateway;
 import com.burakpozut.order_service.domain.gateway.ProductGateway;
+import com.burakpozut.order_service.domain.repository.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

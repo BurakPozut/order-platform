@@ -7,9 +7,9 @@ import com.burakpozut.common.event.order.ServiceCompletionEvent;
 import com.burakpozut.order_service.app.command.UpdateOrderCommand;
 import com.burakpozut.order_service.domain.Order;
 import com.burakpozut.order_service.domain.OrderConfirmationState;
-import com.burakpozut.order_service.domain.OrderConfirmationStateRepository;
-import com.burakpozut.order_service.domain.OrderRepository;
 import com.burakpozut.order_service.domain.OrderStatus;
+import com.burakpozut.order_service.domain.repository.OrderConfirmationStateRepository;
+import com.burakpozut.order_service.domain.repository.OrderRepository;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;

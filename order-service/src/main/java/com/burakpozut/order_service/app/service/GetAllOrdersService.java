@@ -7,20 +7,20 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import com.burakpozut.order_service.domain.Order;
-import com.burakpozut.order_service.domain.OrderRepository;
+import com.burakpozut.order_service.domain.repository.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class GetAllOrdersService {
-  private final OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
-  public List<Order> handle() {
-    return orderRepository.findAll();
-  }
+    public List<Order> handle() {
+        return orderRepository.findAll();
+    }
 
-  public Slice<Order> handle(Pageable pageable) {
-    return orderRepository.findAll(pageable);
-  }
+    public Slice<Order> handle(Pageable pageable) {
+        return orderRepository.findAll(pageable);
+    }
 }

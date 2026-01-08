@@ -6,20 +6,20 @@ import org.springframework.stereotype.Service;
 
 import com.burakpozut.order_service.app.exception.OrderNotFoundException;
 import com.burakpozut.order_service.domain.Order;
-import com.burakpozut.order_service.domain.OrderRepository;
+import com.burakpozut.order_service.domain.repository.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class GetOrderByIdService {
-  private final OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
-  public Order handle(UUID id) {
-    var order = orderRepository.findById(id)
-        .orElseThrow(() -> new OrderNotFoundException(id));
+    public Order handle(UUID id) {
+        var order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
 
-    return order;
-  }
+        return order;
+    }
 
 }

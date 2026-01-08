@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.burakpozut.order_service.domain.Order;
 import com.burakpozut.order_service.domain.OrderConfirmationState;
-import com.burakpozut.order_service.domain.OrderConfirmationStateRepository;
+import com.burakpozut.order_service.domain.repository.OrderConfirmationStateRepository;
 import com.burakpozut.order_service.infra.kafka.OrderCreatedPublisher;
 
 import lombok.RequiredArgsConstructor;
