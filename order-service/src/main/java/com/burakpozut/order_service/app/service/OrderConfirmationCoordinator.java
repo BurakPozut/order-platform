@@ -2,6 +2,7 @@ package com.burakpozut.order_service.app.service;
 
 import java.util.UUID;
 
+import com.burakpozut.common.domain.ServiceName;
 import com.burakpozut.common.event.order.ServiceCompletionEvent;
 import com.burakpozut.order_service.app.command.UpdateOrderCommand;
 import com.burakpozut.order_service.domain.Order;
@@ -30,7 +31,7 @@ public class OrderConfirmationCoordinator {
     @Transactional
     public void handleServiceCompletion(ServiceCompletionEvent event) {
         UUID orderId = event.orderId();
-        String serviceName = event.serviceName();
+        ServiceName serviceName = event.serviceName();
 
         log.info("Received completion event for order: {} from service: {}",
                 orderId, serviceName);
