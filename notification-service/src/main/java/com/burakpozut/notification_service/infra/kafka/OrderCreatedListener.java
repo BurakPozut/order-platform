@@ -1,5 +1,6 @@
 package com.burakpozut.notification_service.infra.kafka;
 
+import com.burakpozut.common.domain.ServiceName;
 import com.burakpozut.common.event.order.OrderCreatedEvent;
 import com.burakpozut.common.event.order.OrderEvent;
 import com.burakpozut.notification_service.app.command.CreateNotificationCommand;
@@ -20,33 +21,36 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OrderCreatedListener {
 
-  private final CreateNotificationService createNotificationService;
-  private final OrderCompensationPublisher compensationPublisher;
+    private final CreateNotificationService createNotificationService;
+    private final OrderCompensationPublisher compensationPublisher;
+    private final ServiceCompletionPublisher serviceCompletionPublisher;
 
-  @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
-  public void onMessage(@Payload OrderEvent event) {
-    if (event instanceof OrderCreatedEvent createdEvent) {
+    @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
+    public void onMessage(@Payload OrderEvent event) {
+        if (event instanceof OrderCreatedEvent createdEvent) {
 
-      try {
-        var command = CreateNotificationCommand.of(
-            createdEvent.customerId(), createdEvent.orderId(),
-            NotificationType.ORDER_CONFIRMED,
-            NotificationChannel.EMAIL,
-            NotificationStatus.PENDING);
+            try {
+                var command = CreateNotificationCommand.of(
+                        createdEvent.customerId(), createdEvent.orderId(),
+                        NotificationType.ORDER_CONFIRMED,
+                        NotificationChannel.EMAIL,
+                        NotificationStatus.PENDING);
 
-        createNotificationService.handle(command);
-        log.info("Successfully created notification for order: {}", createdEvent.orderId());
-      } catch (Exception e) {
-        log.error("Failed to create notification for order: {}, Reason: {}",
-            createdEvent.orderId(), e.getMessage(), e);
+                createNotificationService.handle(command);
+                log.info("Successfully created notification for order: {}", createdEvent.orderId());
 
-        compensationPublisher.publish(
-            createdEvent.orderId(),
-            createdEvent.customerId(),
-            createdEvent.items(),
-            "Notification service failed: " + e.getMessage());
-      }
-    } // we are ignoring OrderCompensationEvent right now
-  }
+                serviceCompletionPublisher.publish(createdEvent.orderId(), ServiceName.NOTIFICATION);
+            } catch (Exception e) {
+                log.error("Failed to create notification for order: {}, Reason: {}",
+                        createdEvent.orderId(), e.getMessage(), e);
+
+                compensationPublisher.publish(
+                        createdEvent.orderId(),
+                        createdEvent.customerId(),
+                        createdEvent.items(),
+                        "Notification service failed: " + e.getMessage());
+            }
+        } // we are ignoring OrderCompensationEvent right now
+    }
 
 }

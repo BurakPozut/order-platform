@@ -15,42 +15,42 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderCompensationEventHandler {
-  private final ReleaseInventoryService releaseInventoryService;
+    private final ReleaseInventoryService releaseInventoryService;
 
-  @Value("${spring.kafka.consumer.group-id}")
-  private String groupId;
+    @Value("${spring.kafka.consumer.group-id}")
+    private String groupId;
 
-  public void handle(OrderCompensationEvent compensationEvent) {
-    if (skipIfInitiatedByThisService(compensationEvent)) {
-      return;
+    public void handle(OrderCompensationEvent compensationEvent) {
+        if (skipIfInitiatedByThisService(compensationEvent)) {
+            return;
+        }
+
+        try {
+            log.warn("Received compensation event for order: {}, Reason: {}, Initiated by service: {}",
+                    compensationEvent.orderId(), compensationEvent.reason(), compensationEvent.groupId());
+
+            if (compensationEvent.items() == null || compensationEvent.items().isEmpty()) {
+                log.warn("Skipping compensation event for order: {} - items list is null or empty",
+                        compensationEvent.orderId());
+                return;
+            }
+
+            for (OrderItemEvent item : compensationEvent.items()) {
+                var command = ReleaseInventoryCommand.of(item.productId(), item.quantity());
+                releaseInventoryService.handle(command);
+            }
+        } catch (Exception e) {
+            log.error("Failed to process compensation event for order: {}, Error: {}",
+                    compensationEvent.orderId(), e.getMessage(), e);
+        }
     }
 
-    try {
-      log.warn("Received compensation event for order: {}, Reason: {}",
-          compensationEvent.orderId(), compensationEvent.reason());
-
-      if (compensationEvent.items() == null || compensationEvent.items().isEmpty()) {
-        log.warn("Skipping compensation event for order: {} - items list is null or empty",
-            compensationEvent.orderId());
-        return;
-      }
-
-      for (OrderItemEvent item : compensationEvent.items()) {
-        var command = ReleaseInventoryCommand.of(item.productId(), item.quantity());
-        releaseInventoryService.handle(command);
-      }
-    } catch (Exception e) {
-      log.error("Failed to process compensation event for order: {}, Error: {}",
-          compensationEvent.orderId(), e.getMessage(), e);
+    private boolean skipIfInitiatedByThisService(OrderCompensationEvent event) {
+        if (groupId.equals(event.groupId())) {
+            log.debug("Skipping compensation event initiated by this service for order: {}",
+                    event.orderId());
+            return true;
+        }
+        return false;
     }
-  }
-
-  private boolean skipIfInitiatedByThisService(OrderCompensationEvent event) {
-    if (groupId.equals(event.groupId())) {
-      log.debug("Skipping compensation event initiated by this service for order: {}",
-          event.orderId());
-      return true;
-    }
-    return false;
-  }
 }

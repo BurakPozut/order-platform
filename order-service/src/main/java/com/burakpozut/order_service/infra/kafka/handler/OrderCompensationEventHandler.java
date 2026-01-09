@@ -17,8 +17,8 @@ public class OrderCompensationEventHandler {
 
     public void handle(OrderCompensationEvent compensationEvent) {
         try {
-            log.warn("Received compensation event for order: {}, Reason: {}",
-                    compensationEvent.orderId(), compensationEvent.reason());
+            log.warn("Received compensation event for order: {}, Reason: {}, Initiated by service: {}",
+                    compensationEvent.orderId(), compensationEvent.reason(), compensationEvent.groupId());
             cancelOrderService.handle(compensationEvent.orderId());
         } catch (Exception e) {
             log.error("Failed to process compensation event for order: {}, Error: {}",

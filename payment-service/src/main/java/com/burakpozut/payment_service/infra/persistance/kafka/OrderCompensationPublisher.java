@@ -21,35 +21,36 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderCompensationPublisher {
-  private final KafkaTemplate<String, OrderCompensationEvent> kafkaTemplate;
+    private final KafkaTemplate<String, OrderCompensationEvent> kafkaTemplate;
 
-  @Value("${app.kafka.topics.order-events}")
-  private String topic;
+    @Value("${app.kafka.topics.order-events}")
+    private String topic;
 
-  @Value("${spring.kafka.consumer.group-id}")
-  private String groupId;
+    @Value("${spring.kafka.consumer.group-id}")
+    private String groupId;
 
-  public void publish(UUID orderId, UUID customerId, List<OrderItemEvent> items, String reason) {
-    var event = OrderCompensationEvent.of(
-        UuidCreator.getTimeOrdered(),
-        Instant.now(), orderId, customerId, items, reason, reason);
+    public void publish(UUID orderId, UUID customerId, List<OrderItemEvent> items, String reason) {
+        var event = OrderCompensationEvent.of(
+                UuidCreator.getTimeOrdered(),
+                Instant.now(), orderId, customerId, items, reason, groupId);
 
-    CompletableFuture<SendResult<String, OrderCompensationEvent>> future = kafkaTemplate.send(topic, orderId.toString(),
-        event);
-    future.whenComplete((result, exception) -> {
-      if (exception == null) {
-        log.info("Successfully published OrderCompensationEvent for order: {} to partition: {}",
-            orderId, result.getRecordMetadata().partition());
-      } else {
-        log.error("Failed to publish OrderCompensationEvent for order: {}. Error: {}",
-            orderId, exception.getMessage(), exception);
-        handlePublishFailure(orderId, exception);
-      }
-    });
-  }
+        CompletableFuture<SendResult<String, OrderCompensationEvent>> future = kafkaTemplate.send(topic,
+                orderId.toString(),
+                event);
+        future.whenComplete((result, exception) -> {
+            if (exception == null) {
+                log.info("Successfully published OrderCompensationEvent for order: {} to partition: {}",
+                        orderId, result.getRecordMetadata().partition());
+            } else {
+                log.error("Failed to publish OrderCompensationEvent for order: {}. Error: {}",
+                        orderId, exception.getMessage(), exception);
+                handlePublishFailure(orderId, exception);
+            }
+        });
+    }
 
-  private void handlePublishFailure(UUID orderId, Throwable failure) {
-    log.warn("Event publish failed, Order might still be pending mode. OrderId: {}",
-        orderId);
-  }
+    private void handlePublishFailure(UUID orderId, Throwable failure) {
+        log.warn("Event publish failed, Order might still be pending mode. OrderId: {}",
+                orderId);
+    }
 }
