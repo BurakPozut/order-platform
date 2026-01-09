@@ -1,17 +1,17 @@
-package com.burakpozut.order_service.app.service;
+package com.burakpozut.order_service.infra.kafka.handler;
 
 import java.util.UUID;
 
 import com.burakpozut.common.domain.ServiceName;
 import com.burakpozut.common.event.order.ServiceCompletionEvent;
 import com.burakpozut.order_service.app.command.UpdateOrderCommand;
+import com.burakpozut.order_service.app.service.UpdateOrderService;
 import com.burakpozut.order_service.domain.Order;
 import com.burakpozut.order_service.domain.OrderConfirmationState;
 import com.burakpozut.order_service.domain.OrderStatus;
 import com.burakpozut.order_service.domain.repository.OrderConfirmationStateRepository;
 import com.burakpozut.order_service.domain.repository.OrderRepository;
 
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
@@ -21,15 +21,13 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class OrderConfirmationCoordinator {
+public class ServiceCompletionEventHandler {
     private final OrderConfirmationStateRepository confirmationStateRepository;
     private final OrderRepository orderRepository;
     private final UpdateOrderService updateOrderService;
 
-    @KafkaListener(topics = "${app.kafka.topics.service-completions}", groupId = "${spring.kafka.consumer.group-id}")
-
     @Transactional
-    public void handleServiceCompletion(ServiceCompletionEvent event) {
+    public void handle(ServiceCompletionEvent event) {
         UUID orderId = event.orderId();
         ServiceName serviceName = event.serviceName();
 
@@ -39,15 +37,15 @@ public class OrderConfirmationCoordinator {
         OrderConfirmationState state = confirmationStateRepository
                 .findByOrderId(orderId)
                 .orElseGet(() -> {
-                    log.info("Creating new confirmation state for order: {}", orderId);
-                    return confirmationStateRepository.save(
-                            OrderConfirmationState.createFor(orderId), true);
+                    log.info("Creating new confirmation state for order: {}",
+                            orderId);
+                    return confirmationStateRepository.save(OrderConfirmationState.createFor(orderId), true);
                 });
 
         OrderConfirmationState updateState = state.markServiceCompleted(serviceName);
         confirmationStateRepository.save(updateState, false);
 
-        log.info("Service {} completed for order: {}, State: payment = {}, product={}, notification={}",
+        log.info("Service {} completed for order: {}, State: payemnt = {}, product = {}, notification = {}",
                 serviceName, orderId,
                 updateState.paymentCompleted(),
                 updateState.productCompleted(),

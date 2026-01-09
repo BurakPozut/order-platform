@@ -14,6 +14,7 @@ public record OrderConfirmationState(
         LocalDateTime confirmedAt,
         LocalDateTime createdAt,
         LocalDateTime updateAt) {
+    // TODO: add private constructors to the records to prevent external creations
 
     public boolean isAllCompleted() {
         return paymentCompleted && productCompleted && notificationCompleted;
@@ -45,4 +46,33 @@ public record OrderConfirmationState(
                 id, orderId, paymentCompleted, productCompleted, notificationCompleted,
                 LocalDateTime.now(), createdAt, LocalDateTime.now());
     }
+
+    public static OrderConfirmationState rehydrate(
+            UUID id,
+            UUID orderId,
+            boolean paymentCompleted,
+            boolean productCompleted,
+            boolean notificationCompleted,
+            LocalDateTime confirmedAt,
+            LocalDateTime createdAt,
+            LocalDateTime updateAt) {
+        return new OrderConfirmationState(
+                id, orderId, paymentCompleted, productCompleted, notificationCompleted,
+                confirmedAt, createdAt, updateAt);
+    }
+
+    public static OrderConfirmationState of(
+            UUID id,
+            UUID orderId,
+            boolean paymentCompleted,
+            boolean productCompleted,
+            boolean notificationCompleted,
+            LocalDateTime confirmedAt,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
+        return new OrderConfirmationState(
+                id, orderId, paymentCompleted, productCompleted, notificationCompleted,
+                confirmedAt, createdAt, updatedAt);
+    }
+
 }

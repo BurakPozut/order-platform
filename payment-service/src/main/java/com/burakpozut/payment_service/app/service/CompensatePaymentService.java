@@ -16,43 +16,43 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CompensatePaymentService {
 
-  private final PaymentRepository paymentRepository;
+    private final PaymentRepository paymentRepository;
 
-  @Transactional
-  public void handle(UUID orderId, String reason) {
-    var paymentOpt = paymentRepository.findByOrderId(orderId);
+    @Transactional
+    public void handle(UUID orderId, String reason) {
+        var paymentOpt = paymentRepository.findByOrderId(orderId);
 
-    if (paymentOpt.isEmpty()) {
-      log.warn("Payment not found for order: {}. Compensation skipped. Reason:{}",
-          orderId, reason);
-      return;
+        if (paymentOpt.isEmpty()) {
+            log.warn("Payment not found for order: {}. Compensation skipped. Reason:{}",
+                    orderId, reason);
+            return;
+        }
+
+        var payment = paymentOpt.get();
+        PaymentStatus targetStatus = determineCompensationStatus(payment.status());
+
+        if (targetStatus == null) {
+            log.info("Payment {} for order {} is already in terminal state: {}. No compensation needed.",
+                    payment.id(), orderId, payment.status());
+            return;
+        }
+
+        log.info("Compensating payment {} for order {}. Status transition: {} -> {}. Reason: {}",
+                payment.id(), orderId, payment.status(), targetStatus, reason);
+
+        var compensated = payment.update(targetStatus, null, null, null);
+        paymentRepository.save(compensated, false);
+
+        log.info("Successfully compensated payment {} for order {}. New status: {}",
+                payment.id(), orderId, targetStatus);
+
     }
 
-    var payment = paymentOpt.get();
-    PaymentStatus targetStatus = determineCompensationStatus(payment.status());
-
-    if (targetStatus == null) {
-      log.info("Payment {} for order {} is already in terminal state: {}. No compensation needed.",
-          payment.id(), orderId, payment.status());
-      return;
+    private PaymentStatus determineCompensationStatus(PaymentStatus currenStatus) {
+        return switch (currenStatus) {
+            case PENDING -> PaymentStatus.CANCELLED;
+            case COMPLETED -> PaymentStatus.REFUNDED;
+            case FAILED, CANCELLED, REFUNDED -> null;
+        };
     }
-
-    log.info("Compensating payment {} for order {}. Status transition: {} -> {}. Reason: {}",
-        payment.id(), orderId, payment.status(), targetStatus, reason);
-
-    var compensated = payment.update(targetStatus, null, null, null);
-    paymentRepository.save(compensated, false);
-
-    log.info("Successgully compensated payment {} for order {}. New status: {}",
-        payment.id(), orderId, targetStatus);
-
-  }
-
-  private PaymentStatus determineCompensationStatus(PaymentStatus currenStatus) {
-    return switch (currenStatus) {
-      case PENDING -> PaymentStatus.CANCELLED;
-      case COMPLETED -> PaymentStatus.REFUNDED;
-      case FAILED, CANCELLED, REFUNDED -> null;
-    };
-  }
 }
