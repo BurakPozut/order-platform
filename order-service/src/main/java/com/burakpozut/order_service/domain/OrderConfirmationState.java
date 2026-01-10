@@ -14,7 +14,6 @@ public record OrderConfirmationState(
         LocalDateTime confirmedAt,
         LocalDateTime createdAt,
         LocalDateTime updateAt) {
-    // TODO: add private constructors to the records to prevent external creations
 
     public boolean isAllCompleted() {
         return paymentCompleted && productCompleted && notificationCompleted;

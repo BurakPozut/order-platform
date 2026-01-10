@@ -70,13 +70,10 @@ public class ServiceCompletionEventHandler {
             confirmationStateRepository.save(confirmedState, false);
 
             log.info("Order {} confirmed successfully", orderId);
-            // TODO: publish orderConfirmed event to update payment
         } else {
             log.warn("Order {} is not in PENDING status. Current status {}",
                     orderId, order.status());
         }
-        // TODO: We might need to change something in the compensation event to make the
-        // order confirmation state to be cancelled
     }
 
 }
