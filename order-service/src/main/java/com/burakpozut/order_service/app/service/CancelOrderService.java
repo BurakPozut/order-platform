@@ -1,13 +1,16 @@
 package com.burakpozut.order_service.app.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.burakpozut.common.event.order.OrderItemEvent;
 import com.burakpozut.order_service.app.exception.OrderNotFoundException;
 import com.burakpozut.order_service.domain.Order;
 import com.burakpozut.order_service.domain.OrderStatus;
 import com.burakpozut.order_service.domain.repository.OrderRepository;
+import com.burakpozut.order_service.infra.kafka.OrderCancelledPublisher;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class CancelOrderService {
+
     private final OrderRepository orderRepository;
+    private final OrderCancelledPublisher orderCancelledPublisher;
 
     @Transactional
     public void handle(UUID orderId) {
@@ -36,5 +41,8 @@ public class CancelOrderService {
             log.info("Order {} is already cancelled. Skipping.", orderId);
             return;
         }
+        List<OrderItemEvent> items = order.items().stream()
+                .map(item -> OrderItemEvent.of(item.productId(), item.quantity())).toList();
+        orderCancelledPublisher.publish(orderId, orderId, items, null);
     }
 }
