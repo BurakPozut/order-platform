@@ -43,6 +43,6 @@ public class CancelOrderService {
         }
         List<OrderItemEvent> items = order.items().stream()
                 .map(item -> OrderItemEvent.of(item.productId(), item.quantity())).toList();
-        orderCancelledPublisher.publish(orderId, orderId, items, null);
+        orderCancelledPublisher.publish(orderId, order.customerId(), items, null);
     }
 }
