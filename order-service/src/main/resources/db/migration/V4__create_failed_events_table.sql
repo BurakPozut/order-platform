@@ -3,6 +3,7 @@ CREATE TABLE failed_events(
   entity_id     UUID,  -- NULLable, can be order_id, customer_id, product_id, etc.
   entity_type   VARCHAR(50),  -- 'ORDER', 'CUSTOMER', 'PRODUCT', etc.
   event_type    VARCHAR(100) NOT NULL,
+  event_class_name VARCHAR(255) NOT NULL,
   event_payload TEXT NOT NULL,
   error_message VARCHAR(1000),
   status        VARCHAR(20) NOT NULL DEFAULT 'PENDING',
