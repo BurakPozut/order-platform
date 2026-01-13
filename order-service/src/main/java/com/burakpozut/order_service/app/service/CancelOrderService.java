@@ -32,8 +32,9 @@ public class CancelOrderService {
                 order.idempotencyKey(), null);
 
         orderRepository.save(cancelledOrder, false);
+        if (order.status() == OrderStatus.CANCELLED) {
+            log.info("Order {} is already cancelled. Skipping.", orderId);
+            return;
+        }
     }
-    // TODO: add OrderCancelledEvent for manual cancelletions for the payment and
-    // product services
-
 }

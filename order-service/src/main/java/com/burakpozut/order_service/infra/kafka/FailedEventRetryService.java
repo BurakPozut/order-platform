@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import com.burakpozut.common.event.order.OrderCompensationEvent;
@@ -172,22 +171,21 @@ public class FailedEventRetryService {
         failedEventRepository.save(failedEvent);
 
         // We need to check if it is a order event before we cancel it
-        if ("OrderCreatedEvent".equals(failedEvent.getEventType()) &&
-                "Order".equals(failedEvent.getEntityType())) {
-
-            UUID orderId = failedEvent.getEntityId();
-            if (orderId == null)
-                log.warn("Cannot cancel order: entityId is null for failed event: {}",
-                        failedEvent.getId());
-
+        if ("OrderCreatedEvent".equals(failedEvent.getEventType())) {
             try {
-                cancelOrderService.handle(failedEvent.getEntityId());
-                log.info("Cancelled order: {} due to failed OrderCreatedEvent publish", orderId);
-            } catch (Exception e) {
-                log.error("Failed to cancel order: {} for failed event: {}. Error: {}",
-                        orderId, failedEvent.getId(), e.getMessage(), e);
-            }
+                OrderCreatedEvent event = objectMapper.readValue(
+                        failedEvent.getEventPayload(),
+                        OrderCreatedEvent.class);
 
+                // Simple call - will publish OrderCancelledEvent automatically
+                cancelOrderService.handle(event.orderId());
+
+                log.info("Cancelled order: {} due to failed OrderCreatedEvent publish",
+                        event.orderId());
+            } catch (Exception e) {
+                log.error("Failed to cancel order for failed event: {}. Error: {}",
+                        failedEvent.getId(), e.getMessage(), e);
+            }
         }
         log.warn("Marked failed event: {} as permanently failed after {} retries",
                 failedEvent.getId(), failedEvent.getRetryCount());

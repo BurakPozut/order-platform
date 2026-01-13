@@ -1,5 +1,6 @@
 package com.burakpozut.order_service.infra.kafka;
 
+import com.burakpozut.common.event.order.OrderCancelledEvent;
 import com.burakpozut.common.event.order.OrderCompensationEvent;
 import com.burakpozut.common.event.order.OrderCreatedEvent;
 import com.burakpozut.common.event.order.OrderEvent;
@@ -24,12 +25,15 @@ public class OrderEventListener {
                 event.getClass().getSimpleName(), event.orderId());
 
         switch (event) {
-            case OrderCompensationEvent compensationevent ->
-                orderCompensationEventHandler.handle(compensationevent);
+            case OrderCompensationEvent compensationEvent ->
+                orderCompensationEventHandler.handle(compensationEvent);
 
-            case OrderCreatedEvent compensationevent ->
+            case OrderCreatedEvent compensationEvent ->
                 // Order service doesn't need to handle order created event;
                 log.debug("Ignoring OrderCreatedEvent - this service creates these events");
+
+            case OrderCancelledEvent cancelledEvent -> {
+            }
 
         }
     }
