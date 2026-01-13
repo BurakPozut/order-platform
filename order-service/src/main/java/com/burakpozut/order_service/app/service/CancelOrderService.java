@@ -33,5 +33,7 @@ public class CancelOrderService {
 
         orderRepository.save(cancelledOrder, false);
     }
+    // TODO: add OrderCancelledEvent for manual cancelletions for the payment and
+    // product services
 
 }
