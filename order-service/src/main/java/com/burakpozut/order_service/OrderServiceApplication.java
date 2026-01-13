@@ -12,5 +12,3 @@ public class OrderServiceApplication {
         SpringApplication.run(OrderServiceApplication.class, args);
     }
 }
-
-// TODO: add failed tables and handling services to the other services

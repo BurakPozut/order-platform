@@ -9,10 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SpringDataFailedEventRepository extends JpaRepository<FailedEventJpaEntity, UUID> {
 
-    List<FailedEventJpaEntity> findByStatusOrderByCreatedAtAsc(FailedEventStatus status); // TODO: what did this called.
-                                                                                          // in jpa we create fucntions
-                                                                                          // based on names like 'by' or
-                                                                                          // 'Asc'
+    List<FailedEventJpaEntity> findByStatusOrderByCreatedAtAsc(FailedEventStatus status);
 
     List<FailedEventJpaEntity> findByEntityTypeAndEntityId(String entityType, UUID entityId);
 

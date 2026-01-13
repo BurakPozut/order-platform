@@ -107,11 +107,5 @@ public class OrderCreatedPublisher {
             log.error("Failed to store failed event for order: {}. Error: {}",
                     event.orderId(), e.getMessage(), e);
         }
-
-        // Optionally: Store failed event for later retry
-        // failedEventRepository.save(new FailedEvent(event, failure));
     }
-
-    // TODO: Do we need resilience here? Maybe notification service is down or fed
-    // up?
 }
