@@ -21,77 +21,63 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class HttpOrderGateway implements OrderGateway {
-  private final WebClient webClient;
-  private final CircuitBreaker circuitBreaker;
-  private final Retry retry;
+    private final WebClient webClient;
+    private final CircuitBreaker circuitBreaker;
+    private final Retry retry;
 
-  public HttpOrderGateway(WebClient.Builder builder,
-      @Value("${order.service.url}") String orderServiceUrl,
-      CircuitBreaker orderCircuitBreaker,
-      Retry orderRetry) {
-    this.webClient = builder.baseUrl(orderServiceUrl).build();
-    this.circuitBreaker = orderCircuitBreaker;
-    this.retry = orderRetry;
-  }
-
-  @Override
-  public void validateOrderId(UUID orderId) {
-    // try {
-    webClient.get().uri("/api/orders/{id}", orderId)
-        .retrieve().toBodilessEntity()
-        .transformDeferred(RetryOperator.of(retry))
-        .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-        .onErrorMap(error -> mapError(error, orderId))
-        .block();
-    // } catch (WebClientResponseException.NotFound e) {
-    // log.error("Order not found with id: {}", orderId);
-    // return false;
-    // } catch (WebClientResponseException e) {
-    // log.error("Order service error for order {}: {} - {}",
-    // orderId, e.getStatusCode(), e.getMessage());
-    // throw new ExternalServiceException("Order service returned error: " +
-    // e.getStatusCode(), e);
-    // } catch (Exception e) {
-    // log.error("Falied to communicate with order servoce for order {}: {}",
-    // orderId, e.getMessage());
-
-    // throw new ExternalServiceException("Order service is unavailable");
-    // }
-  }
-
-  private Throwable mapError(Throwable error, UUID orderId) {
-    if (error instanceof WebClientResponseException.NotFound e) {
-      return mapNotFoundError(e, orderId);
-    } else if (error instanceof WebClientResponseException e) {
-      return e.getStatusCode().is5xxServerError()
-          ? mapServerError(e, orderId)
-          : mapClientError(e, orderId);
-    } else {
-      return mapNetworkError(error, orderId);
+    public HttpOrderGateway(WebClient.Builder builder,
+            @Value("${order.service.url}") String orderServiceUrl,
+            CircuitBreaker orderCircuitBreaker,
+            Retry orderRetry) {
+        this.webClient = builder.baseUrl(orderServiceUrl).build();
+        this.circuitBreaker = orderCircuitBreaker;
+        this.retry = orderRetry;
     }
-  }
 
-  private ExternalServiceNotFoundException mapNotFoundError(WebClientResponseException.NotFound e, UUID orderId) {
-    log.error("Payment endpoint not found for order {}: {} - {}",
-        orderId, e.getStatusCode(), e.getMessage());
-    return new ExternalServiceNotFoundException("Payment service endpoint not found: " + e.getMessage());
-  }
+    @Override
+    public void validateOrderId(UUID orderId) {
+        // try {
+        webClient.get().uri("/api/orders/{id}", orderId).header("X-Source-Service", "payment-service")
+                .retrieve().toBodilessEntity()
+                .transformDeferred(RetryOperator.of(retry))
+                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                .onErrorMap(error -> mapError(error, orderId))
+                .block();
+    }
 
-  private ExternalServiceException mapServerError(WebClientResponseException e, UUID orderId) {
-    log.error("Payment service server error for order {}: {} - {}",
-        orderId, e.getStatusCode(), e.getMessage());
-    return new ExternalServiceException("Payment service returned server error: " + e.getStatusCode(), e);
-  }
+    private Throwable mapError(Throwable error, UUID orderId) {
+        if (error instanceof WebClientResponseException.NotFound e) {
+            return mapNotFoundError(e, orderId);
+        } else if (error instanceof WebClientResponseException e) {
+            return e.getStatusCode().is5xxServerError()
+                    ? mapServerError(e, orderId)
+                    : mapClientError(e, orderId);
+        } else {
+            return mapNetworkError(error, orderId);
+        }
+    }
 
-  private ExternalServiceException mapClientError(WebClientResponseException e, UUID orderId) {
-    log.error("Payment service client error for order {}: {} - {}",
-        orderId, e.getStatusCode(), e.getMessage());
-    return new ExternalServiceException("Payment service returned client error: " + e.getStatusCode(), e);
-  }
+    private ExternalServiceNotFoundException mapNotFoundError(WebClientResponseException.NotFound e, UUID orderId) {
+        log.error("Payment endpoint not found for order {}: {} - {}",
+                orderId, e.getStatusCode(), e.getMessage());
+        return new ExternalServiceNotFoundException("Payment service endpoint not found: " + e.getMessage());
+    }
 
-  private ExternalServiceException mapNetworkError(Throwable error, UUID orderId) {
-    log.error("Failed to communicate with Payment service for order {}: {}",
-        orderId, error.getMessage());
-    return new ExternalServiceException("Payment service is unavailable", error);
-  }
+    private ExternalServiceException mapServerError(WebClientResponseException e, UUID orderId) {
+        log.error("Payment service server error for order {}: {} - {}",
+                orderId, e.getStatusCode(), e.getMessage());
+        return new ExternalServiceException("Payment service returned server error: " + e.getStatusCode(), e);
+    }
+
+    private ExternalServiceException mapClientError(WebClientResponseException e, UUID orderId) {
+        log.error("Payment service client error for order {}: {} - {}",
+                orderId, e.getStatusCode(), e.getMessage());
+        return new ExternalServiceException("Payment service returned client error: " + e.getStatusCode(), e);
+    }
+
+    private ExternalServiceException mapNetworkError(Throwable error, UUID orderId) {
+        log.error("Failed to communicate with Payment service for order {}: {}",
+                orderId, error.getMessage());
+        return new ExternalServiceException("Payment service is unavailable", error);
+    }
 }

@@ -21,62 +21,62 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class HttpCustomerGateway implements CustomerGateway {
 
-  private final WebClient webClient;
-  private final CircuitBreaker circuitBreaker;
-  private final Retry retry;
+    private final WebClient webClient;
+    private final CircuitBreaker circuitBreaker;
+    private final Retry retry;
 
-  public HttpCustomerGateway(WebClient.Builder builder,
-      @Value("${customer.service.url}") String customerServiceUrl,
-      CircuitBreaker customerCircuitBreaker,
-      Retry customerRetry) {
-    this.webClient = builder.baseUrl(customerServiceUrl).build();
-    this.circuitBreaker = customerCircuitBreaker;
-    this.retry = customerRetry;
-  }
-
-  @Override
-  public void validateCustomerExists(UUID customerId) {
-    webClient.get().uri("api/customers/{id}",
-        customerId).retrieve().toBodilessEntity()
-        .transformDeferred(RetryOperator.of(retry))
-        .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-        .onErrorMap(error -> mapError(error, customerId))
-        .block();
-  }
-
-  private Throwable mapError(Throwable error, UUID orderId) {
-    if (error instanceof WebClientResponseException.NotFound e) {
-      return mapNotFoundError(e, orderId);
-    } else if (error instanceof WebClientResponseException e) {
-      return e.getStatusCode().is5xxServerError()
-          ? mapServerError(e, orderId)
-          : mapClientError(e, orderId);
-    } else {
-      return mapNetworkError(error, orderId);
+    public HttpCustomerGateway(WebClient.Builder builder,
+            @Value("${customer.service.url}") String customerServiceUrl,
+            CircuitBreaker customerCircuitBreaker,
+            Retry customerRetry) {
+        this.webClient = builder.baseUrl(customerServiceUrl).build();
+        this.circuitBreaker = customerCircuitBreaker;
+        this.retry = customerRetry;
     }
-  }
 
-  private ExternalServiceNotFoundException mapNotFoundError(WebClientResponseException.NotFound e, UUID customerId) {
-    log.error("Customer endpoint not found for customer {}: {} - {}",
-        customerId, e.getStatusCode(), e.getMessage());
-    return new ExternalServiceNotFoundException("Customer service endpoint not found: " + e.getMessage());
-  }
+    @Override
+    public void validateCustomerExists(UUID customerId) {
+        webClient.get().uri("api/customers/{id}",
+                customerId).header("X-Source-Service", "notification-service").retrieve().toBodilessEntity()
+                .transformDeferred(RetryOperator.of(retry))
+                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                .onErrorMap(error -> mapError(error, customerId))
+                .block();
+    }
 
-  private ExternalServiceException mapServerError(WebClientResponseException e, UUID customerId) {
-    log.error("Customer service server error for customer {}: {} - {}",
-        customerId, e.getStatusCode(), e.getMessage());
-    return new ExternalServiceException("Customer service returned server error: " + e.getStatusCode(), e);
-  }
+    private Throwable mapError(Throwable error, UUID orderId) {
+        if (error instanceof WebClientResponseException.NotFound e) {
+            return mapNotFoundError(e, orderId);
+        } else if (error instanceof WebClientResponseException e) {
+            return e.getStatusCode().is5xxServerError()
+                    ? mapServerError(e, orderId)
+                    : mapClientError(e, orderId);
+        } else {
+            return mapNetworkError(error, orderId);
+        }
+    }
 
-  private ExternalServiceException mapClientError(WebClientResponseException e, UUID customerId) {
-    log.error("Customer service client error for customer {}: {} - {}",
-        customerId, e.getStatusCode(), e.getMessage());
-    return new ExternalServiceException("Customer service returned client error: " + e.getStatusCode(), e);
-  }
+    private ExternalServiceNotFoundException mapNotFoundError(WebClientResponseException.NotFound e, UUID customerId) {
+        log.error("Customer endpoint not found for customer {}: {} - {}",
+                customerId, e.getStatusCode(), e.getMessage());
+        return new ExternalServiceNotFoundException("Customer service endpoint not found: " + e.getMessage());
+    }
 
-  private ExternalServiceException mapNetworkError(Throwable error, UUID customerId) {
-    log.error("Failed to communicate with Customer service for customer {}: {}",
-        customerId, error.getMessage());
-    return new ExternalServiceException("Customer service is unavailable", error);
-  }
+    private ExternalServiceException mapServerError(WebClientResponseException e, UUID customerId) {
+        log.error("Customer service server error for customer {}: {} - {}",
+                customerId, e.getStatusCode(), e.getMessage());
+        return new ExternalServiceException("Customer service returned server error: " + e.getStatusCode(), e);
+    }
+
+    private ExternalServiceException mapClientError(WebClientResponseException e, UUID customerId) {
+        log.error("Customer service client error for customer {}: {} - {}",
+                customerId, e.getStatusCode(), e.getMessage());
+        return new ExternalServiceException("Customer service returned client error: " + e.getStatusCode(), e);
+    }
+
+    private ExternalServiceException mapNetworkError(Throwable error, UUID customerId) {
+        log.error("Failed to communicate with Customer service for customer {}: {}",
+                customerId, error.getMessage());
+        return new ExternalServiceException("Customer service is unavailable", error);
+    }
 }
