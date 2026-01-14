@@ -1,38 +1,41 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		// {
-		// 	"path": "src/order-platform/src/main/java/com/burakpozut/microservices/order_platform"
-		// },
-		{
-			"path": "customer-service"
-		},
-		{
-			"path": "product-service"
-		},
-		{
-			"path": "order-service"
-		},
-		{
-			"path": "payment-service"
-		},
-		{
-			"path": "notification-service"
-		}
-	],
-	"settings": {
-		"java.configuration.updateBuildConfiguration": "automatic",
-		"java.compile.nullAnalysis.mode": "disabled",
-		"java.import.maven.enabled": true,
-		"java.project.exclude": [
-			"customer-service/**",
-			"product-service/**",
-			"order-service/**",
-			"payment-service/**",
-			"notification-service/**"
-		],
-		"workbench.list.typeNavigationMode": "trigger"
-	}
+    "folders": [
+        {
+            "path": "."
+        },
+        // {
+        // 	"path": "src/order-platform/src/main/java/com/burakpozut/microservices/order_platform"
+        // },
+        {
+            "path": "customer-service"
+        },
+        {
+            "path": "product-service"
+        },
+        {
+            "path": "order-service"
+        },
+        {
+            "path": "payment-service"
+        },
+        {
+            "path": "notification-service"
+        },
+        {
+            "path": "api-gateway"
+        }
+    ],
+    "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.compile.nullAnalysis.mode": "disabled",
+        "java.import.maven.enabled": true,
+        "java.project.exclude": [
+            "customer-service/**",
+            "product-service/**",
+            "order-service/**",
+            "payment-service/**",
+            "notification-service/**"
+        ],
+        "workbench.list.typeNavigationMode": "trigger"
+    }
 }
