@@ -12,3 +12,4 @@ public class OrderServiceApplication {
         SpringApplication.run(OrderServiceApplication.class, args);
     }
 }
+// TODO: maybe we need to use gateway for the kafka events as well?

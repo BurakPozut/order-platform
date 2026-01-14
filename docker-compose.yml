@@ -153,7 +153,21 @@ services:
     networks:
       - microservices-network
     restart: unless-stopped
-
+  notification-service:
+    build:
+      context: .
+      dockerfile: ./notification-service/Dockerfile
+    container_name: notification-service
+    env_file:
+      - ./notification-service/.env
+    ports:
+      - "${NOTIFICATION_SERVICE_PORT}:8081"
+    depends_on:
+      notification-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
   redpanda:
     image: redpandadata/redpanda:latest
     container_name: redpanda
@@ -192,6 +206,25 @@ services:
       - "8089:8080"
     depends_on:
       - redpanda
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ./api-gateway/Dockerfile
+    container_name: api-gateway
+    env_file:
+      - ./api-gateway/.env
+    ports:
+      - "${API_GATEWAY_PORT}:8090"
+    depends_on:
+      - customer-service
+      - product-service
+      - order-service
+      - payment-service
+      - notification-service
     networks:
       - microservices-network
     restart: unless-stopped
