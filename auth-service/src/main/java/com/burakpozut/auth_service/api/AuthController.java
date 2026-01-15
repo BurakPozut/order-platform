@@ -38,7 +38,13 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request) {
         var command = AuthMapper.toCommand(request);
         var result = loginService.handle(command);
-        return ResponseEntity.ok(new AuthResponse(result.accessToken(), result.refreshToken()));
+        return ResponseEntity.ok(new AuthResponse(result.accessToken(), result.refreshToken())); // We should send
+                                                                                                 // refresh token etc
+                                                                                                 // via cookies for
+                                                                                                 // using http only but
+                                                                                                 // since this is not
+                                                                                                 // that project I might
+                                                                                                 // let it slide
     }
 
     @PostMapping("/refresh")

@@ -30,6 +30,9 @@ public class GatewayConfig {
     @Value("${notification.service.url}")
     private String notificationServiceUrl;
 
+    @Value("${auth.service.url}")
+    private String authServiceUrl;
+
     @Bean
     public RouterFunction<ServerResponse> customerRoute() {
         return route("customer-service")
@@ -67,6 +70,14 @@ public class GatewayConfig {
         return route("notification-service")
                 .route(path("/api/notifications/**"), http())
                 .before(uri(notificationServiceUrl))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> authRoute() {
+        return route("auth-service")
+                .route(path("/api/auth/**"), http())
+                .before(uri(authServiceUrl))
                 .build();
     }
 }

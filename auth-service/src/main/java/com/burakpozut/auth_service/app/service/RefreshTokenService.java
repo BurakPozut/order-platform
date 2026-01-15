@@ -33,7 +33,7 @@ public class RefreshTokenService {
             throw new InvalidRefreshTokenException();
         }
 
-        String tokenHash = passwordEncoder.encode(command.refreshToken());
+        // String tokenHash = passwordEncoder.encode(command.refreshToken());
         if (!passwordEncoder.matches(command.refreshToken(), existingToken.tokenHash())) {
             throw new InvalidRefreshTokenException();
         }
