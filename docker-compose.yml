@@ -97,8 +97,8 @@ services:
     container_name: customer-service
     env_file:
       - ./customer-service/.env
-    ports:
-      - "${CUSTOMER_SERVICE_PORT}:8081"
+    # ports:
+    #   - "${CUSTOMER_SERVICE_PORT}:8081"
     depends_on:
       customer-db:
         condition: service_healthy
@@ -113,8 +113,8 @@ services:
     container_name: product-service
     env_file:
       - ./product-service/.env
-    ports:
-      - "${PRODUCT_SERVICE_PORT}:8081"
+    # ports:
+    #   - "${PRODUCT_SERVICE_PORT}:8081"
     depends_on:
       product-db:
         condition: service_healthy
@@ -129,8 +129,8 @@ services:
     container_name: order-service
     env_file:
       - ./order-service/.env
-    ports:
-      - "${ORDER_SERVICE_PORT}:8081"
+    # ports:
+    #   - "${ORDER_SERVICE_PORT}:8081"
     depends_on:
       order-db:
         condition: service_healthy
@@ -145,8 +145,8 @@ services:
     container_name: payment-service
     env_file:
       - ./payment-service/.env
-    ports:
-      - "${PAYMENT_SERVICE_PORT}:8081"
+    # ports:
+    #   - "${PAYMENT_SERVICE_PORT}:8081"
     depends_on:
       payment-db:
         condition: service_healthy
@@ -160,8 +160,8 @@ services:
     container_name: notification-service
     env_file:
       - ./notification-service/.env
-    ports:
-      - "${NOTIFICATION_SERVICE_PORT}:8081"
+    # ports:
+    #   - "${NOTIFICATION_SERVICE_PORT}:8081"
     depends_on:
       notification-db:
         condition: service_healthy
