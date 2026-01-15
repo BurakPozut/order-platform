@@ -89,7 +89,25 @@ services:
       - microservices-network
     restart: unless-stopped
 
+  auth-db:
+    image: postgres:16-alpine
+    container_name: auth-db
+    env_file:
+      - ./auth-service/.env
+    ports:
+      - "${AUTH_DB_PORT}:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - microservices-network
+    restart: unless-stopped
   
+  # --- SERVICES ---
   customer-service:
     build:
       context: .
@@ -153,6 +171,7 @@ services:
     networks:
       - microservices-network
     restart: unless-stopped
+
   notification-service:
     build:
       context: .
@@ -236,6 +255,7 @@ volumes:
   order_db_data:
   payment_db_data:
   notification_db_data:
+  auth_db_data:
 
 networks:
   microservices-network:
