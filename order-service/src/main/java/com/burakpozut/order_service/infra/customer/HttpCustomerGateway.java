@@ -53,14 +53,16 @@ public class HttpCustomerGateway implements CustomerGateway {
     private Mono<ResponseEntity<Void>> handleCircuitBreakerOpenFallback(UUID customerId) {
         log.warn("Customer service circuit breaker is OPEN. Fallback: Skipping customer validation for customer: {}",
                 customerId);
-        return Mono.empty(); // Skip validation, allow order to proceed
+        return Mono.error(new ExternalServiceException(
+                "Customer service circuit breaker is open - cannot validate customer: " + customerId));
 
     }
 
     private Mono<ResponseEntity<Void>> handleServiceUnavailableFallback(UUID customerId) {
         log.warn("Customer service unavailable. Fallback: Skipping customer validation for customer: {}", customerId);
-        return Mono.empty(); // Skip validation, allow order to proceed
-    }
+        return Mono.error(new ExternalServiceException(
+                "Customer service is unavailable - cannot validate customer: " + customerId));
+    }// TODO: change these return these are for a test
 
     private Throwable mapError(Throwable error, UUID orderId) {
         if (error instanceof WebClientResponseException.NotFound e) {
