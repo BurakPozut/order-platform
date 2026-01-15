@@ -7,6 +7,7 @@ public class RefreshTokenMapper {
         return RefreshToken.rehydrate(
                 entity.getId(),
                 entity.getUserId(),
+                entity.getTokenId(),
                 entity.getTokenHash(),
                 entity.getExpiresAt(),
                 entity.getRevokedAt());
@@ -16,6 +17,7 @@ public class RefreshTokenMapper {
         var entity = new RefreshTokenJpaEntity();
         entity.setId(token.id());
         entity.setUserId(token.userId());
+        entity.setTokenId(token.tokenId());
         entity.setTokenHash(token.tokenHash());
         entity.setExpiresAt(token.expiresAt());
         entity.setRevokedAt(token.revokedAt());

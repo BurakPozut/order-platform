@@ -1,6 +1,8 @@
 package com.burakpozut.auth_service.infra.jwt;
 
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
@@ -20,6 +22,8 @@ public class JwtService {
     private final String issuer;
     private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
+    private static final SecureRandom SecureRandom = new SecureRandom();
+    private static final Base64.Encoder Base64UrlEncoder = Base64.getUrlEncoder().withoutPadding();
 
     public JwtService(
             @Value("${jwt.secret}") String secret,
@@ -47,7 +51,23 @@ public class JwtService {
     }
 
     public String generateRefreshToken() {
-        return UuidCreator.getTimeOrdered().toString();
+        byte[] randomBytes = new byte[32];
+        SecureRandom.nextBytes(randomBytes);
+
+        String tokenId = UuidCreator.getTimeOrdered().toString();
+        String secret = Base64UrlEncoder.encodeToString(randomBytes);
+        String refreshToken = tokenId + "." + secret;
+
+        return refreshToken;
+    }
+
+    public String extractTokenId(String refreshToken) {
+        int dotIndex = refreshToken.indexOf(".");
+        if (dotIndex == -1) {
+            throw new IllegalArgumentException("Invalid refresh token format");
+        }
+
+        return refreshToken.substring(0, dotIndex);
     }
 
     public long getRefreshTokenExpiration() {

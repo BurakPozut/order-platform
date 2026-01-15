@@ -10,5 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface SpringDataRefreshTokenRepository extends JpaRepository<RefreshTokenJpaEntity, UUID> {
     Optional<RefreshTokenJpaEntity> findByTokenHash(String tokenHash);
 
+    Optional<RefreshTokenJpaEntity> findByTokenId(String tokenId); // Add this
+
     void deleteByUserId(UUID userId);
 }

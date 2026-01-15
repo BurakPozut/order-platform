@@ -21,6 +21,11 @@ public class RefreshTokenRepositoryAdapter implements RefreshTokenRepository {
     }
 
     @Override
+    public Optional<RefreshToken> findByTokenId(String tokenId) {
+        return jpa.findByTokenId(tokenId).map(RefreshTokenMapper::toDomain);
+    }
+
+    @Override
     public RefreshToken save(RefreshToken token, boolean isNew) {
         var entity = RefreshTokenMapper.toEntity(token, isNew);
         var savedEntity = jpa.save(entity);

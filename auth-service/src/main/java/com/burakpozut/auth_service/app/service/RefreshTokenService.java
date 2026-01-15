@@ -2,7 +2,7 @@ package com.burakpozut.auth_service.app.service;
 
 import java.time.Instant;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
+// import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +13,7 @@ import com.burakpozut.auth_service.domain.RefreshTokenRepository;
 import com.burakpozut.auth_service.domain.User;
 import com.burakpozut.auth_service.domain.UserRepository;
 import com.burakpozut.auth_service.infra.jwt.JwtService;
+import com.burakpozut.auth_service.infra.security.TokenHashService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,12 +22,17 @@ import lombok.RequiredArgsConstructor;
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    // private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final TokenHashService tokenHashService;
 
     @Transactional
     public RefreshTokenResult handle(RefreshTokenCommand command) {
-        RefreshToken existingToken = refreshTokenRepository.findByTokenHash(command.refreshToken())
+
+        String fullToken = command.refreshToken();
+        String tokenId = jwtService.extractTokenId(fullToken);
+
+        RefreshToken existingToken = refreshTokenRepository.findByTokenId(tokenId)
                 .orElseThrow(InvalidRefreshTokenException::new);
 
         if (!existingToken.isValid()) {
@@ -34,7 +40,7 @@ public class RefreshTokenService {
         }
 
         // String tokenHash = passwordEncoder.encode(command.refreshToken());
-        if (!passwordEncoder.matches(command.refreshToken(), existingToken.tokenHash())) {
+        if (!tokenHashService.matches(fullToken, existingToken.tokenHash())) {
             throw new InvalidRefreshTokenException();
         }
 
@@ -49,10 +55,11 @@ public class RefreshTokenService {
 
         String newAccessToken = jwtService.generateAccessToken(user.id(), user.email());
         String newRefreshToken = jwtService.generateRefreshToken();
+        String newTokenId = jwtService.extractTokenId(newRefreshToken);
         Instant expiresAt = Instant.now().plusMillis(jwtService.getRefreshTokenExpiration());
 
-        String newTokenHash = passwordEncoder.encode(newRefreshToken);
-        RefreshToken newRefreshTokenEntity = RefreshToken.createNew(user.id(), newTokenHash, expiresAt);
+        String newTokenHash = tokenHashService.hash(newRefreshToken);
+        RefreshToken newRefreshTokenEntity = RefreshToken.createNew(user.id(), newTokenId, newTokenHash, expiresAt);
         refreshTokenRepository.save(newRefreshTokenEntity, true);
 
         return new RefreshTokenResult(newAccessToken, newRefreshToken);

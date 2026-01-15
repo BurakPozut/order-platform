@@ -13,6 +13,7 @@ import com.burakpozut.auth_service.domain.RefreshTokenRepository;
 import com.burakpozut.auth_service.domain.User;
 import com.burakpozut.auth_service.domain.UserRepository;
 import com.burakpozut.auth_service.infra.jwt.JwtService;
+import com.burakpozut.auth_service.infra.security.TokenHashService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +24,7 @@ public class LoginService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final TokenHashService tokenHashService;
 
     @Transactional
     public LoginResult handle(LoginCommand command) {
@@ -39,10 +41,11 @@ public class LoginService {
 
         String accessToken = jwtService.generateAccessToken(user.id(), user.email());
         String refreshToken = jwtService.generateRefreshToken();
+        String tokenId = jwtService.extractTokenId(refreshToken);
         Instant expiresAt = Instant.now().plusMillis(jwtService.getRefreshTokenExpiration());
 
-        String tokenHash = passwordEncoder.encode(refreshToken);
-        RefreshToken refreshTokenEntity = RefreshToken.createNew(user.id(), tokenHash, expiresAt);
+        String tokenHash = tokenHashService.hash(refreshToken);
+        RefreshToken refreshTokenEntity = RefreshToken.createNew(user.id(), tokenId, tokenHash, expiresAt);
         refreshTokenRepository.save(refreshTokenEntity, true);
 
         return new LoginResult(accessToken, refreshToken);

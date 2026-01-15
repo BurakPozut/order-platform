@@ -8,6 +8,7 @@ import com.burakpozut.common.exception.DomainValidationException;
 public record RefreshToken(
         UUID id,
         UUID userId,
+        String tokenId,
         String tokenHash,
         Instant expiresAt,
         Instant revokedAt) {
@@ -17,19 +18,22 @@ public record RefreshToken(
             throw new DomainValidationException("Id cannot be null");
         if (userId == null)
             throw new DomainValidationException("User id cannot be null");
+        if (tokenId == null || tokenId.isBlank())
+            throw new DomainValidationException("Token id cannot be null or blank");
         if (tokenHash == null || tokenHash.isBlank())
             throw new DomainValidationException("Token hash cannot be null or blank");
         if (expiresAt == null)
             throw new DomainValidationException("Expires at cannot be null");
     }
 
-    public static RefreshToken createNew(UUID userId, String tokenHash, Instant expiresAt) {
+    public static RefreshToken createNew(UUID userId, String tokenId, String tokenHash, Instant expiresAt) {
         UUID id = UUID.randomUUID();
-        return new RefreshToken(id, userId, tokenHash, expiresAt, null);
+        return new RefreshToken(id, userId, tokenId, tokenHash, expiresAt, null);
     }
 
-    public static RefreshToken rehydrate(UUID id, UUID userId, String tokenHash, Instant expiresAt, Instant revokedAt) {
-        return new RefreshToken(id, userId, tokenHash, expiresAt, revokedAt);
+    public static RefreshToken rehydrate(UUID id, UUID userId, String tokenId, String tokenHash, Instant expiresAt,
+            Instant revokedAt) {
+        return new RefreshToken(id, userId, tokenId, tokenHash, expiresAt, revokedAt);
     }
 
     public boolean isExpired() {
