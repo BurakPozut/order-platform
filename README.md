@@ -8,8 +8,9 @@ This project implements a complete order processing platform using a microservic
 
 ## Architecture
 
-The system consists of five independent microservices, each with its own database and responsibility:
+The system consists of six components: an API Gateway and five independent microservices, each with its own database and responsibility:
 
+- **API Gateway** - Single entry point for all client requests, routing to appropriate services
 - **Customer Service** - Manages customer information and profiles
 - **Product Service** - Handles product catalog and inventory management
 - **Order Service** - Orchestrates order creation and lifecycle management
@@ -17,6 +18,7 @@ The system consists of five independent microservices, each with its own databas
 - **Notification Service** - Sends notifications to customers
 
 Services communicate through:
+- **API Gateway** - Routes all external client requests to appropriate microservices
 - **Synchronous REST APIs** for direct service-to-service calls
 - **Asynchronous Event Streaming** via Kafka/Redpanda for event-driven workflows
 - **Common Library** for shared domain models, events, and exceptions
@@ -39,11 +41,35 @@ Services communicate through:
 - **OpenAPI/Swagger** - API documentation
 
 ### Infrastructure
+- **Spring Cloud Gateway** - API Gateway for request routing and load balancing
 - **Kafka UI** - Web interface for Kafka topic management
 - **Health Checks** - Container health monitoring
 - **Docker Networking** - Service discovery and communication
 
 ## Services
+
+### API Gateway (Port 8090)
+Single entry point for all client requests. Routes requests to appropriate microservices based on URL patterns.
+
+**Routes:**
+- `/api/customers/**` → Customer Service
+- `/api/products/**` → Product Service
+- `/api/orders/**` → Order Service
+- `/api/payments/**` → Payment Service
+- `/api/notifications/**` → Notification Service
+
+**Features:**
+- Request routing and load balancing
+- Circuit breaker integration for resilience
+- Request/response logging
+- Health check endpoints
+- Swagger/OpenAPI documentation aggregation
+
+**Endpoints:**
+- `GET /` - Gateway information and available routes
+- `GET /swagger-ui.html` - Aggregated API documentation
+- `GET /actuator/health` - Gateway health status
+- `GET /actuator/gateway/routes` - List all configured routes
 
 ### Customer Service (Port 9081)
 Manages customer data and profiles.
@@ -209,6 +235,7 @@ You can start services individually or all at once. Each service runs on a diffe
 mvn clean install -DskipTests
 
 # Start each service in separate terminals
+cd api-gateway && mvn spring-boot:run
 cd customer-service && mvn spring-boot:run
 cd product-service && mvn spring-boot:run
 cd order-service && mvn spring-boot:run
@@ -224,6 +251,7 @@ docker-compose up
 ### 5. Verify Services
 
 Check service health:
+- API Gateway: http://localhost:8090/actuator/health
 - Customer Service: http://localhost:9081/actuator/health
 - Product Service: http://localhost:9082/actuator/health
 - Order Service: http://localhost:9083/actuator/health
@@ -232,7 +260,10 @@ Check service health:
 
 ### 6. Access API Documentation
 
-Swagger/OpenAPI documentation is available at:
+**Recommended:** Access all APIs through the API Gateway:
+- API Gateway (Aggregated): http://localhost:8090/swagger-ui.html
+
+Individual service documentation:
 - Customer Service: http://localhost:9081/swagger-ui.html
 - Product Service: http://localhost:9082/swagger-ui.html
 - Order Service: http://localhost:9083/swagger-ui.html
@@ -247,14 +278,16 @@ Kafka UI is available at: http://localhost:8089
 
 ### Order Creation Flow
 
-1. **Client** sends POST request to Order Service to create an order
-2. **Order Service** validates customer and products via synchronous REST calls
-3. **Order Service** creates order and publishes `OrderCreatedEvent` to Kafka
-4. **Product Service** consumes event and reserves inventory
-5. **Payment Service** consumes event and processes payment
-6. **Notification Service** consumes event and sends notification
-7. Each service publishes `ServiceCompletionEvent` upon success
-8. **Order Service** tracks completions and updates order state
+1. **Client** sends POST request to API Gateway at `/api/orders`
+2. **API Gateway** routes request to Order Service
+3. **Order Service** validates customer and products via synchronous REST calls
+4. **Order Service** creates order and publishes `OrderCreatedEvent` to Kafka
+5. **Product Service** consumes event and reserves inventory
+6. **Payment Service** consumes event and processes payment
+7. **Notification Service** consumes event and sends notification
+8. Each service publishes `ServiceCompletionEvent` upon success
+9. **Order Service** tracks completions and updates order state
+10. **API Gateway** returns response to client
 
 ### Compensation Flow
 
@@ -267,14 +300,15 @@ If any service fails:
 
 ```
 building-micro-services/
-├── common-lib/              # Shared library with events, exceptions, domain models
-├── customer-service/        # Customer management service
-├── product-service/         # Product catalog and inventory service
-├── order-service/           # Order orchestration service
-├── payment-service/         # Payment processing service
+├── api-gateway/            # API Gateway for request routing
+├── common-lib/             # Shared library with events, exceptions, domain models
+├── customer-service/       # Customer management service
+├── product-service/        # Product catalog and inventory service
+├── order-service/          # Order orchestration service
+├── payment-service/        # Payment processing service
 ├── notification-service/   # Notification service
-├── docker-compose.yml       # Infrastructure orchestration
-└── README.md               # This file
+├── docker-compose.yml      # Infrastructure orchestration
+└── README.md              # This file
 ```
 
 Each service follows a similar structure:
@@ -336,13 +370,12 @@ The `common-lib` module contains shared code used across all services:
 - **Database Per Service** - Service data isolation
 - **Hexagonal Architecture** - Clean architecture with ports and adapters
 - **CQRS** - Command Query Responsibility Segregation (implicit in design)
-- **API Gateway Pattern** - (Can be added as enhancement)
+- **API Gateway Pattern** - Single entry point for all client requests
 
 ## Future Enhancements
 
 Potential improvements and extensions:
 
-- API Gateway for unified entry point
 - Service mesh (Istio/Linkerd) for advanced traffic management
 - Distributed tracing (Jaeger/Zipkin)
 - Centralized logging (ELK stack)
