@@ -13,4 +13,3 @@ public class OrderServiceApplication {
     }
 }
 // TODO: maybe we need to use gateway for the kafka events as well?
-// api-gateway'i containarized yapicaktin fln sonra auth var
