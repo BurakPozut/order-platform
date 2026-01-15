@@ -23,6 +23,9 @@
         },
         {
             "path": "api-gateway"
+        },
+        {
+            "path": "auth-service"
         }
     ],
     "settings": {
