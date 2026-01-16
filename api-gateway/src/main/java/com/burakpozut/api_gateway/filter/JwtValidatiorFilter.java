@@ -28,17 +28,31 @@ public class JwtValidatiorFilter extends OncePerRequestFilter {
 
     private final SecretKey secretKey;
     private final String expectedIssuer;
+    private final boolean jwtValidationEnabled;
 
     public JwtValidatiorFilter(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.issuer}") String issuer) {
+            @Value("${jwt.issuer}") String issuer,
+            @Value("${jwt.validation.enabled}") boolean jwtValidationEnabled) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
         this.expectedIssuer = issuer;
+        this.jwtValidationEnabled = jwtValidationEnabled;
+
+        if (!jwtValidationEnabled) {
+            log.warn("⚠️  JWT validation is DISABLED - This should only be used for testing!");
+        }
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
+
+        // Bypass validation if disabled (for testing)
+        if (!jwtValidationEnabled) {
+            log.debug("JWT validation bypassed");
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String path = request.getRequestURI();
         if (isPublicEndpoint(path)) {

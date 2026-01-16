@@ -18,8 +18,9 @@ public class TokenHashService {
 
     public String hash(String token) {
         try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256"); // TODO: Why did we used this in here write it
-                                                                         // down
+            // We switched from bcrypt from SHA-256. This is a token not a password so this
+            // is fine and faster for faster look up.
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
             String saltedToken = token + saltSecret;
             byte[] hashBytes = digest.digest(saltedToken.getBytes(StandardCharsets.UTF_8));
