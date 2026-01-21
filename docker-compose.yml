@@ -136,6 +136,8 @@ services:
     depends_on:
       product-db:
         condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     networks:
       - microservices-network
     restart: unless-stopped
@@ -249,6 +251,42 @@ services:
       - microservices-network
     restart: unless-stopped
 
+  # --- ELASTICSEARCH (for product search, logs, etc.) ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "${ELASTICSEARCH_PORT:-9200}:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sSf http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=10s || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.18.0
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+    ports:
+      - "${KIBANA_PORT:-5601}:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
 volumes:
   customer_db_data:
   product_db_data:
@@ -256,6 +294,7 @@ volumes:
   payment_db_data:
   notification_db_data:
   auth_db_data:
+  elasticsearch_data:
 
 networks:
   microservices-network:

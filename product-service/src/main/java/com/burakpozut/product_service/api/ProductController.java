@@ -17,7 +17,6 @@ import com.burakpozut.product_service.api.dto.request.PatchProductRequest;
 import com.burakpozut.product_service.api.dto.request.ReserveInventoryRequest;
 import com.burakpozut.product_service.api.dto.request.UpdateProductRequest;
 import com.burakpozut.product_service.api.dto.response.ProductResponse;
-import com.burakpozut.product_service.app.port.ProductSearchQuery;
 import com.burakpozut.product_service.app.service.DeleteProductService;
 import com.burakpozut.product_service.app.service.GetAllProductsService;
 import com.burakpozut.product_service.app.service.GetProductByIdService;
@@ -26,7 +25,6 @@ import com.burakpozut.product_service.app.service.PatchProductService;
 import com.burakpozut.product_service.app.service.RerserveInventoryService;
 import com.burakpozut.product_service.app.service.UpdateProductService;
 import com.burakpozut.product_service.app.service.elasticsearch.ProductSearchQueryService;
-import com.burakpozut.product_service.app.service.elasticsearch.ProductSearchService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +43,6 @@ public class ProductController {
     private final PatchProductService patchProductService;
     private final DeleteProductService deleteProductService;
     private final RerserveInventoryService rerserveInventoryService;
-    private final ProductSearchService productSearchService;
     private final ProductSearchQueryService productSearchQueryService;
 
     @GetMapping
@@ -80,21 +77,6 @@ public class ProductController {
         var results = productSearchQueryService.search(null);
         return ResponseEntity.ok(results.stream().map(ProductResponse::from).toList());
     }
-    // @GetMapping("/search")
-    // public ResponseEntity<List<ProductResponse>> search(@RequestParam(required =
-    // false) String q) {
-    // var docs = productSearchService.search(q);
-    // var response = docs.stream().map(ProductResponse::fromSearchDoc).toList();
-    // return ResponseEntity.ok(response);
-    // }
-
-    // @GetMapping("/search-all")
-    // public ResponseEntity<String> searchAll(@RequestParam(required = false)
-    // String q) {
-    // var docs = productSearchService.searchAll();
-    // var response = docs;
-    // return ResponseEntity.ok(response);
-    // }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable UUID id,
