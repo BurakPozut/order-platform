@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.burakpozut.product_service.api.dto.request.PatchProductRequest;
 import com.burakpozut.product_service.api.dto.request.ReserveInventoryRequest;
+import com.burakpozut.product_service.api.dto.request.SearchRequest;
 import com.burakpozut.product_service.api.dto.request.UpdateProductRequest;
 import com.burakpozut.product_service.api.dto.response.ProductResponse;
 import com.burakpozut.product_service.app.service.DeleteProductService;
@@ -67,9 +68,41 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ProductResponse>> search(@RequestParam(required = false) String q) {
-        var results = productSearchQueryService.search(q);
-        return ResponseEntity.ok(results.stream().map(ProductResponse::from).toList());
+    public ResponseEntity<List<ProductResponse>> search(
+            @RequestParam(required = false, defaultValue = "") String q,
+            @RequestParam(required = false, defaultValue = "ACTIVE") List<String> status,
+            @RequestParam(required = false, defaultValue = "USD") String currency,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false, defaultValue = "name") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String sortOrder,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "20") Integer size) {
+
+        SearchRequest request = new SearchRequest();
+        request.setQuery(q != null && !q.isEmpty() ? q : null);
+        request.setStatuses(status);
+        request.setCurrency(currency);
+        request.setMinPrice(minPrice);
+        request.setMaxPrice(maxPrice);
+        request.setSortBy(sortBy);
+        request.setSortOrder(sortOrder);
+        request.setPage(page);
+        request.setSize(size);
+
+        var results = productSearchQueryService.searchWithFilters(request);
+        return ResponseEntity.ok(results.stream()
+                .map(ProductResponse::from)
+                .toList());
+    }
+
+    @GetMapping("/search/suggestions")
+    public ResponseEntity<List<String>> getSuggestions(
+            @RequestParam(required = false, defaultValue = "") String prefix,
+            @RequestParam(defaultValue = "10") int limit) {
+        var suggestions = productSearchQueryService.getSuggestions(
+                prefix != null && !prefix.isEmpty() ? prefix : "", limit);
+        return ResponseEntity.ok(suggestions);
     }
 
     @GetMapping("/search-all")
