@@ -14,6 +14,7 @@ import com.burakpozut.notification_service.api.dto.response.NotificationResponse
 import com.burakpozut.notification_service.app.service.CreateNotificationService;
 import com.burakpozut.notification_service.app.service.GetAllNotificationsService;
 import com.burakpozut.notification_service.app.service.GetNotificationByIdService;
+import com.burakpozut.notification_service.app.service.SyncNotificationsToElasticsearchService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,36 +25,42 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
-  private final GetAllNotificationsService getAllNotificationsService;
-  private final GetNotificationByIdService getNotificationByIdService;
-  private final CreateNotificationService createNotificationService;
+    private final GetAllNotificationsService getAllNotificationsService;
+    private final GetNotificationByIdService getNotificationByIdService;
+    private final CreateNotificationService createNotificationService;
+    private final SyncNotificationsToElasticsearchService syncNotificationsToElasticsearchService;
 
-  @GetMapping
-  public ResponseEntity<List<NotificationResponse>> getAll() {
-    var notifications = getAllNotificationsService.handle();
-    var body = notifications.stream().map(NotificationResponse::from).toList();
+    @GetMapping
+    public ResponseEntity<List<NotificationResponse>> getAll() {
+        var notifications = getAllNotificationsService.handle();
+        var body = notifications.stream().map(NotificationResponse::from).toList();
 
-    return ResponseEntity.ok(body);
-  }
+        return ResponseEntity.ok(body);
+    }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<NotificationResponse> getById(@PathVariable UUID id) {
-    var notification = getNotificationByIdService.handle(id);
-    var body = NotificationResponse.from(notification);
+    @GetMapping("/{id}")
+    public ResponseEntity<NotificationResponse> getById(@PathVariable UUID id) {
+        var notification = getNotificationByIdService.handle(id);
+        var body = NotificationResponse.from(notification);
 
-    return ResponseEntity.ok(body);
-  }
+        return ResponseEntity.ok(body);
+    }
 
-  @PostMapping()
-  public ResponseEntity<NotificationResponse> createNotification(
-      @Valid @RequestBody CreateNotificationRequest request) {
-    var command = NotificationMapper.toCommand(request);
+    @PostMapping()
+    public ResponseEntity<NotificationResponse> createNotification(
+            @Valid @RequestBody CreateNotificationRequest request) {
+        var command = NotificationMapper.toCommand(request);
 
-    var notification = createNotificationService.handle(command);
+        var notification = createNotificationService.handle(command);
 
-    var body = NotificationResponse.from(notification);
-    return ResponseEntity.ok(body);
+        var body = NotificationResponse.from(notification);
+        return ResponseEntity.ok(body);
 
-  }
+    }
 
+    @PostMapping("/sync-to-elasticsearch")
+    public ResponseEntity<SyncNotificationsToElasticsearchService.SyncResult> syncToElasticsearch() {
+        var result = syncNotificationsToElasticsearchService.handle();
+        return ResponseEntity.ok(result);
+    }
 }
