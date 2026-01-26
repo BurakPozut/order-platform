@@ -15,14 +15,14 @@ public class OrderCancelledEventHandler {
     private final CancelPaymentService cancelPaymentService;
 
     public void handle(OrderCancelledEvent cancelledEvent) {
-        log.info("Processing OrderCancelledEvent for order: {}, reason: {}",
+        log.info("payment.orderCancelled.received orderId={} reason={}",
                 cancelledEvent.orderId(), cancelledEvent.reason());
 
         try {
             cancelPaymentService.handle(cancelledEvent.orderId());
-            log.info("Successfully processed cancellation for order: {}", cancelledEvent.orderId());
+            log.info("payment.orderCancelled.completed orderId={}", cancelledEvent.orderId());
         } catch (Exception e) {
-            log.error("Failed to process cancellation for order: {}, Error: {}",
+            log.error("payment.orderCancelled.failed orderId={} message={}",
                     cancelledEvent.orderId(), e.getMessage(), e);
         }
     }

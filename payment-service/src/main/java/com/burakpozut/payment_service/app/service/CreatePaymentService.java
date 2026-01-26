@@ -35,7 +35,8 @@ public class CreatePaymentService {
         Optional<Payment> existing = paymentRepository.findByIdempotencyKey(currentKey);
 
         if (existing.isPresent()) {
-            log.info("Returning existing order from current bucket: {}", currentKey);
+            log.info("payment.create.idempotent_hit bucket=current paymentId={} orderId={}",
+                    existing.get().id(), command.orderId());
             return existing.get();
         }
 
@@ -43,9 +44,13 @@ public class CreatePaymentService {
         Optional<Payment> existingPrev = paymentRepository.findByIdempotencyKey(prevKey);
 
         if (existingPrev.isPresent() && isRecent(existingPrev.get())) {
-            log.info("Returning existing order from previous bucket : {}", prevKey);
+            log.info("payment.create.idempotent_hit bucket=previous paymentId={} orderId={}",
+                    existingPrev.get().id(), command.orderId());
             return existingPrev.get();
         }
+
+        log.debug("payment.create.validation.start orderId={} amount={} currency={}",
+                command.orderId(), command.amount(), command.currency());
 
         validateOrderExists(command.orderId());
 
@@ -53,7 +58,10 @@ public class CreatePaymentService {
                 command.currency(), command.status(),
                 command.provider(), command.providerRef(), currentKey);
 
-        return paymentRepository.save(payment, true);
+        var savedPayment = paymentRepository.save(payment, true);
+        log.info("payment.create.persisted paymentId={} orderId={} amount={} status={}",
+                savedPayment.id(), savedPayment.orderId(), savedPayment.amount(), savedPayment.status());
+        return savedPayment;
     }
 
     private String deriveKey(UUID orderId, BigDecimal amount, long bucket) {

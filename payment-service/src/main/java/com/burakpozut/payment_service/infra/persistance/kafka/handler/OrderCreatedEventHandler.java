@@ -27,7 +27,8 @@ public class OrderCreatedEventHandler {
     private final ServiceCompletionPublisher serviceCompletionPublisher;
 
     public void handle(OrderCreatedEvent createdEvent) {
-        log.info("Processing OrderCreated for order: {}", createdEvent.orderId());
+        log.info("payment.orderCreated.received orderId={} customerId={} amount={}",
+                createdEvent.orderId(), createdEvent.customerId(), createdEvent.totalAmount());
 
         try {
             var command = CreatePaymentCommand.of(
@@ -36,14 +37,17 @@ public class OrderCreatedEventHandler {
                     createdEvent.currency(), PaymentStatus.PENDING,
                     "Paypal", "1234");
 
-            createPaymentService.handle(command);
-            log.info("Successfully created payment for order: {}", createdEvent.orderId());
+            var payment = createPaymentService.handle(command);
+            log.info("payment.orderCreated.payment_created paymentId={} orderId={} amount={}",
+                    payment.id(), createdEvent.orderId(), payment.amount());
 
             serviceCompletionPublisher.publish(createdEvent.orderId(), ServiceName.PAYMENT);
+            log.debug("payment.orderCreated.completion_published orderId={} serviceName=PAYMENT",
+                    createdEvent.orderId());
 
         } catch (OrderNotFoundException | DomainValidationException e) {
             // Business validation failures - expected scenarios
-            log.warn("Business validation failed for order: {}. Reason: {}",
+            log.warn("payment.orderCreated.validation_failed orderId={} reason={} action=compensate",
                     createdEvent.orderId(), e.getMessage());
             orderCompensationPublisher.publish(
                     createdEvent.orderId(),
@@ -52,7 +56,7 @@ public class OrderCreatedEventHandler {
                     "Payment creation failed: " + e.getMessage());
         } catch (ExternalServiceException e) {
             // External service errors (order service unavailable, network issues)
-            log.error("External service error while creating payment for order: {}. Reason: {}",
+            log.error("payment.orderCreated.external_service_error orderId={} message={} action=compensate",
                     createdEvent.orderId(), e.getMessage(), e);
             orderCompensationPublisher.publish(
                     createdEvent.orderId(),
@@ -63,7 +67,7 @@ public class OrderCreatedEventHandler {
             throw e;
         } catch (DataAccessException e) {
             // Technical database errors - might be retryable
-            log.error("Database error while creating payment for order: {}. Reason: {}",
+            log.error("payment.orderCreated.database_error orderId={} message={} action=compensate",
                     createdEvent.orderId(), e.getMessage(), e);
             orderCompensationPublisher.publish(
                     createdEvent.orderId(),
@@ -74,7 +78,7 @@ public class OrderCreatedEventHandler {
             throw e;
         } catch (Exception e) {
             // Unexpected technical errors
-            log.error("Unexpected error while creating payment for order: {}. Reason: {}",
+            log.error("payment.orderCreated.unexpected_error orderId={} message={} action=compensate",
                     createdEvent.orderId(), e.getMessage(), e);
             orderCompensationPublisher.publish(
                     createdEvent.orderId(),

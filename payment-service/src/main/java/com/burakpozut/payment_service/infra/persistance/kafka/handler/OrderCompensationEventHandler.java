@@ -25,19 +25,19 @@ public class OrderCompensationEventHandler {
         }
 
         try {
-            log.warn("Received compensation event for order: {}, Reason: {}, Initiated by service: {}",
+            log.warn("payment.compensation.received orderId={} reason={} initiatedBy={}",
                     compensationEvent.orderId(), compensationEvent.reason(), compensationEvent.groupId());
 
             compensatePaymentService.handle(compensationEvent.orderId(), compensationEvent.reason());
         } catch (Exception e) {
-            log.error("Failed to process compensation event for order: {}, Error: {}",
+            log.error("payment.compensation.failed orderId={} message={}",
                     compensationEvent.orderId(), e.getMessage(), e);
         }
     }
 
     private boolean skipIfInitiatedByThisService(OrderCompensationEvent event) {
         if (groupId.equals(event.groupId())) {
-            log.debug("Skipping compensation event initiated by this service for order: {}",
+            log.debug("payment.compensation.ignored orderId={} reason=initiated_by_this_service",
                     event.orderId());
             return true;
         }

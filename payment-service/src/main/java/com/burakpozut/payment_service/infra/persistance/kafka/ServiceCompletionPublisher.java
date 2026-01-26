@@ -40,10 +40,10 @@ public class ServiceCompletionPublisher {
 
         future.whenComplete((result, exception) -> {
             if (exception == null) {
-                log.info("Successfully publish ServiceCompletionEvent for order: {} from service: {} to partition: {}",
+                log.info("kafka.serviceCompletion.published orderId={} serviceName={} partition={}",
                         orderId, serviceName, result.getRecordMetadata().partition());
             } else {
-                log.error("Failed to publish ServiceCompletionEvent for order: {} from service : {}, Error: {}",
+                log.error("kafka.serviceCompletion.publish_failed orderId={} serviceName={} message={}",
                         orderId, serviceName, exception.getMessage(), exception);
                 handlePublishFailure(event, exception);
             }
@@ -75,10 +75,10 @@ public class ServiceCompletionPublisher {
                     null);
 
             failedEventRepository.save(failedEvent);
-            log.info("Stored failed ServiceCompletionEvent for order: {} in database for later retry",
+            log.info("kafka.serviceCompletion.failed_event_stored orderId={} action=retry_later",
                     event.orderId());
         } catch (Exception e) {
-            log.error("Failed to store failed event for order: {}. Error: {}",
+            log.error("kafka.serviceCompletion.failed_event_storage_failed orderId={} message={}",
                     event.orderId(), e.getMessage(), e);
         }
     }

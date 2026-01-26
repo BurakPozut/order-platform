@@ -2,14 +2,14 @@ package com.burakpozut.payment_service.infra.order;
 
 import java.util.UUID;
 
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
-import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.Retry;
 
 import com.burakpozut.common.exception.ExternalServiceException;
@@ -21,63 +21,71 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class HttpOrderGateway implements OrderGateway {
-    private final WebClient webClient;
+    private final RestClient restClient;
     private final CircuitBreaker circuitBreaker;
     private final Retry retry;
 
-    public HttpOrderGateway(WebClient.Builder builder,
+    public HttpOrderGateway(RestClient.Builder builder,
             @Value("${order.service.url}") String orderServiceUrl,
             CircuitBreaker orderCircuitBreaker,
             Retry orderRetry) {
-        this.webClient = builder.baseUrl(orderServiceUrl).build();
+        this.restClient = builder.baseUrl(orderServiceUrl).build();
         this.circuitBreaker = orderCircuitBreaker;
         this.retry = orderRetry;
     }
 
     @Override
     public void validateOrderId(UUID orderId) {
-        // try {
-        webClient.get().uri("/api/orders/{id}", orderId).header("X-Source-Service", "payment-service")
-                .retrieve().toBodilessEntity()
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .onErrorMap(error -> mapError(error, orderId))
-                .block();
-    }
-
-    private Throwable mapError(Throwable error, UUID orderId) {
-        if (error instanceof WebClientResponseException.NotFound e) {
-            return mapNotFoundError(e, orderId);
-        } else if (error instanceof WebClientResponseException e) {
-            return e.getStatusCode().is5xxServerError()
-                    ? mapServerError(e, orderId)
-                    : mapClientError(e, orderId);
-        } else {
-            return mapNetworkError(error, orderId);
+        try {
+            retry.executeRunnable(() -> circuitBreaker.executeRunnable(() -> {
+                restClient.get()
+                        .uri("/api/orders/{id}", orderId)
+                        .header("X-Source-Service", "payment-service")
+                        .header("X-Trace-Id", safeTraceId())
+                        .retrieve()
+                        .toBodilessEntity();
+            }));
+        } catch (CallNotPermittedException e) {
+            handleCircuitBreakerOpenFallback(orderId);
+        } catch (RestClientResponseException e) {
+            throw mapResponseError(e, orderId);
+        } catch (Exception e) {
+            throw mapNetworkError(e, orderId);
         }
     }
 
-    private ExternalServiceNotFoundException mapNotFoundError(WebClientResponseException.NotFound e, UUID orderId) {
-        log.error("Payment endpoint not found for order {}: {} - {}",
-                orderId, e.getStatusCode(), e.getMessage());
-        return new ExternalServiceNotFoundException("Payment service endpoint not found: " + e.getMessage());
+    private String safeTraceId() {
+        String traceId = MDC.get("traceId");
+        return traceId == null ? "" : traceId;
     }
 
-    private ExternalServiceException mapServerError(WebClientResponseException e, UUID orderId) {
-        log.error("Payment service server error for order {}: {} - {}",
-                orderId, e.getStatusCode(), e.getMessage());
-        return new ExternalServiceException("Payment service returned server error: " + e.getStatusCode(), e);
+    private void handleCircuitBreakerOpenFallback(UUID orderId) {
+        log.warn("order.service.circuit_breaker_open orderId={} action=skip_validation",
+                orderId);
+        throw new ExternalServiceException(
+                "Order service circuit breaker is open - cannot validate order: " + orderId);
     }
 
-    private ExternalServiceException mapClientError(WebClientResponseException e, UUID orderId) {
-        log.error("Payment service client error for order {}: {} - {}",
+    private RuntimeException mapResponseError(RestClientResponseException e, UUID orderId) {
+        if (e.getStatusCode().is4xxClientError()) {
+            if (e.getStatusCode().value() == 404) {
+                log.error("order.endpoint.not_found orderId={} statusCode={} message={}",
+                        orderId, e.getStatusCode(), e.getMessage());
+                return new ExternalServiceNotFoundException("Order service endpoint not found: " + e.getMessage());
+            }
+            log.error("order.service.client_error orderId={} statusCode={} message={}",
+                    orderId, e.getStatusCode(), e.getMessage());
+            return new ExternalServiceException("Order service returned client error: " + e.getStatusCode(), e);
+        }
+
+        log.error("order.service.server_error orderId={} statusCode={} message={}",
                 orderId, e.getStatusCode(), e.getMessage());
-        return new ExternalServiceException("Payment service returned client error: " + e.getStatusCode(), e);
+        return new ExternalServiceException("Order service returned server error: " + e.getStatusCode(), e);
     }
 
     private ExternalServiceException mapNetworkError(Throwable error, UUID orderId) {
-        log.error("Failed to communicate with Payment service for order {}: {}",
+        log.error("order.service.communication_failed orderId={} message={}",
                 orderId, error.getMessage());
-        return new ExternalServiceException("Payment service is unavailable", error);
+        return new ExternalServiceException("Order service is unavailable", error);
     }
 }

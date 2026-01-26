@@ -19,9 +19,11 @@ public class CancelPaymentService {
 
     @Transactional
     public void handle(UUID orderId) {
+        log.info("payment.cancel.start orderId={}", orderId);
+
         var paymentOpt = paymentRepository.findById(orderId);
         if (paymentOpt.isEmpty()) {
-            log.warn("Payment not found for order: {}. Cancellation skipped.", orderId);
+            log.warn("payment.cancel.not_found orderId={} action=skipping", orderId);
             return;
         }
 
@@ -29,18 +31,18 @@ public class CancelPaymentService {
         PaymentStatus targetStatus = determineCancellationStatus(payment.status());
 
         if (targetStatus == null) {
-            log.info("Payment {} for order {} is already in terminal state: {}. No cancellation needed.",
+            log.info("payment.cancel.already_terminal paymentId={} orderId={} status={} action=skipping",
                     payment.id(), orderId, payment.status());
             return;
         }
 
-        log.info("CAncelling payment {} for order {}. Status transtition: {} -> {}.",
+        log.info("payment.cancel.transition paymentId={} orderId={} fromStatus={} toStatus={}",
                 payment.id(), orderId, payment.status(), targetStatus);
 
         var cancelled = payment.update(targetStatus, null, null, null);
         paymentRepository.save(cancelled, false);
 
-        log.info("Successfully cancelled payment {} for order {}. New status: {}",
+        log.info("payment.cancel.completed paymentId={} orderId={} newStatus={}",
                 payment.id(), orderId, targetStatus);
     }
 

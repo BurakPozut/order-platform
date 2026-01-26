@@ -37,33 +37,41 @@ public class PaymentController {
 
   @GetMapping
   public ResponseEntity<List<PaymentResponse>> getAll() {
+    log.info("api.payment.getAll.start");
     var payments = getAllPaymentsService.handle();
     var body = payments.stream().map(PaymentResponse::from).toList();
+    log.info("api.payment.getAll.completed count={}", body.size());
     return ResponseEntity.ok(body);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<PaymentResponse> getById(@PathVariable UUID id) {
-    var payemnt = getPaymentByIdService.handle(id);
-    var body = PaymentResponse.from(payemnt);
+    log.info("api.payment.getById.start paymentId={}", id);
+    var payment = getPaymentByIdService.handle(id);
+    var body = PaymentResponse.from(payment);
+    log.info("api.payment.getById.completed paymentId={}", id);
     return ResponseEntity.ok(body);
   }
 
   @PostMapping()
   public ResponseEntity<PaymentResponse> create(@Valid @RequestBody CreatePaymentRequest request) {
+    log.info("api.payment.create.start orderId={} amount={} currency={}",
+            request.orderId(), request.amount(), request.currency());
     var command = PaymentMapper.toCommand(request);
     var saved = createPaymentService.handle(command);
     var body = PaymentResponse.from(saved);
+    log.info("api.payment.create.completed paymentId={} orderId={}", saved.id(), saved.orderId());
     return ResponseEntity.ok(body);
   }
 
   @PatchMapping("/{id}")
   public ResponseEntity<PaymentResponse> patch(@PathVariable UUID id,
       @Valid @RequestBody PatchPaymentRequest request) {
+    log.info("api.payment.patch.start paymentId={} status={}", id, request.status());
     var command = PaymentMapper.toCommand(request);
     var payment = patchPaymentService.handle(id, command);
     var body = PaymentResponse.from(payment);
-
+    log.info("api.payment.patch.completed paymentId={}", id);
     return ResponseEntity.ok(body);
   }
 

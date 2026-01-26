@@ -30,11 +30,14 @@ public class PatchPaymentService {
 
     if (updated != existing) {
       if (command.status() != null && !command.status().equals(existing.status())) {
-        log.info("Payment {} status transition: {} -> {}",
+        log.info("payment.patch.status_transition paymentId={} fromStatus={} toStatus={}",
             paymentId, existing.status(), command.status());
       }
-      return paymentRepository.save(updated, false);
+      var saved = paymentRepository.save(updated, false);
+      log.info("payment.patch.completed paymentId={} status={}", saved.id(), saved.status());
+      return saved;
     }
+    log.debug("payment.patch.no_changes paymentId={}", paymentId);
     return existing;
   }
 }

@@ -22,8 +22,10 @@ public class CompensatePaymentService {
     public void handle(UUID orderId, String reason) {
         var paymentOpt = paymentRepository.findByOrderId(orderId);
 
+        log.info("payment.compensate.start orderId={} reason={}", orderId, reason);
+
         if (paymentOpt.isEmpty()) {
-            log.warn("Payment not found for order: {}. Compensation skipped. Reason:{}",
+            log.warn("payment.compensate.not_found orderId={} reason={} action=skipping",
                     orderId, reason);
             return;
         }
@@ -32,18 +34,18 @@ public class CompensatePaymentService {
         PaymentStatus targetStatus = determineCompensationStatus(payment.status());
 
         if (targetStatus == null) {
-            log.info("Payment {} for order {} is already in terminal state: {}. No compensation needed.",
+            log.info("payment.compensate.already_terminal paymentId={} orderId={} status={} action=skipping",
                     payment.id(), orderId, payment.status());
             return;
         }
 
-        log.info("Compensating payment {} for order {}. Status transition: {} -> {}. Reason: {}",
+        log.info("payment.compensate.transition paymentId={} orderId={} fromStatus={} toStatus={} reason={}",
                 payment.id(), orderId, payment.status(), targetStatus, reason);
 
         var compensated = payment.update(targetStatus, null, null, null);
         paymentRepository.save(compensated, false);
 
-        log.info("Successfully compensated payment {} for order {}. New status: {}",
+        log.info("payment.compensate.completed paymentId={} orderId={} newStatus={}",
                 payment.id(), orderId, targetStatus);
 
     }
