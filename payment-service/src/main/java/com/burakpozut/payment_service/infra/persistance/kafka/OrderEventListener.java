@@ -8,7 +8,9 @@ import com.burakpozut.payment_service.infra.persistance.kafka.handler.OrderCance
 import com.burakpozut.payment_service.infra.persistance.kafka.handler.OrderCompensationEventHandler;
 import com.burakpozut.payment_service.infra.persistance.kafka.handler.OrderCreatedEventHandler;
 
+import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
@@ -24,14 +26,27 @@ public class OrderEventListener {
     private final OrderCancelledEventHandler orderCancelledEventHandler;
 
     @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
-    public void onMessage(@Payload OrderEvent event) {
-        log.info("kafka.orderEvent.received orderId={} eventType={}",
-                event.orderId(), event.getClass().getSimpleName());
+    public void onMessage(@Payload OrderEvent event,
+            @Header(name = "X-Trace-Id", required = false) String traceId) {
+        log.debug("traceId coming from event ---- {}", traceId);
+        if (traceId != null && !traceId.isBlank()) {
+            MDC.put("traceId", traceId);
+        }
 
-        switch (event) {
-            case OrderCreatedEvent createdEvent -> orderCreatedEventHandler.handle(createdEvent);
-            case OrderCompensationEvent compensationEvent -> orderCompensationEventHandler.handle(compensationEvent);
-            case OrderCancelledEvent cancelledEvent -> orderCancelledEventHandler.handle(cancelledEvent);
+        try {
+
+            log.info("kafka.orderEvent.received orderId={} eventType={}",
+                    event.orderId(), event.getClass().getSimpleName());
+
+            switch (event) {
+                case OrderCreatedEvent createdEvent -> orderCreatedEventHandler.handle(createdEvent);
+                case OrderCompensationEvent compensationEvent ->
+                    orderCompensationEventHandler.handle(compensationEvent);
+                case OrderCancelledEvent cancelledEvent -> orderCancelledEventHandler.handle(cancelledEvent);
+            }
+
+        } finally {
+            MDC.remove("traceId");
         }
     }
 

@@ -6,6 +6,9 @@ import java.util.concurrent.CompletableFuture;
 import com.burakpozut.common.domain.ServiceName;
 import com.burakpozut.common.event.order.ServiceCompletionEvent;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -27,8 +30,14 @@ public class ServiceCompletionPublisher {
     public void publish(UUID orderId, ServiceName serviceName) {
         var event = ServiceCompletionEvent.of(orderId, serviceName);
 
-        CompletableFuture<SendResult<String, ServiceCompletionEvent>> future = kafkaTemplate.send(topic,
+        ProducerRecord<String, ServiceCompletionEvent> record = new ProducerRecord<String, ServiceCompletionEvent>(
+                topic,
                 orderId.toString(), event);
+        String traceId = MDC.get("traceId");
+        if (traceId != null && !traceId.isBlank()) {
+            record.headers().add(new RecordHeader("X-Trace-Id", traceId.getBytes()));
+        }
+        CompletableFuture<SendResult<String, ServiceCompletionEvent>> future = kafkaTemplate.send(record);
 
         future.whenComplete((result, exception) -> {
             if (exception == null) {
@@ -43,7 +52,8 @@ public class ServiceCompletionPublisher {
     }
 
     private void handlePublishFailure(UUID orderId, ServiceName serviceName, Throwable failure) {
-        log.warn("kafka.serviceCompletion.publish_failed orderId={} serviceName={} message={} action=order_confirmation_delayed",
+        log.warn(
+                "kafka.serviceCompletion.publish_failed orderId={} serviceName={} message={} action=order_confirmation_delayed",
                 orderId, serviceName, failure.getMessage());
     }
 

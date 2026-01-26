@@ -9,7 +9,9 @@ import com.burakpozut.notification_service.domain.NotificationChannel;
 import com.burakpozut.notification_service.domain.NotificationStatus;
 import com.burakpozut.notification_service.domain.NotificationType;
 
+import org.slf4j.MDC;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +28,12 @@ public class OrderCreatedListener {
     private final ServiceCompletionPublisher serviceCompletionPublisher;
 
     @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
-    public void onMessage(@Payload OrderEvent event) {
+    public void onMessage(@Payload OrderEvent event, @Header(name = "X-Trace-Id") String traceId) {
         if (event instanceof OrderCreatedEvent createdEvent) {
 
+            if (traceId != null && !traceId.isBlank()) {
+                MDC.put("traceId", traceId);
+            }
             try {
                 var command = CreateNotificationCommand.of(
                         createdEvent.customerId(), createdEvent.orderId(),
@@ -52,6 +57,8 @@ public class OrderCreatedListener {
                         createdEvent.customerId(),
                         createdEvent.items(),
                         "Notification service failed: " + e.getMessage());
+            } finally {
+                MDC.remove("traceId");
             }
         } // we are ignoring OrderCompensationEvent right now
     }

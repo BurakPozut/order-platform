@@ -13,6 +13,9 @@ import com.burakpozut.payment_service.infra.persistance.failed_event.SpringDataF
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -41,9 +44,16 @@ public class OrderCompensationPublisher {
                 UuidCreator.getTimeOrdered(),
                 Instant.now(), orderId, customerId, items, reason, groupId);
 
-        CompletableFuture<SendResult<String, OrderCompensationEvent>> future = kafkaTemplate.send(topic,
-                orderId.toString(),
-                event);
+        ProducerRecord<String, OrderCompensationEvent> record = new ProducerRecord<String, OrderCompensationEvent>(
+                topic,
+                orderId.toString(), event);
+        String traceId = MDC.get("traceId");
+        if (traceId != null && !traceId.isBlank()) {
+            record.headers().add(new RecordHeader("X-Trace-Id", traceId.getBytes()));
+        }
+
+        CompletableFuture<SendResult<String, OrderCompensationEvent>> future = kafkaTemplate.send(record);
+
         future.whenComplete((result, exception) -> {
             if (exception == null) {
                 log.info("kafka.orderCompensation.published orderId={} partition={}",

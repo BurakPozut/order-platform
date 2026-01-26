@@ -11,6 +11,9 @@ import com.burakpozut.payment_service.infra.persistance.failed_event.SpringDataF
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.uuid.UuidCreator;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -34,6 +37,14 @@ public class ServiceCompletionPublisher {
 
     public void publish(UUID orderId, ServiceName serviceName) {
         var event = ServiceCompletionEvent.of(orderId, serviceName);
+
+        ProducerRecord<String, ServiceCompletionEvent> record = new ProducerRecord<String, ServiceCompletionEvent>(
+                topic,
+                orderId.toString(), event);
+        String traceId = MDC.get("traceId");
+        if (traceId != null && !traceId.isBlank()) {
+            record.headers().add(new RecordHeader("X-Trace-Id", traceId.getBytes()));
+        }
 
         CompletableFuture<SendResult<String, ServiceCompletionEvent>> future = kafkaTemplate.send(topic,
                 orderId.toString(), event);
