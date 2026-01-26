@@ -18,11 +18,14 @@ public class GetCustomerByIdService {
   private final CustomerRepository customerRepository;
 
   public Customer handle(UUID id) {
-    log.debug("Looking up customer with ID: {}", id);
-    return customerRepository.findById(id).orElseThrow(() -> {
-      log.warn("Customer not found with ID: {}", id);
+    log.debug("customer.getById.start customerId={}", id);
+    var customer = customerRepository.findById(id).orElseThrow(() -> {
+      log.warn("customer.getById.not_found customerId={}", id);
       return new CustomerNotFoundException(id);
     });
+    log.info("customer.getById.found customerId={} email={} fullName={}",
+            customer.id(), customer.email(), customer.fullName());
+    return customer;
   }
 
 }

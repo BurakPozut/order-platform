@@ -42,41 +42,51 @@ public class CustomerController {
 
   @GetMapping
   public ResponseEntity<List<CustomerResponse>> getAll() {
+    log.info("api.customer.getAll.start");
     var customers = getAllCustomersService.handle();
     var body = customers.stream().map(CustomerResponse::from).collect(Collectors.toList());
+    log.info("api.customer.getAll.completed count={}", body.size());
     return ResponseEntity.ok(body);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<CustomerResponse> getById(@PathVariable UUID id) {
+    log.info("api.customer.getById.start customerId={}", id);
     var customer = getCustomerByIdService.handle(id);
     var body = CustomerResponse.from(customer);
+    log.info("api.customer.getById.completed customerId={}", id);
     return ResponseEntity.ok(body);
   }
 
   @PostMapping()
   public ResponseEntity<CustomerResponse> create(@RequestBody @Valid CreateCustomerRequest request) {
+    log.info("api.customer.create.start email={} fullName={}", request.email(), request.fullName());
     var command = CustomerMapper.toCommand(request);
     var customer = createCustomerService.handle(command);
     var body = CustomerResponse.from(customer);
-
+    log.info("api.customer.create.completed customerId={} email={}", customer.id(), customer.email());
     return ResponseEntity.ok(body);
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<CustomerResponse> update(@PathVariable UUID id,
       @Valid @RequestBody UpdateCustomerRequest request) {
+    log.info("api.customer.update.start customerId={} email={} fullName={}",
+            id, request.email(), request.fullName());
     var command = CustomerMapper.toCommand(request);
     var customer = updateCustomerService.handle(id, command);
-
+    log.info("api.customer.update.completed customerId={}", id);
     return ResponseEntity.ok(CustomerResponse.from(customer));
   }
 
   @PatchMapping("/{id}")
   public ResponseEntity<CustomerResponse> patch(@PathVariable UUID id,
       @Valid @RequestBody PatchCustomerRequest request) {
+    log.info("api.customer.patch.start customerId={} email={} fullName={}",
+            id, request.email(), request.fullName());
     var command = CustomerMapper.toCommand(request);
     var customer = patchCustomerService.handle(id, command);
+    log.info("api.customer.patch.completed customerId={}", id);
     return ResponseEntity.ok(CustomerResponse.from(customer));
   }
 }

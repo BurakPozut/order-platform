@@ -11,13 +11,18 @@ import com.burakpozut.customer_service.domain.Customer;
 import com.burakpozut.customer_service.domain.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PatchCustomerService {
   private final CustomerRepository customerRepository;
 
   public Customer handle(UUID id, PatchCustomerCommand command) {
+    log.info("customer.patch.start customerId={} email={} fullName={}",
+            id, command.email(), command.fullName());
+
     var existing = customerRepository.findById(id)
         .orElseThrow(() -> new CustomerNotFoundException(id));
 
@@ -25,11 +30,16 @@ public class PatchCustomerService {
     String newEmail = command.email() != null ? command.email() : existing.email();
 
     if (command.email() != null && !existing.email().equals(newEmail) && customerRepository.existsByEmail(newEmail)) {
+      log.warn("customer.patch.email_conflict customerId={} newEmail={}",
+              id, newEmail);
       throw new EmailAlreadyInUseException(newEmail);
     }
 
     var updated = Customer.rehydrate(id, newFullName, newEmail);
-    return customerRepository.save(updated, false);
+    var saved = customerRepository.save(updated, false);
+    log.info("customer.patch.completed customerId={} email={} fullName={}",
+            saved.id(), saved.email(), saved.fullName());
+    return saved;
   }
 
 }
