@@ -2,15 +2,15 @@ package com.burakpozut.order_service.infra.notification;
 
 import java.util.UUID;
 
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
-import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.Retry;
 
 import com.burakpozut.common.exception.ExternalServiceException;
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class HttpNotificationGateway implements NotificationGateway {
-    private final WebClient webClient;
+    private final RestClient restClient;
     private final CircuitBreaker circuitBreaker;
     private final Retry retry;
 
@@ -34,11 +34,11 @@ public class HttpNotificationGateway implements NotificationGateway {
             String status) {
     }
 
-    public HttpNotificationGateway(WebClient.Builder builder,
+    public HttpNotificationGateway(RestClient.Builder builder,
             @Value("${notification.service.url}") String notificationServiceUrl,
             CircuitBreaker notificationCircuitBreaker,
             Retry notificationRetry) {
-        this.webClient = builder.baseUrl(notificationServiceUrl).build();
+        this.restClient = builder.baseUrl(notificationServiceUrl).build();
         this.circuitBreaker = notificationCircuitBreaker;
         this.retry = notificationRetry;
     }
@@ -48,45 +48,56 @@ public class HttpNotificationGateway implements NotificationGateway {
         var request = new CreateNotificationRequest(customerId, orderId, "ORDER_CONFIRMED",
                 "EMAIL", "PENDING");
 
-        webClient.post().uri("/api/notifications").header("X-Source-Service", "order-service")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(request)
-                .retrieve()
-                .toBodilessEntity()
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .onErrorMap(error -> mapError(error, orderId))
-                .block();
-    }
-
-    private Throwable mapError(Throwable error, UUID orderId) {
-        if (error instanceof WebClientResponseException.NotFound e) {
-            return mapNotFoundError(e, orderId);
-        } else if (error instanceof WebClientResponseException e) {
-            return e.getStatusCode().is5xxServerError()
-                    ? mapServerError(e, orderId)
-                    : mapClientError(e, orderId);
-        } else {
-            return mapNetworkError(error, orderId);
+        try {
+            retry.executeRunnable(() -> circuitBreaker.executeRunnable(() -> {
+                restClient.post()
+                        .uri("/api/notifications")
+                        .header("X-Source-Service", "order-service")
+                        .header("X-Trace-Id", safeTraceId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(request)
+                        .retrieve()
+                        .toBodilessEntity();
+            }));
+        } catch (CallNotPermittedException e) {
+            handleCircuitBreakerOpenFallback(orderId);
+        } catch (RestClientResponseException e) {
+            throw mapResponseError(e, orderId);
+        } catch (Exception e) {
+            throw mapNetworkError(e, orderId);
         }
     }
 
-    private ExternalServiceNotFoundException mapNotFoundError(WebClientResponseException.NotFound e, UUID orderId) {
-        log.error("notification.endpoint.not_found orderId={} statusCode={} message={}",
-                orderId, e.getStatusCode(), e.getMessage());
-        return new ExternalServiceNotFoundException("Notification service endpoint not found: " + e.getMessage());
+    private String safeTraceId() {
+        String traceId = MDC.get("traceId");
+        return traceId == null ? "" : traceId;
     }
 
-    private ExternalServiceException mapServerError(WebClientResponseException e, UUID orderId) {
+    private void handleCircuitBreakerOpenFallback(UUID orderId) {
+        log.warn("notification.service.circuit_breaker_open orderId={} action=skip_notification",
+                orderId);
+        throw new ExternalServiceException(
+                "Notification service circuit breaker is open - cannot send notification: " + orderId);
+    }
+
+    private RuntimeException mapResponseError(RestClientResponseException e, UUID orderId) {
+        if (e.getStatusCode().is4xxClientError()) {
+            if (e.getStatusCode().value() == 404) {
+                log.error("notification.endpoint.not_found orderId={} statusCode={} message={}",
+                        orderId, e.getStatusCode(), e.getMessage());
+                return new ExternalServiceNotFoundException(
+                        "Notification service endpoint not found: " + e.getMessage());
+            }
+            log.error("notification.service.client_error orderId={} statusCode={} message={}",
+                    orderId, e.getStatusCode(), e.getMessage());
+            return new ExternalServiceException(
+                    "Notification service returned client error: " + e.getStatusCode(), e);
+        }
+
         log.error("notification.service.server_error orderId={} statusCode={} message={}",
                 orderId, e.getStatusCode(), e.getMessage());
-        return new ExternalServiceException("Notification service returned server error: " + e.getStatusCode(), e);
-    }
-
-    private ExternalServiceException mapClientError(WebClientResponseException e, UUID orderId) {
-        log.error("notification.service.client_error orderId={} statusCode={} message={}",
-                orderId, e.getStatusCode(), e.getMessage());
-        return new ExternalServiceException("Notification service returned client error: " + e.getStatusCode(), e);
+        return new ExternalServiceException(
+                "Notification service returned server error: " + e.getStatusCode(), e);
     }
 
     private ExternalServiceException mapNetworkError(Throwable error, UUID orderId) {

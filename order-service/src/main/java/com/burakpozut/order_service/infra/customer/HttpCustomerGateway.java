@@ -13,6 +13,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.retry.Retry;
 
 import com.burakpozut.common.exception.ExternalServiceException;
+import com.burakpozut.common.exception.ExternalServiceNotFoundException;
 import com.burakpozut.order_service.domain.gateway.CustomerGateway;
 
 import lombok.extern.slf4j.Slf4j;
@@ -67,14 +68,13 @@ public class HttpCustomerGateway implements CustomerGateway {
                 "Customer service circuit breaker is open - cannot validate customer: " + customerId);
     }
 
-    private ExternalServiceException mapResponseError(RestClientResponseException e, UUID customerId) {
+    private RuntimeException mapResponseError(RestClientResponseException e, UUID customerId) {
         if (e.getStatusCode().is4xxClientError()) {
             if (e.getStatusCode().value() == 404) {
                 log.error("customer.endpoint.not_found customerId={} statusCode={} message={}",
                         customerId, e.getStatusCode(), e.getMessage());
 
-                // TODO: make this ExternalServiceNotFound exception
-                return new ExternalServiceException("Customer service endpoint not found: " + e.getMessage());
+                return new ExternalServiceNotFoundException("Customer service endpoint not found: " + e.getMessage());
             }
             log.error("customer.service.client_error customerId={} statusCode={} message={}",
                     customerId, e.getStatusCode(), e.getMessage());

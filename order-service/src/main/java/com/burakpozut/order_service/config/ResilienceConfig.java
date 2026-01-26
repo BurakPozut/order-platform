@@ -4,7 +4,7 @@ import java.time.Duration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClientResponseException;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -49,7 +49,7 @@ public class ResilienceConfig {
                     if (throwable instanceof CallNotPermittedException) {
                         return false;
                     }
-                    if (throwable instanceof WebClientResponseException e) {
+                    if (throwable instanceof RestClientResponseException e) {
                         return e.getStatusCode().is5xxServerError();
                     }
                     return true;
@@ -80,7 +80,7 @@ public class ResilienceConfig {
                     if (throwable instanceof CallNotPermittedException) {
                         return false;
                     }
-                    if (throwable instanceof WebClientResponseException e) {
+                    if (throwable instanceof RestClientResponseException e) {
                         return e.getStatusCode().is5xxServerError();
                     }
                     return true;
@@ -111,7 +111,7 @@ public class ResilienceConfig {
                     if (throwable instanceof CallNotPermittedException) {
                         return false;
                     }
-                    if (throwable instanceof WebClientResponseException e) {
+                    if (throwable instanceof RestClientResponseException e) {
                         return e.getStatusCode().is5xxServerError();
                     }
                     return true;
@@ -142,7 +142,7 @@ public class ResilienceConfig {
                     if (throwable instanceof CallNotPermittedException) {
                         return false;
                     }
-                    if (throwable instanceof WebClientResponseException e) {
+                    if (throwable instanceof RestClientResponseException e) {
                         return e.getStatusCode().is5xxServerError();
                     }
                     return true;
