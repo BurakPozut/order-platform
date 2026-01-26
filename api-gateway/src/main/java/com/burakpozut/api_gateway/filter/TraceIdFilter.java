@@ -23,7 +23,7 @@ public class TraceIdFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String traceId = extreactTraceId(request);
+        String traceId = extractTraceId(request);
         if (traceId == null || traceId.isBlank()) {
             traceId = UUID.randomUUID().toString();
         }
@@ -35,7 +35,7 @@ public class TraceIdFilter extends OncePerRequestFilter {
 
     }
 
-    private String extreactTraceId(HttpServletRequest request) {
+    private String extractTraceId(HttpServletRequest request) {
         String traceParent = request.getHeader(TRACEPARENT_HEADER);
         if (traceParent != null && traceParent.split("-").length >= 3) {
             return traceParent.split("-")[1];

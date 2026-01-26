@@ -18,7 +18,6 @@ import com.burakpozut.order_service.domain.gateway.CustomerGateway;
 
 import lombok.extern.slf4j.Slf4j;
 
-// TODO: make this change in every http clint we are no longer using webClient
 // TODO: in kafka logs we lost the traceId?
 @Component
 @Slf4j
@@ -38,6 +37,7 @@ public class HttpCustomerGateway implements CustomerGateway {
 
     @Override
     public void validateCustomerExists(UUID customerId) {
+        log.debug("trace.forwarded {}", safeTraceId());
         try {
             retry.executeRunnable(() -> circuitBreaker.executeRunnable(() -> {
                 restClient.get()
