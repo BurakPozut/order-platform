@@ -40,13 +40,22 @@ public class ServiceCompletionPublisher {
         CompletableFuture<SendResult<String, ServiceCompletionEvent>> future = kafkaTemplate.send(record);
 
         future.whenComplete((result, exception) -> {
-            if (exception == null) {
-                log.info("kafka.serviceCompletion.published orderId={} serviceName={} partition={}",
-                        orderId, serviceName, result.getRecordMetadata().partition());
-            } else {
-                log.error("kafka.serviceCompletion.publish_failed orderId={} serviceName={} message={}",
-                        orderId, serviceName, exception.getMessage(), exception);
-                handlePublishFailure(orderId, serviceName, exception);
+            if (traceId != null && !traceId.isBlank()) {
+                MDC.put("traceId", traceId);
+            }
+            try {
+
+                if (exception == null) {
+                    log.info("kafka.serviceCompletion.published orderId={} serviceName={} partition={}",
+                            orderId, serviceName, result.getRecordMetadata().partition());
+                } else {
+                    log.error("kafka.serviceCompletion.publish_failed orderId={} serviceName={} message={}",
+                            orderId, serviceName, exception.getMessage(), exception);
+                    handlePublishFailure(orderId, serviceName, exception);
+                }
+
+            } finally {
+                MDC.remove("traceId");
             }
         });
     }
