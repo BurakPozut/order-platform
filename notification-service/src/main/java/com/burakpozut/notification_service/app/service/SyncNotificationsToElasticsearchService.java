@@ -21,13 +21,13 @@ public class SyncNotificationsToElasticsearchService {
     private final NotificationElasticsearchRepository elasticsearchRepository;
 
     public SyncResult handle() {
-        log.info("Starting sync of notifications from database to Elasticsearch...");
+        log.info("notification.sync.start");
 
         List<Notification> notifications = notificationRepository.findAll();
-        log.info("Found {} notifications in database", notifications.size());
+        log.debug("notification.sync.found_in_database count={}", notifications.size());
 
         if (notifications.isEmpty()) {
-            log.info("No notifications to sync");
+            log.info("notification.sync.empty action=skipping");
             return new SyncResult(0, 0);
         }
 
@@ -37,7 +37,8 @@ public class SyncNotificationsToElasticsearchService {
 
         elasticsearchRepository.saveAll(documents);
 
-        log.info("Successfully synced {} notifications to Elasticsearch", documents.size());
+        log.info("notification.sync.completed totalInDatabase={} syncedToElasticsearch={}",
+                notifications.size(), documents.size());
 
         return new SyncResult(notifications.size(), documents.size());
     }

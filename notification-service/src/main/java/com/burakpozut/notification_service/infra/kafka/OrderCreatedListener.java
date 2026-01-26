@@ -36,13 +36,16 @@ public class OrderCreatedListener {
                         NotificationChannel.EMAIL,
                         NotificationStatus.PENDING);
 
-                createNotificationService.handle(command);
-                log.info("Successfully created notification for order: {}", createdEvent.orderId());
+                var notification = createNotificationService.handle(command);
+                log.info("notification.orderCreated.notification_created notificationId={} orderId={} customerId={}",
+                        notification.id(), createdEvent.orderId(), createdEvent.customerId());
 
                 serviceCompletionPublisher.publish(createdEvent.orderId(), ServiceName.NOTIFICATION);
+                log.debug("notification.orderCreated.completion_published orderId={} serviceName=NOTIFICATION",
+                        createdEvent.orderId());
             } catch (Exception e) {
-                log.error("Failed to create notification for order: {}, Reason: {}",
-                        createdEvent.orderId(), e.getMessage(), e);
+                log.error("notification.orderCreated.failed orderId={} customerId={} message={} action=compensate",
+                        createdEvent.orderId(), createdEvent.customerId(), e.getMessage(), e);
 
                 compensationPublisher.publish(
                         createdEvent.orderId(),

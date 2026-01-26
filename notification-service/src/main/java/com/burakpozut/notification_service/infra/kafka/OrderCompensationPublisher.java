@@ -46,10 +46,10 @@ public class OrderCompensationPublisher {
 
         future.whenComplete((result, exception) -> {
             if (exception == null) {
-                log.info("Successfully published OrderCompensationEvent for order: {} to partition: {}",
+                log.info("kafka.orderCompensation.published orderId={} partition={}",
                         orderId, result.getRecordMetadata().partition());
             } else {
-                log.error("Failed to publish OrderCompensationEvent for order: {}. Error: {}",
+                log.error("kafka.orderCompensation.publish_failed orderId={} message={}",
                         orderId, exception.getMessage(), exception);
                 handlePublishFailure(orderId, exception);
             }
@@ -57,7 +57,7 @@ public class OrderCompensationPublisher {
     }
 
     private void handlePublishFailure(UUID orderId, Throwable failure) {
-        log.warn("Event publish failed, Order might still be pending mode. OrderId: {}",
-                orderId);
+        log.warn("kafka.orderCompensation.publish_failed orderId={} message={} action=order_may_be_pending",
+                orderId, failure.getMessage());
     }
 }

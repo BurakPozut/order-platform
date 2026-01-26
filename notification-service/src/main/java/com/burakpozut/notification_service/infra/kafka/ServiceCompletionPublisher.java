@@ -32,10 +32,10 @@ public class ServiceCompletionPublisher {
 
         future.whenComplete((result, exception) -> {
             if (exception == null) {
-                log.info("Successfully publish ServiceCompletionEvent for order: {} from service: {} to partition: {}",
+                log.info("kafka.serviceCompletion.published orderId={} serviceName={} partition={}",
                         orderId, serviceName, result.getRecordMetadata().partition());
             } else {
-                log.error("Failed to publish ServiceCompletionEvent for order:{} from service: {}, Error: {}",
+                log.error("kafka.serviceCompletion.publish_failed orderId={} serviceName={} message={}",
                         orderId, serviceName, exception.getMessage(), exception);
                 handlePublishFailure(orderId, serviceName, exception);
             }
@@ -43,8 +43,8 @@ public class ServiceCompletionPublisher {
     }
 
     private void handlePublishFailure(UUID orderId, ServiceName serviceName, Throwable failure) {
-        log.warn("ServiceCompletionEvent publish failed for order: {} from service: {}. " +
-                "Order confirmation may be delayed.", orderId, serviceName);
+        log.warn("kafka.serviceCompletion.publish_failed orderId={} serviceName={} message={} action=order_confirmation_delayed",
+                orderId, serviceName, failure.getMessage());
     }
 
 }
