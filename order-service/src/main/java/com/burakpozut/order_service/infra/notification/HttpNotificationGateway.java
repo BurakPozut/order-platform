@@ -72,25 +72,25 @@ public class HttpNotificationGateway implements NotificationGateway {
     }
 
     private ExternalServiceNotFoundException mapNotFoundError(WebClientResponseException.NotFound e, UUID orderId) {
-        log.error("Notification endpoint not found for order {}: {} - {}",
+        log.error("notification.endpoint.not_found orderId={} statusCode={} message={}",
                 orderId, e.getStatusCode(), e.getMessage());
         return new ExternalServiceNotFoundException("Notification service endpoint not found: " + e.getMessage());
     }
 
     private ExternalServiceException mapServerError(WebClientResponseException e, UUID orderId) {
-        log.error("Notification service server error for order {}: {} - {}",
+        log.error("notification.service.server_error orderId={} statusCode={} message={}",
                 orderId, e.getStatusCode(), e.getMessage());
         return new ExternalServiceException("Notification service returned server error: " + e.getStatusCode(), e);
     }
 
     private ExternalServiceException mapClientError(WebClientResponseException e, UUID orderId) {
-        log.error("Notification service client error for order {}: {} - {}",
+        log.error("notification.service.client_error orderId={} statusCode={} message={}",
                 orderId, e.getStatusCode(), e.getMessage());
         return new ExternalServiceException("Notification service returned client error: " + e.getStatusCode(), e);
     }
 
     private ExternalServiceException mapNetworkError(Throwable error, UUID orderId) {
-        log.error("Failed to communicate with Notification service for order {}: {}",
+        log.error("notification.service.communication_failed orderId={} message={}",
                 orderId, error.getMessage());
         return new ExternalServiceException("Notification service is unavailable", error);
     }

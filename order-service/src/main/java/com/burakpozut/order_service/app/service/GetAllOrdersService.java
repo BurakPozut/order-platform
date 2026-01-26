@@ -10,9 +10,11 @@ import com.burakpozut.order_service.domain.Order;
 import com.burakpozut.order_service.domain.repository.OrderRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GetAllOrdersService {
     private final OrderRepository orderRepository;
 
@@ -21,6 +23,7 @@ public class GetAllOrdersService {
     }
 
     public Slice<Order> handle(Pageable pageable) {
+        log.info("order.getAll.start page={} size={}", pageable.getPageNumber(), pageable.getPageSize());
         return orderRepository.findAll(pageable);
     }
 }

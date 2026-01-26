@@ -64,14 +64,14 @@ public class FailedEventRetryService {
             return;
         }
 
-        log.info("Found {} failed events to retry", eventsToRetry.size());
+        log.info("failedEvent.retry.start count={}", eventsToRetry.size());
 
         for (FailedEventJpaEntity failedEvent : eventsToRetry) {
             try {
                 retryEvent(failedEvent);
             } catch (Exception e) {
-                log.error("Error retrying failed event: {}. Error: {}",
-                        failedEvent.getId(), e.getMessage());
+                log.error("failedEvent.retry.error eventId={} message={}",
+                        failedEvent.getId(), e.getMessage(), e);
             }
         }
 
@@ -100,18 +100,18 @@ public class FailedEventRetryService {
 
             future.whenComplete((result, exception) -> {
                 if (exception == null) {
-                    log.info("Successfully retried event: {} for entity: {} (attempt {}/{})",
+                    log.info("failedEvent.retry.success eventId={} entityId={} attempt={} maxRetries={}",
                             failedEvent.getId(), failedEvent.getEntityId(),
                             failedEvent.getRetryCount(), MAX_RETRIES);
                     markAsCompleted(failedEvent);
                 } else {
-                    log.warn("Retry failed for event: {} (attempt {}/{})",
+                    log.warn("failedEvent.retry.failed eventId={} attempt={} maxRetries={}",
                             failedEvent.getId(), failedEvent.getRetryCount(), MAX_RETRIES);
                     handleRetryFailure(failedEvent, exception);
                 }
             });
         } catch (Exception e) {
-            log.error("Error deserializing or retrying event: {}. Error: {}",
+            log.error("failedEvent.retry.deserialization_error eventId={} message={}",
                     failedEvent.getId(), e.getMessage(), e);
             markAsFailed(failedEvent, "Deserialization error: " + e.getMessage());
         }
@@ -125,7 +125,7 @@ public class FailedEventRetryService {
 
             default -> {
                 Class<? extends OrderEvent> clazz = EVENT_CLASS_REGISTRY.get(eventType);
-                log.error("Could find the event type in the FailedEventRetryService.");
+                log.error("failedEvent.retry.unknown_event_type eventType={}", eventType);
                 yield clazz;
             }
         };
@@ -158,7 +158,7 @@ public class FailedEventRetryService {
     private void markAsCompleted(FailedEventJpaEntity failedEvent) {
         failedEvent.setStatus(FailedEventStatus.COMPLETED);
         failedEventRepository.save(failedEvent);
-        log.info("Marked failed event: {} as completed", failedEvent.getId());
+        log.info("failedEvent.completed eventId={}", failedEvent.getId());
     }
 
     @Transactional
@@ -180,14 +180,14 @@ public class FailedEventRetryService {
                 // Simple call - will publish OrderCancelledEvent automatically
                 cancelOrderService.handle(event.orderId());
 
-                log.info("Cancelled order: {} due to failed OrderCreatedEvent publish",
+                log.info("failedEvent.order.cancelled orderId={} reason=failed_publish",
                         event.orderId());
             } catch (Exception e) {
-                log.error("Failed to cancel order for failed event: {}. Error: {}",
-                        failedEvent.getId(), e.getMessage(), e);
+                log.error("failedEvent.order.cancel_failed eventId={} orderId={} message={}",
+                        failedEvent.getId(), failedEvent.getEntityId(), e.getMessage(), e);
             }
         }
-        log.warn("Marked failed event: {} as permanently failed after {} retries",
+        log.warn("failedEvent.permanently_failed eventId={} retryCount={}",
                 failedEvent.getId(), failedEvent.getRetryCount());
     }
 }

@@ -95,7 +95,7 @@ public class HttpProductGateway implements ProductGateway {
             return products.stream()
                     .collect(Collectors.toMap(ProductInfo::productId, Function.identity()));
         } catch (Exception e) {
-            log.error("Unexpected error fetching products", e);
+            log.error("product.fetch.failed productIds={}", productIds, e);
             throw new ExternalServiceException("Failed to fetch products", e);
         }
     }
@@ -110,7 +110,7 @@ public class HttpProductGateway implements ProductGateway {
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .onErrorResume(WebClientResponseException.NotFound.class,
                         e -> {
-                            log.warn("Product not found: {}", productId);
+                            log.warn("product.fetch.not_found productId={}", productId);
                             return Mono.empty(); // Return empty for 404 - product doesn't exist
                         })
                 .onErrorMap(error -> mapError(error, productId));
@@ -158,25 +158,25 @@ public class HttpProductGateway implements ProductGateway {
     }
 
     private ExternalServiceNotFoundException mapNotFoundError(WebClientResponseException.NotFound e, UUID productId) {
-        log.error("Product endpoint not found for product {}: {} - {}",
+        log.error("product.endpoint.not_found productId={} statusCode={} message={}",
                 productId, e.getStatusCode(), e.getMessage());
         return new ExternalServiceNotFoundException("Product service endpoint not found: " + e.getMessage());
     }
 
     private ExternalServiceException mapServerError(WebClientResponseException e, UUID productId) {
-        log.error("Product service server error for product {}: {} - {}",
+        log.error("product.service.server_error productId={} statusCode={} message={}",
                 productId, e.getStatusCode(), e.getMessage());
         return new ExternalServiceException("Product service returned server error: " + e.getStatusCode(), e);
     }
 
     private ExternalServiceException mapClientError(WebClientResponseException e, UUID productId) {
-        log.error("Product service client error for product {}: {} - {}",
+        log.error("product.service.client_error productId={} statusCode={} message={}",
                 productId, e.getStatusCode(), e.getMessage());
         return new ExternalServiceException("Product service returned client error: " + e.getStatusCode(), e);
     }
 
     private ExternalServiceException mapNetworkError(Throwable error, UUID productId) {
-        log.error("Failed to communicate with Product service for product {}: {}",
+        log.error("product.service.communication_failed productId={} message={}",
                 productId, error.getMessage());
         return new ExternalServiceException("Product service is unavailable", error);
     }

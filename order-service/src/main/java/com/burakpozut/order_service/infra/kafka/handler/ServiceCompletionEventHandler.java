@@ -31,22 +31,21 @@ public class ServiceCompletionEventHandler {
         UUID orderId = event.orderId();
         ServiceName serviceName = event.serviceName();
 
-        log.info("Received completion event for order: {} from service: {}",
+        log.info("order.completion.received orderId={} serviceName={}",
                 orderId, serviceName);
 
         OrderConfirmationState state = confirmationStateRepository
                 .findByOrderId(orderId)
                 .orElseGet(() -> {
-                    log.info("Creating new confirmation state for order: {}",
-                            orderId);
+                    log.info("order.confirmation.state.created orderId={}", orderId);
                     return confirmationStateRepository.save(OrderConfirmationState.createFor(orderId), true);
                 });
 
         OrderConfirmationState updateState = state.markServiceCompleted(serviceName);
         confirmationStateRepository.save(updateState, false);
 
-        log.info("Service {} completed for order: {}, State: payemnt = {}, product = {}, notification = {}",
-                serviceName, orderId,
+        log.info("order.completion.service_completed orderId={} serviceName={} paymentCompleted={} productCompleted={} notificationCompleted={}",
+                orderId, serviceName,
                 updateState.paymentCompleted(),
                 updateState.productCompleted(),
                 updateState.notificationCompleted());
@@ -57,7 +56,7 @@ public class ServiceCompletionEventHandler {
     }
 
     private void confirmOrder(UUID orderId, OrderConfirmationState state) {
-        log.info("All services completed for order: {}. Confirming order...", orderId);
+        log.info("order.completion.all_completed orderId={} action=confirming", orderId);
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalStateException("Order not found: " + orderId));
@@ -69,9 +68,9 @@ public class ServiceCompletionEventHandler {
             OrderConfirmationState confirmedState = state.markConfirmed();
             confirmationStateRepository.save(confirmedState, false);
 
-            log.info("Order {} confirmed successfully", orderId);
+            log.info("order.confirmed orderId={}", orderId);
         } else {
-            log.warn("Order {} is not in PENDING status. Current status {}",
+            log.warn("order.confirm.invalid_status orderId={} currentStatus={} expectedStatus=PENDING",
                     orderId, order.status());
         }
     }

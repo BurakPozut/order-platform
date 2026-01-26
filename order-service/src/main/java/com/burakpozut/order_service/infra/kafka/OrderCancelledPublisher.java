@@ -31,9 +31,10 @@ public class OrderCancelledPublisher {
         kafkaTemplate.send(topic, orderId.toString(), event)
                 .whenComplete((result, exception) -> {
                     if (exception == null) {
-                        log.info("Published OrderCancelledEvent for order: {}", orderId);
+                        log.info("kafka.orderCancelled.published orderId={}", orderId);
                     } else {
-                        log.error("Failed to publsih OrderCancelledEvent for order: {}", orderId, exception);
+                        log.error("kafka.orderCancelled.publish_failed orderId={} message={}",
+                                orderId, exception.getMessage(), exception);
                     }
                 });
     }

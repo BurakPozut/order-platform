@@ -49,7 +49,8 @@ public class OrderCreationService {
         Optional<Order> existing = orderRepository.findByIdempotencyKey(currentKey);
 
         if (existing.isPresent()) {
-            log.info("Returning existing order from current bucket : {}", currentKey);
+            log.info("order.create.idempotent_hit bucket=current orderId={} customerId={}",
+                    existing.get().id(), existing.get().customerId());
             return new CreationResult(existing.get(), false);
         }
         // Check Previous bucket (handles the boundry case)
@@ -58,9 +59,14 @@ public class OrderCreationService {
 
         // This is where we need freshness check
         if (existingPrev.isPresent() && isRecent(existingPrev.get())) {
-            log.info("Returning existing order from previous bucket: {}", prevKey);
+            log.info("order.create.idempotent_hit bucket=previous orderId={} customerId={}",
+                    existingPrev.get().id(), existingPrev.get().customerId());
+
             return new CreationResult(existing.get(), false);
         }
+
+        log.debug("order.create.validation.start customerId={} items={}",
+                command.customerId(), command.items() != null ? command.items().size() : 0);
 
         var validationResult = validateAndFetchData(command);
 
@@ -73,6 +79,10 @@ public class OrderCreationService {
                     command.status(),
                     command.currency(), orderItems, currentKey);
             var savedOrder = orderRepository.save(order, true);
+
+            log.info("order.create.persisted orderId={} customerId={} itemCount={}",
+                    savedOrder.id(), savedOrder.customerId(), savedOrder.items().size());
+
             return new CreationResult(savedOrder, true);
         });
     }

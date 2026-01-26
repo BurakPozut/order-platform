@@ -67,7 +67,7 @@ public record Order(
   public static Order of(UUID customerId, OrderStatus status,
       BigDecimal totalAmount, Currency currency, List<OrderItem> items, String idempotencyKey) {
 
-    log.debug("idempotency key in the object: " + idempotencyKey);
+    log.debug("order.create.idempotency_key idempotencyKey={}", idempotencyKey);
     return new Order(
         UUID.randomUUID(),
         customerId,

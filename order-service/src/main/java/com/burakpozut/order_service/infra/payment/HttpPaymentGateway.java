@@ -73,25 +73,25 @@ public class HttpPaymentGateway implements PaymentGateway {
     }
 
     private ExternalServiceNotFoundException mapNotFoundError(WebClientResponseException.NotFound e, UUID orderId) {
-        log.error("Payment endpoint not found for order {}: {} - {}",
+        log.error("payment.endpoint.not_found orderId={} statusCode={} message={}",
                 orderId, e.getStatusCode(), e.getMessage());
         return new ExternalServiceNotFoundException("Payment service endpoint not found: " + e.getMessage());
     }
 
     private ExternalServiceException mapServerError(WebClientResponseException e, UUID orderId) {
-        log.error("Payment service server error for order {}: {} - {}",
+        log.error("payment.service.server_error orderId={} statusCode={} message={}",
                 orderId, e.getStatusCode(), e.getMessage());
         return new ExternalServiceException("Payment service returned server error: " + e.getStatusCode(), e);
     }
 
     private ExternalServiceException mapClientError(WebClientResponseException e, UUID orderId) {
-        log.error("Payment service client error for order {}: {} - {}",
+        log.error("payment.service.client_error orderId={} statusCode={} message={}",
                 orderId, e.getStatusCode(), e.getMessage());
         return new ExternalServiceException("Payment service returned client error: " + e.getStatusCode(), e);
     }
 
     private ExternalServiceException mapNetworkError(Throwable error, UUID orderId) {
-        log.error("Failed to communicate with Payment service for order {}: {}",
+        log.error("payment.service.communication_failed orderId={} message={}",
                 orderId, error.getMessage());
         return new ExternalServiceException("Payment service is unavailable", error);
     }

@@ -21,8 +21,8 @@ public class OrderEventListener {
 
     @KafkaListener(topics = "${app.kafka.topics.order-events}", groupId = "${spring.kafka.consumer.group-id}")
     public void onMessage(@Payload OrderEvent event) {
-        log.info("Received OrderEvent: type={}, orderId={}",
-                event.getClass().getSimpleName(), event.orderId());
+        log.info("kafka.orderEvent.received orderId={} eventType={}",
+                event.orderId(), event.getClass().getSimpleName());
 
         switch (event) {
             case OrderCompensationEvent compensationEvent ->
@@ -30,7 +30,8 @@ public class OrderEventListener {
 
             case OrderCreatedEvent compensationEvent ->
                 // Order service doesn't need to handle order created event;
-                log.debug("Ignoring OrderCreatedEvent - this service creates these events");
+                log.debug("kafka.orderEvent.ignored orderId={} eventType=OrderCreatedEvent reason=created_by_this_service",
+                        compensationEvent.orderId());
 
             case OrderCancelledEvent cancelledEvent -> {
             }

@@ -17,12 +17,12 @@ public class OrderCompensationEventHandler {
 
     public void handle(OrderCompensationEvent compensationEvent) {
         try {
-            log.warn("Received compensation event for order: {}, Reason: {}, Initiated by service: {}",
+            log.warn("order.compensation.received orderId={} reason={} initiatedBy={}",
                     compensationEvent.orderId(), compensationEvent.reason(), compensationEvent.groupId());
             cancelOrderService.handle(compensationEvent.orderId());
         } catch (Exception e) {
-            log.error("Failed to process compensation event for order: {}, Error: {}",
-                    compensationEvent.orderId(), e.getMessage());
+            log.error("order.compensation.failed orderId={} message={}",
+                    compensationEvent.orderId(), e.getMessage(), e);
         }
     }
 

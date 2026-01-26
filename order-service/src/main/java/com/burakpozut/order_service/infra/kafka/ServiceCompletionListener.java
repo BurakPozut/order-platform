@@ -18,7 +18,7 @@ public class ServiceCompletionListener {
 
     @KafkaListener(topics = "${app.kafka.topics.service-completions}", groupId = "${spring.kafka.consumer.group-id.service-completions}")
     public void onMessage(@Payload ServiceCompletionEvent event) {
-        log.info("Received ServiceCompletionEvent: orderId={}, serviceName={}",
+        log.info("kafka.serviceCompletion.received orderId={} serviceName={}",
                 event.orderId(), event.serviceName());
 
         serviceCompletionEventHandler.handle(event);

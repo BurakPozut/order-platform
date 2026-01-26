@@ -14,21 +14,39 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class CreateOrderOrchestrator {
-  private final OrderCreationService orderCreationService;
-  private final OrderSideEffectsService orderSideEffectsService;
-  private final CancelOrderService cancleOrderService;
+    private final OrderCreationService orderCreationService;
+    private final OrderSideEffectsService orderSideEffectsService;
+    private final CancelOrderService cancleOrderService;
 
-  public Order handle(CreateOrderCommand command) {
-    CreationResult result = orderCreationService.create(command);
-    try {
-      if (result.isNew())
-        orderSideEffectsService.trigger(result.order());
-    } catch (Exception e) {
-      log.error("Failed to trigger effects for order {}, Rolling back (Cancelling)", result.order().id(), e);
-      cancleOrderService.handle(result.order().id());
-      throw e;
+    public Order handle(CreateOrderCommand command) {
+        log.info("order.create.start customerId={} items={}",
+                command.customerId(), command.items() != null ? command.items().size() : 0);
+
+        CreationResult result = orderCreationService.create(command);
+
+        if (result.isNew()) {
+            log.info("order.create.created orderId={} customerId={} total={}",
+                    result.order().id(), result.order().customerId(), result.order().totalAmount());
+        } else {
+            log.info("order.create.idempotent_hit orderId={} customerId={}",
+                    result.order().id(), result.order().customerId());
+        }
+
+        try {
+            if (result.isNew()) {
+                log.debug("order.create.sideEffects.start orderId={}", result.order().id());
+                orderSideEffectsService.trigger(result.order());
+                log.debug("order.create.sideEffects.done orderId={}", result.order().id());
+            }
+        } catch (Exception e) {
+            log.error("order.create.sideEffects.failed orderId={} action=cancel",
+                    result.order().id(), e);
+            cancleOrderService.handle(result.order().id());
+            log.warn("order.create.cancelled orderId={}", result.order().id());
+            throw e;
+        }
+
+        return result.order();
     }
-    return result.order();
-  }
 
 }

@@ -29,7 +29,7 @@ public class CancelOrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 
-        log.info("Cancelling order : {}", orderId);
+        log.info("order.cancel.start orderId={}", orderId);
 
         Order cancelledOrder = Order.rehydrate(orderId, order.customerId(),
                 OrderStatus.CANCELLED, order.totalAmount(),
@@ -38,7 +38,7 @@ public class CancelOrderService {
 
         orderRepository.save(cancelledOrder, false);
         if (order.status() == OrderStatus.CANCELLED) {
-            log.info("Order {} is already cancelled. Skipping.", orderId);
+            log.info("order.cancel.already_cancelled orderId={} action=skipping", orderId);
             return;
         }
         List<OrderItemEvent> items = order.items().stream()
