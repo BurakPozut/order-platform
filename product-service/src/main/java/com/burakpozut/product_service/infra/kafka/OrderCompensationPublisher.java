@@ -51,10 +51,10 @@ public class OrderCompensationPublisher {
 
         future.whenComplete((result, exception) -> {
             if (exception == null) {
-                log.info("Successfully published OrderCompensationEvent for order: {} to partition: {}",
+                log.info("kafka.orderCompensation.published orderId={} partition={}",
                         orderId, result.getRecordMetadata().partition());
             } else {
-                log.error("Failed to publis OrderCompensationEvent for order: {}. Error: {}",
+                log.error("kafka.orderCompensation.publish_failed orderId={} message={}",
                         orderId, exception.getMessage(), exception);
 
                 handlePublishFailure(event, exception);
@@ -86,10 +86,10 @@ public class OrderCompensationPublisher {
                     null);
 
             failedEventRepository.save(failedEvent);
-            log.info("Stored failed OrderCompensationEvent for order: {} in database for later retry",
+            log.info("kafka.orderCompensation.failed_event_stored orderId={} action=retry_later",
                     event.orderId());
         } catch (Exception e) {
-            log.error("Failed to store failed event for order: {}. Error: {}",
+            log.error("kafka.orderCompensation.failed_event_storage_failed orderId={} message={}",
                     event.orderId(), e.getMessage(), e);
         }
     }

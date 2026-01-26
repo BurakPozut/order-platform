@@ -20,14 +20,17 @@ public class RerserveInventoryService {
 
   @Transactional
   public void handle(ReserveInventoryCommand command) {
-    log.info("Reserving inventory - productId: {}, quantity: {}",
+    log.info("product.inventory.reserve.start productId={} quantity={}",
         command.productId(), command.quantity());
 
     var product = productRepository.findById(command.productId())
         .orElseThrow(() -> new ProductNotFoundException(command.productId()));
-    log.info("Current inventory for product {}: {}", command.productId(), product.inventory());
+    log.debug("product.inventory.reserve.current_inventory productId={} currentInventory={}",
+        command.productId(), product.inventory());
 
     if (product.inventory() < command.quantity()) {
+      log.warn("product.inventory.reserve.insufficient productId={} requested={} available={}",
+          command.productId(), command.quantity(), product.inventory());
       throw new InsufficentInventoryException(command.productId());
     }
 
@@ -41,11 +44,9 @@ public class RerserveInventoryService {
         product.version(),
         product.inventory() - command.quantity());
 
-    log.info("Saving updated inventory - productId: {}, new inventory: {}",
-        command.productId(), updated.inventory());
-
     productRepository.save(updated, false);
-    log.info("Inventory reservation completed for product: {}", command.productId());
+    log.info("product.inventory.reserve.completed productId={} oldInventory={} newInventory={}",
+        command.productId(), product.inventory(), updated.inventory());
 
   }
 

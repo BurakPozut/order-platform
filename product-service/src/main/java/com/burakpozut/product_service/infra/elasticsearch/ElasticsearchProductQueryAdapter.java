@@ -38,7 +38,8 @@ public class ElasticsearchProductQueryAdapter implements ProductSearchQuery {
                     .map(this::toSearchResult)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            log.warn("Elasticsearch search failed: {}. Returning empty results.", e.getMessage());
+            log.warn("elasticsearch.search.failed query={} message={} action=returning_empty",
+                    query, e.getMessage());
             return List.of();
         }
     }
@@ -63,7 +64,8 @@ public class ElasticsearchProductQueryAdapter implements ProductSearchQuery {
                     .map(this::toSearchResult)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("Elasticsearch search with filters failed", e);
+            log.error("elasticsearch.search.filters_failed query={} message={} action=returning_empty",
+                    request.getQuery(), e.getMessage(), e);
             return List.of();
         }
     }
@@ -153,7 +155,8 @@ public class ElasticsearchProductQueryAdapter implements ProductSearchQuery {
                     .map(ProductDocument::getName)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            log.warn("Elasticsearch suggestions failed: {}. Returning empty results.", e.getMessage());
+            log.warn("elasticsearch.suggestions.failed prefix={} limit={} message={} action=returning_empty",
+                    prefix, limit, e.getMessage());
             return List.of();
         }
     }

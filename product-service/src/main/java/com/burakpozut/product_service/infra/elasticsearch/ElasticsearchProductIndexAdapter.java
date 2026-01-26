@@ -21,7 +21,7 @@ public class ElasticsearchProductIndexAdapter implements ProductSearchIndex {
     @Override
     public void indexAll(List<Product> products) {
         if (products == null || products.isEmpty()) {
-            log.debug("No products to index");
+            log.debug("elasticsearch.index.empty action=skipping");
             return;
         }
 
@@ -31,9 +31,10 @@ public class ElasticsearchProductIndexAdapter implements ProductSearchIndex {
                     .collect(Collectors.toList());
 
             elasticsearchRepository.saveAll(documents);
-            log.info("Indexed {} products to Elasticsearch", documents.size());
+            log.info("elasticsearch.index.completed count={}", documents.size());
         } catch (Exception e) {
-            log.error("Failed to index products to Elasticsearch", e);
+            log.error("elasticsearch.index.failed count={} message={}",
+                    products.size(), e.getMessage(), e);
             throw new RuntimeException("Failed to index products", e);
         }
     }

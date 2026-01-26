@@ -14,13 +14,17 @@ import com.burakpozut.product_service.domain.ProductRepository;
 import com.burakpozut.product_service.domain.ProductStatus;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PatchProductService {
   private final ProductRepository productRepository;
 
   public Product handle(UUID id, PatchProductCommand command) {
+    log.info("product.patch.start productId={}", id);
+
     var existing = productRepository.findById(id)
         .orElseThrow(() -> new ProductNotFoundException(id));
 
@@ -31,13 +35,18 @@ public class PatchProductService {
 
     if (command.name() != null && !existing.name().equals(newName)
         && productRepository.existsByName(newName)) {
+      log.warn("product.patch.name_conflict productId={} newName={}",
+          id, newName);
       throw new NameAlreadyInUseException(newName);
     }
 
     var updated = Product.rehydrate(id, newName, price, currency, status,
         existing.version(),
         existing.inventory());
-    return productRepository.save(updated, false);
+    var saved = productRepository.save(updated, false);
+    log.info("product.patch.completed productId={} name={} status={}",
+        saved.id(), saved.name(), saved.status());
+    return saved;
   }
 
 }

@@ -29,6 +29,7 @@ import com.burakpozut.product_service.app.service.elasticsearch.ProductSearchQue
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RestController
 @RequestMapping("api/products")
 @RequiredArgsConstructor
+@Slf4j
 public class ProductController {
     private final GetAllProductsService getAllProducts;
     private final GetProductByIdService getProductByIdService;
@@ -48,22 +50,28 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<ProductResponse>> getAll() {
+        log.info("api.product.getAll.start");
         var products = getAllProducts.handle();
         var response = products.stream().map(ProductResponse::from).collect(Collectors.toList());
+        log.info("api.product.getAll.completed count={}", response.size());
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getById(@PathVariable UUID id) {
+        log.info("api.product.getById.start productId={}", id);
         var product = getProductByIdService.handle(id);
         var response = ProductResponse.from(product);
+        log.info("api.product.getById.completed productId={}", id);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/name/{name}")
     public ResponseEntity<ProductResponse> getByName(@PathVariable String name) {
+        log.info("api.product.getByName.start name={}", name);
         var product = getProductByNameServie.handle(name);
         var response = ProductResponse.from(product);
+        log.info("api.product.getByName.completed name={} productId={}", name, product.id());
         return ResponseEntity.ok(response);
     }
 
@@ -79,6 +87,9 @@ public class ProductController {
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "20") Integer size) {
 
+        log.info("api.product.search.start query={} status={} currency={} minPrice={} maxPrice={} page={} size={}",
+                q, status, currency, minPrice, maxPrice, page, size);
+
         SearchRequest request = new SearchRequest();
         request.setQuery(q != null && !q.isEmpty() ? q : null);
         request.setStatuses(status);
@@ -91,54 +102,70 @@ public class ProductController {
         request.setSize(size);
 
         var results = productSearchQueryService.searchWithFilters(request);
-        return ResponseEntity.ok(results.stream()
+        var response = results.stream()
                 .map(ProductResponse::from)
-                .toList());
+                .toList();
+        log.info("api.product.search.completed resultCount={}", response.size());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/search/suggestions")
     public ResponseEntity<List<String>> getSuggestions(
             @RequestParam(required = false, defaultValue = "") String prefix,
             @RequestParam(defaultValue = "10") int limit) {
+        log.info("api.product.search.suggestions.start prefix={} limit={}", prefix, limit);
         var suggestions = productSearchQueryService.getSuggestions(
                 prefix != null && !prefix.isEmpty() ? prefix : "", limit);
+        log.info("api.product.search.suggestions.completed count={}", suggestions.size());
         return ResponseEntity.ok(suggestions);
     }
 
     @GetMapping("/search-all")
     public ResponseEntity<List<ProductResponse>> searchAll() {
+        log.info("api.product.searchAll.start");
         var results = productSearchQueryService.search(null);
-        return ResponseEntity.ok(results.stream().map(ProductResponse::from).toList());
+        var response = results.stream().map(ProductResponse::from).toList();
+        log.info("api.product.searchAll.completed count={}", response.size());
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable UUID id,
             @Valid @RequestBody UpdateProductRequest request) {
+        log.info("api.product.update.start productId={} name={} price={} currency={} status={}",
+                id, request.name(), request.price(), request.currency(), request.status());
         var command = ProductMapper.toCommand(request);
         var product = updateProductService.handle(id, command);
+        log.info("api.product.update.completed productId={}", id);
         return ResponseEntity.ok(ProductResponse.from(product));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ProductResponse> patch(@PathVariable UUID id,
             @Valid @RequestBody PatchProductRequest request) {
+        log.info("api.product.patch.start productId={} status={}", id, request.status());
         var command = ProductMapper.toCommand(request);
-        var customer = patchProductService.handle(id, command);
-        return ResponseEntity.ok(ProductResponse.from(customer));
+        var product = patchProductService.handle(id, command);
+        log.info("api.product.patch.completed productId={}", id);
+        return ResponseEntity.ok(ProductResponse.from(product));
     }
 
     @PostMapping("/{id}/reserve")
     public ResponseEntity<Void> decreaseStock(@PathVariable UUID id,
             @RequestBody @Valid ReserveInventoryRequest body) {
+        log.info("api.product.reserve.start productId={} quantity={}", id, body.quantity());
         var command = ProductMapper.toCommand(id, body);
         rerserveInventoryService.handle(command);
+        log.info("api.product.reserve.completed productId={}", id);
         return ResponseEntity.noContent().build();
 
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        log.info("api.product.delete.start productId={}", id);
         deleteProductService.handle(id);
+        log.info("api.product.delete.completed productId={}", id);
         return ResponseEntity.noContent().build();
 
     }

@@ -20,13 +20,14 @@ public class SyncProductSearchService {
     private final ProductSearchIndex productSearchIndex;
 
     public void sync() {
+        log.info("product.search.sync.start");
         List<Product> products = productRepository.findAll();
         if (products.isEmpty()) {
-            log.info("No products to sync to search index.");
+            log.info("product.search.sync.empty action=skipping");
             return;
         }
         productSearchIndex.indexAll(products);
-        log.info("Synced {} products to search index.", products.size());
+        log.info("product.search.sync.completed count={}", products.size());
     }
 
 }

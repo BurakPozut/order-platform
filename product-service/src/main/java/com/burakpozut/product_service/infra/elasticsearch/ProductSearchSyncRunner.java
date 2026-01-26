@@ -20,10 +20,13 @@ public class ProductSearchSyncRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        log.info("product.search.sync.startup.start");
         try {
             syncProductSearchService.sync();
+            log.info("product.search.sync.startup.completed");
         } catch (Exception e) {
-            log.warn("Could not sync products to Elasticsearch on startup. Search may be empty.", e);
+            log.warn("product.search.sync.startup.failed message={} action=continuing",
+                    e.getMessage(), e);
         }
     }
 }

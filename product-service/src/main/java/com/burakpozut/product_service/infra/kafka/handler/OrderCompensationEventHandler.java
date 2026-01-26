@@ -26,11 +26,11 @@ public class OrderCompensationEventHandler {
         }
 
         try {
-            log.warn("Received compensation event for order: {}, Reason: {}, Initiated by service: {}",
+            log.warn("product.compensation.received orderId={} reason={} initiatedBy={}",
                     compensationEvent.orderId(), compensationEvent.reason(), compensationEvent.groupId());
 
             if (compensationEvent.items() == null || compensationEvent.items().isEmpty()) {
-                log.warn("Skipping compensation event for order: {} - items list is null or empty",
+                log.warn("product.compensation.empty_items orderId={} action=skipping",
                         compensationEvent.orderId());
                 return;
             }
@@ -39,15 +39,17 @@ public class OrderCompensationEventHandler {
                 var command = ReleaseInventoryCommand.of(item.productId(), item.quantity());
                 releaseInventoryService.handle(command);
             }
+            log.info("product.compensation.completed orderId={} itemCount={}",
+                    compensationEvent.orderId(), compensationEvent.items().size());
         } catch (Exception e) {
-            log.error("Failed to process compensation event for order: {}, Error: {}",
+            log.error("product.compensation.failed orderId={} message={}",
                     compensationEvent.orderId(), e.getMessage(), e);
         }
     }
 
     private boolean skipIfInitiatedByThisService(OrderCompensationEvent event) {
         if (groupId.equals(event.groupId())) {
-            log.debug("Skipping compensation event initiated by this service for order: {}",
+            log.debug("product.compensation.ignored orderId={} reason=initiated_by_this_service",
                     event.orderId());
             return true;
         }

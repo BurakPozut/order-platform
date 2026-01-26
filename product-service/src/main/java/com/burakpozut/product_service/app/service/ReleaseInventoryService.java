@@ -19,6 +19,9 @@ public class ReleaseInventoryService {
 
   @Transactional
   public void handle(ReleaseInventoryCommand command) {
+    log.info("product.inventory.release.start productId={} quantity={}",
+        command.productId(), command.quantity());
+
     var product = productRepository.findById(command.productId())
         .orElseThrow(() -> new ProductNotFoundException(command.productId()));
 
@@ -32,6 +35,8 @@ public class ReleaseInventoryService {
         product.inventory() + command.quantity());
 
     productRepository.save(updated, false);
+    log.info("product.inventory.release.completed productId={} oldInventory={} newInventory={}",
+        command.productId(), product.inventory(), updated.inventory());
 
   }
 }

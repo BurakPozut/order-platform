@@ -8,14 +8,19 @@ import com.burakpozut.product_service.domain.Product;
 import com.burakpozut.product_service.domain.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GetAllProductsService {
-  private final ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
-  public List<Product> handle() {
-    return productRepository.findAll();
-  }
+    public List<Product> handle() {
+        log.info("product.getAll.start");
+        var products = productRepository.findAll();
+        log.info("product.getAll.completed count={}", products.size());
+        return products;
+    }
 
 }

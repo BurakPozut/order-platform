@@ -17,12 +17,12 @@ public class OrderCancelledEventHandler {
     private final ReleaseInventoryService releaseInventoryService;
 
     public void handle(OrderCancelledEvent cancelledEvent) {
-        log.info("Processing OrderCancelledEvent for order: {}, reason: {}",
+        log.info("product.orderCancelled.received orderId={} reason={}",
                 cancelledEvent.orderId(), cancelledEvent.reason());
         try {
 
             if (cancelledEvent.items() == null || cancelledEvent.items().isEmpty()) {
-                log.warn("Skipping cancellation event for order: {} - items list is null or empty",
+                log.warn("product.orderCancelled.empty_items orderId={} action=skipping",
                         cancelledEvent.orderId());
                 return;
             }
@@ -30,13 +30,14 @@ public class OrderCancelledEventHandler {
             for (OrderItemEvent item : cancelledEvent.items()) {
                 var command = ReleaseInventoryCommand.of(item.productId(), item.quantity());
                 releaseInventoryService.handle(command);
-                log.info("Successfully released inventory for order: {}. Product: {}, Quantity: {}",
+                log.debug("product.orderCancelled.inventory_released orderId={} productId={} quantity={}",
                         cancelledEvent.orderId(), item.productId(), item.quantity());
 
             }
-            log.info("Successfully processed cancellation for order: {}", cancelledEvent.orderId());
+            log.info("product.orderCancelled.completed orderId={} itemCount={}",
+                    cancelledEvent.orderId(), cancelledEvent.items().size());
         } catch (Exception e) {
-            log.error("Failed to process cancellation for order: {}, Error: {}",
+            log.error("product.orderCancelled.failed orderId={} message={}",
                     cancelledEvent.orderId(), e.getMessage(), e);
         }
     }

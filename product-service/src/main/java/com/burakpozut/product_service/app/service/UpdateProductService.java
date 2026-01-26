@@ -11,24 +11,33 @@ import com.burakpozut.product_service.domain.Product;
 import com.burakpozut.product_service.domain.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UpdateProductService {
   private final ProductRepository productRepository;
 
   public Product handle(UUID id, UpdateProductCommand command) {
+    log.info("product.update.start productId={} name={} price={} currency={} status={}",
+        id, command.name(), command.price(), command.currency(), command.status());
+
     var existing = productRepository.findById(id)
         .orElseThrow(() -> new ProductNotFoundException(id));
 
     if (!existing.name().equals(command.name()) && productRepository.existsByName(command.name())) {
+      log.warn("product.update.name_conflict productId={} newName={}",
+          id, command.name());
       throw new NameAlreadyInUseException(command.name());
     }
 
     var updated = Product.rehydrate(id, command.name(), command.price(),
         command.currency(), command.status(),
         existing.version(), existing.inventory());
-    return productRepository.save(updated, false);
+    var saved = productRepository.save(updated, false);
+    log.info("product.update.completed productId={} name={}", saved.id(), saved.name());
+    return saved;
   }
 
 }
